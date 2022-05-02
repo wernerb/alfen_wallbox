@@ -36,7 +36,7 @@ class FlowHandler(config_entries.ConfigFlow):
 
         try:
             device = AlfenDevice(
-                host, name, self.hass.helpers.aiohttp_client.async_get_clientsession()
+                host, name, self.hass.helpers.aiohttp_client.async_get_clientsession(), username, password
             )
             with timeout(TIMEOUT):
                 await device.init()
