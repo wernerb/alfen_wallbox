@@ -57,10 +57,12 @@ class AlfenDevice:
     async def _do_update(self):
         await self._session.request(ssl=False, method='POST', headers = HEADER_JSON, url=self.__get_url('login'), json={'username': self.username, 'password': self.password})
         response = await self._session.request(ssl=False, method='GET', headers = HEADER_JSON, url=self.__get_url('prop?ids=2060_0,2056_0,2221_3,2221_4,2221_5,2221_A,2221_B,2221_C,2221_16,2201_0'))
-        self._session.request(ssl=False, method='POST', headers = HEADER_JSON, url=self.__get_url('logout'))
-        response_json = await response.json(content_type='alfen/json')
 
         _LOGGER.info(f'Status Response {response}')
+        self._session.request(ssl=False, method='POST', headers = HEADER_JSON, url=self.__get_url('logout'))
+        response_json = await response.json(content_type='alfen/json')
+        _LOGGER.info(response_json)
+
         self._status = AlfenStatus(response_json, self._status)
 
     async def async_get_info(self):
@@ -68,6 +70,8 @@ class AlfenDevice:
         _LOGGER.info(f'Response {response}')
                 
         response_json = await response.json(content_type='alfen/json')
+        _LOGGER.info(response_json)
+
         self.info = AlfenDeviceInfo(response_json)
 
     async def reboot_wallbox(self):
