@@ -8,7 +8,7 @@ from datetime import timedelta
 from homeassistant.util import Throttle
 from .const import DOMAIN
 
-HEADER_JSON = {'content-type': 'application/json; charset=utf-8'}
+HEADER_JSON = {'content-type': 'alfen/json; charset=utf-8'}
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -55,21 +55,25 @@ class AlfenDevice:
         await self._do_update()
 
     async def _do_update(self):
-        await self._session.request(ssl=False, method='POST', url=self.__get_url('login'), json={'username': self.username, 'password': self.password})
-        response = await self._session.request(ssl=False, method='GET', url=self.__get_url('prop?ids=2060_0,2056_0,2221_3,2221_4,2221_5,2221_A,2221_B,2221_C,2221_16,2201_0'))
-        self._session.request(ssl=False, method='POST', url=self.__get_url('logout'))
-        response_json = await response.json()
+        await self._session.request(ssl=False, method='POST', headers = HEADER_JSON, url=self.__get_url('login'), json={'username': self.username, 'password': self.password})
+        response = await self._session.request(ssl=False, method='GET', headers = HEADER_JSON, url=self.__get_url('prop?ids=2060_0,2056_0,2221_3,2221_4,2221_5,2221_A,2221_B,2221_C,2221_16,2201_0'))
+        self._session.request(ssl=False, method='POST', headers = HEADER_JSON, url=self.__get_url('logout'))
+        response_json = await response.json(content_type='alfen/json')
+
+        _LOGGER.info(f'Status Response {response}')
         self._status = AlfenStatus(response_json, self._status)
 
     async def async_get_info(self):
         response = await self._session.request(ssl=False, method='GET', url=self.__get_url('info'))
         _LOGGER.info(f'Response {response}')
                 
-        response_json = await response.json()
+        response_json = await response.json(content_type='alfen/json')
         self.info = AlfenDeviceInfo(response_json)
 
     async def reboot_wallbox(self):
+        await self._session.request(ssl=False, method='POST', headers = HEADER_JSON, url=self.__get_url('login'), json={'username': self.username, 'password': self.password})
         await self._session.post(self.__get_url('cmd'), headers = HEADER_JSON, json={'command': 'reboot'})
+        self._session.request(ssl=False, method='POST', headers = HEADER_JSON, url=self.__get_url('logout'))
 
     def __get_url(self, action):
         return 'https://{}/api/{}'.format(self.host, action)
