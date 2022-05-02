@@ -129,17 +129,7 @@ class AlfenSensor(SensorEntity):
             icon = "mdi:flash"
         elif self._sensor == "latest_reading_k":
             icon = "mdi:flash"
-        elif self._sensor == "nr_of_phases":
-            if self.state == 1:
-                icon = "mdi:record-circle-outline"
-            else:
-                icon = "mdi:google-circles-communities"
         return icon
-
-    @property
-    def native_value(self):
-        """Return the state of the sensor."""
-        return round(self.state, 2)
 
     @property
     def native_unit_of_measurement(self):
