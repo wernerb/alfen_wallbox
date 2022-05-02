@@ -4,8 +4,6 @@ import requests
 import time
 from enum import Enum
 from datetime import timedelta
-import asyncio
-import aiohttp
 
 from homeassistant.util import Throttle
 from .const import DOMAIN
@@ -15,8 +13,6 @@ HEADER_JSON = {'content-type': 'application/json; charset=utf-8'}
 _LOGGER = logging.getLogger(__name__)
 
 MIN_TIME_BETWEEN_UPDATES = timedelta(seconds=30)
-
-CONNECTOR = aiohttp.TCPConnector(verify_ssl=False)
 class AlfenDevice:
 
     def __init__(self, host, name, session, username, password):
@@ -59,14 +55,14 @@ class AlfenDevice:
         await self._do_update()
 
     async def _do_update(self):
-        await self._session.request(connector=CONNECTOR, method='POST', url=self.__get_url('login'), json={'username': self.username, 'password': self.password})
-        response = await self._session.request(connector=CONNECTOR, method='GET', url=self.__get_url('prop?ids=2060_0,2056_0,2221_3,2221_4,2221_5,2221_A,2221_B,2221_C,2221_16,2201_0'))
-        self._session.request(connector=CONNECTOR, method='POST', url=self.__get_url('logout'))
+        await self._session.request(ssl=False, method='POST', url=self.__get_url('login'), json={'username': self.username, 'password': self.password})
+        response = await self._session.request(ssl=False, method='GET', url=self.__get_url('prop?ids=2060_0,2056_0,2221_3,2221_4,2221_5,2221_A,2221_B,2221_C,2221_16,2201_0'))
+        self._session.request(ssl=False, method='POST', url=self.__get_url('logout'))
         response_json = await response.json()
         self._status = AlfenStatus(response_json, self._status)
 
     async def async_get_info(self):
-        response = await self._session.request(connector=CONNECTOR, method='GET', url=self.__get_url('info'))
+        response = await self._session.request(ssl=False, method='GET', url=self.__get_url('info'))
         _LOGGER.info(f'Response {response}')
                 
         response_json = await response.json()
