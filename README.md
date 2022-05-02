@@ -1,4 +1,4 @@
-# Alfen Wallbox (EVSE) - HomeAssistant Integration
+# Alfen Wallbox - HomeAssistant Integration
 
 This is a custom component to allow control of Alfen Wallboxes in [HomeAssistant](https://home-assistant.io).
 
