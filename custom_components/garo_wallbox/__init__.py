@@ -72,6 +72,7 @@ async def async_unload_entry(hass, config_entry):
 
 async def alfen_setup(hass, host, name, username, password):
     """Create a Alfen instance only once."""
+    
     session = hass.helpers.aiohttp_client.async_get_clientsession()
     try:
         with timeout(TIMEOUT):
