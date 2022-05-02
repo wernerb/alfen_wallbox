@@ -86,26 +86,25 @@ class AlfenStatus:
 
     def __init__(self,response, prev_status):
         for prop in response['properties']:
-                match prop['id']:
-                    case '2060_0':
+                    if prop['id'] == '2060_0':
                         self.uptime = prop['value']
-                    case '2056_0':
+                    elif prop['id'] == '2056_0':
                         self.bootups = prop['value']
-                    case '2221_3':
+                    elif prop['id'] == '2221_3':
                         self.voltage_l1 = prop['value']
-                    case '2221_4':
+                    elif prop['id'] == '2221_4':
                         self.voltage_l2 = prop['value']
-                    case '2221_5':
+                    elif prop['id'] == '2221_5':
                         self.voltage_l3 = prop['value']
-                    case '2221_A':
+                    elif prop['id'] == '2221_A':
                         self.current_l1 = prop['value']
-                    case '2221_B':
+                    elif prop['id'] == '2221_B':
                         self.current_l2 = prop['value']
-                    case '2221_C':
+                    elif prop['id'] == '2221_C':
                         self.current_l3 = prop['value']          
-                    case '2221_16':
+                    elif prop['id'] == '2221_16':
                         self.active_power_total = prop['value']
-                    case '2201_0':
+                    elif prop['id'] == '2201_0':
                         self.temperature = prop['value']
 
 class AlfenDeviceInfo:
