@@ -1,4 +1,4 @@
-"""Garo Wallbox integration."""
+"""Alfen Wallbox integration."""
 
 import asyncio
 from datetime import timedelta
@@ -23,7 +23,7 @@ from homeassistant.helpers.entity import Entity
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 from homeassistant.helpers.typing import HomeAssistantType
 
-from .garo import GaroDevice
+from .alfen import AlfenDevice
 
 from .const import (
     DOMAIN,
@@ -36,13 +36,13 @@ SCAN_INTERVAL = timedelta(seconds=60)
 _LOGGER = logging.getLogger(__name__)
 
 async def async_setup(hass: HomeAssistant, config: Dict) -> bool:
-    """Set up the Garo Wallbox component."""
+    """Set up the Alfen Wallbox component."""
     hass.data.setdefault(DOMAIN, {})
     return True
 
 async def async_setup_entry(hass: HomeAssistantType, entry: ConfigEntry):
     conf = entry.data
-    device = await garo_setup(hass, conf[CONF_HOST], conf[CONF_NAME])
+    device = await alfen_setup(hass, conf[CONF_HOST], conf[CONF_NAME])
     if not device:
         return False
     hass.data.setdefault(DOMAIN, {}).update({entry.entry_id: device})
@@ -68,12 +68,12 @@ async def async_unload_entry(hass, config_entry):
         hass.data.pop(DOMAIN)
     return True
 
-async def garo_setup(hass, host, name):
-    """Create a Garo instance only once."""
+async def alfen_setup(hass, host, name):
+    """Create a Alfen instance only once."""
     session = hass.helpers.aiohttp_client.async_get_clientsession()
     try:
         with timeout(TIMEOUT):
-            device = GaroDevice(host, name, session)
+            device = AlfenDevice(host, name, session)
             await device.init()
     except asyncio.TimeoutError:
         _LOGGER.debug("Connection to %s timed out", host)

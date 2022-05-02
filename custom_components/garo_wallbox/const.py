@@ -1,5 +1,5 @@
 
-DOMAIN = "garo_wallbox"
+DOMAIN = "alfen_wallbox"
 
 KEY_MAC = "mac"
 KEY_IP = "ip"

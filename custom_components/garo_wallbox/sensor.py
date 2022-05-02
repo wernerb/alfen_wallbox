@@ -17,9 +17,9 @@ from homeassistant.components.sensor import (
 )
 from homeassistant.helpers import config_validation as cv, entity_platform, service
 
-from . import DOMAIN as GARO_DOMAIN
+from . import DOMAIN as ALFEN_DOMAIN
 
-from .garo import GaroDevice, Mode, Status
+from .alfen import AlfenDevice, Mode, Status
 from .const import (ATTR_MODES, SERVICE_SET_MODE, SERVICE_SET_CURRENT_LIMIT)
 
 _LOGGER = logging.getLogger(__name__)
@@ -31,19 +31,19 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
 
 async def async_setup_entry(hass, entry, async_add_entities):
     """Set up using config_entry."""
-    device = hass.data[GARO_DOMAIN].get(entry.entry_id)
+    device = hass.data[ALFEN_DOMAIN].get(entry.entry_id)
     async_add_entities([
-        GaroMainSensor(device),
-        GaroSensor(device, 'Status', 'status'),
-        GaroSensor(device, "Charging Current", 'current_charging_current', 'A'),
-        GaroSensor(device, "Charging Power", 'current_charging_power', 'W'),
-        GaroSensor(device, "Phases", 'nr_of_phases'),
-        GaroSensor(device, "Current Limit", 'current_limit', 'A'),
-        GaroSensor(device, "Pilot Level", 'pilot_level', 'A'),
-        GaroSensor(device, "Session Energy", 'acc_session_energy', "Wh"),
-        GaroSensor(device, "Total Energy", 'latest_reading', "Wh"),
-        GaroSensor(device, "Total Energy (kWh)", 'latest_reading_k', "kWh"),
-        GaroSensor(device, "Temperature", 'current_temperature', TEMP_CELSIUS),
+        AlfenMainSensor(device),
+        AlfenSensor(device, 'Status', 'status'),
+        AlfenSensor(device, "Charging Current", 'current_charging_current', 'A'),
+        AlfenSensor(device, "Charging Power", 'current_charging_power', 'W'),
+        AlfenSensor(device, "Phases", 'nr_of_phases'),
+        AlfenSensor(device, "Current Limit", 'current_limit', 'A'),
+        AlfenSensor(device, "Pilot Level", 'pilot_level', 'A'),
+        AlfenSensor(device, "Session Energy", 'acc_session_energy', "Wh"),
+        AlfenSensor(device, "Total Energy", 'latest_reading', "Wh"),
+        AlfenSensor(device, "Total Energy (kWh)", 'latest_reading_k', "kWh"),
+        AlfenSensor(device, "Temperature", 'current_temperature', TEMP_CELSIUS),
         ])
 
     platform = entity_platform.current_platform.get()
@@ -63,8 +63,8 @@ async def async_setup_entry(hass, entry, async_add_entities):
         "async_set_current_limit",
     )
 
-class GaroMainSensor(Entity):
-    def __init__(self, device: GaroDevice):
+class AlfenMainSensor(Entity):
+    def __init__(self, device: AlfenDevice):
         """Initialize the sensor."""
         self._device = device
         self._name = f"{device.name}"
@@ -117,8 +117,8 @@ class GaroMainSensor(Entity):
         return attrs
         
 
-class GaroSensor(SensorEntity):
-    def __init__(self, device: GaroDevice, name, sensor, unit = None):
+class AlfenSensor(SensorEntity):
+    def __init__(self, device: AlfenDevice, name, sensor, unit = None):
         """Initialize the sensor."""
         self._device = device
         self._name = f"{device.name} {name}"

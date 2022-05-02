@@ -48,7 +48,7 @@ class Status(Enum):
 
 MIN_TIME_BETWEEN_UPDATES = timedelta(seconds=30)
 
-class GaroDevice:
+class AlfenDevice:
 
     def __init__(self, host, name, session):
         self.host = host

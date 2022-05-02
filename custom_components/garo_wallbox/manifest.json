@@ -1,10 +1,10 @@
 {
-    "domain": "garo_wallbox",
-    "name": "Garo Wallbox",
-    "version": "1.0.9",
+    "domain": "alfen_wallbox",
+    "name": "Alfen Wallbox",
+    "version": "0.0.1",
     "config_flow": true,    
-    "documentation": "https://github.com/sockless-coding/garo_wallbox/",
+    "documentation": "https://github.com/egnerfl/alfen_wallbox",
     "dependencies": [],
-    "codeowners": ["sockless-coding"]
+    "codeowners": ["egnerfl"]
   }
   

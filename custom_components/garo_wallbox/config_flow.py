@@ -9,7 +9,7 @@ import voluptuous as vol
 from homeassistant import config_entries
 from homeassistant.const import CONF_HOST, CONF_NAME
 
-from .garo import GaroDevice
+from .alfen import GaroDevice
 
 from .const import KEY_IP, TIMEOUT
 
