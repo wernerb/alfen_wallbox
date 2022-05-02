@@ -18,6 +18,9 @@
 
 ## Restart
 `HTTP POST https://<HOST_IP>/api/cmd`
+```
+{"command":"reboot"}
+```
 
 ## Log
 `HTTP GET https://<HOST_IP>/api/log?offset=<OFFSET>`
@@ -120,15 +123,15 @@ Sample Response
 
 ### Alfen prop codes
 
-| Code | description |
-| ----------- | ----------- |
-|2060_0| system uptime|
-|2056_0| Number of bootups|
-|2221_3| Voltage L1|
-|2221_4| Voltage L2|
-|2221_5| Voltage L3|
-|2221_A| Current L1|
-|2221_B| Current L2|
-|2221_C| Current L3|
-|2221_16| Active power total|
-|2201_0| Temperature|
+| Code | description | unit |
+| ----------- | ----------- | --- |
+|2060_0| system uptime| |
+|2056_0| Number of bootups| |
+|2221_3| Voltage L1| V |
+|2221_4| Voltage L2| V |
+|2221_5| Voltage L3| V |
+|2221_A| Current L1| A |
+|2221_B| Current L2| A |
+|2221_C| Current L3| A |
+|2221_16| Active power total | kW |
+|2201_0| Temperature| C |

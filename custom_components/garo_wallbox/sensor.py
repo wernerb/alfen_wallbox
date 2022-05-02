@@ -19,8 +19,8 @@ from homeassistant.helpers import config_validation as cv, entity_platform, serv
 
 from . import DOMAIN as ALFEN_DOMAIN
 
-from .alfen import AlfenDevice, Mode, Status
-from .const import (ATTR_MODES, SERVICE_SET_MODE, SERVICE_SET_CURRENT_LIMIT)
+from .alfen import AlfenDevice
+from .const import SERVICE_REBOOT_WALLBOX
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -34,33 +34,24 @@ async def async_setup_entry(hass, entry, async_add_entities):
     device = hass.data[ALFEN_DOMAIN].get(entry.entry_id)
     async_add_entities([
         AlfenMainSensor(device),
-        AlfenSensor(device, 'Status', 'status'),
-        AlfenSensor(device, "Charging Current", 'current_charging_current', 'A'),
-        AlfenSensor(device, "Charging Power", 'current_charging_power', 'W'),
-        AlfenSensor(device, "Phases", 'nr_of_phases'),
-        AlfenSensor(device, "Current Limit", 'current_limit', 'A'),
-        AlfenSensor(device, "Pilot Level", 'pilot_level', 'A'),
-        AlfenSensor(device, "Session Energy", 'acc_session_energy', "Wh"),
-        AlfenSensor(device, "Total Energy", 'latest_reading', "Wh"),
-        AlfenSensor(device, "Total Energy (kWh)", 'latest_reading_k', "kWh"),
-        AlfenSensor(device, "Temperature", 'current_temperature', TEMP_CELSIUS),
-        ])
+        AlfenSensor(device, 'Uptime', 'uptime'),
+        AlfenSensor(device, 'Bootups', 'bootups'),
+        AlfenSensor(device, "Voltage L1", 'voltage_l1', "V"),
+        AlfenSensor(device, "Voltage L2", 'voltage_l2', "V"),
+        AlfenSensor(device, "Voltage L3", 'voltage_l3', "V"),
+        AlfenSensor(device, "Current L1", 'current_l1', "A"),
+        AlfenSensor(device, "Current L2", 'current_l2', "A"),
+        AlfenSensor(device, "Current L3", 'current_l3', "A"),
+        AlfenSensor(device, "Active Power Total", 'active_power_total', "kW"),
+        AlfenSensor(device, "Temperature", 'temperature', TEMP_CELSIUS),
+    ])
 
     platform = entity_platform.current_platform.get()
 
     platform.async_register_entity_service(
-        SERVICE_SET_MODE,
-        {
-            vol.Required('mode'): cv.string,
-        },
-        "async_set_mode",
-    )
-    platform.async_register_entity_service(
-        SERVICE_SET_CURRENT_LIMIT,
-        {
-            vol.Required('limit'): cv.positive_int,
-        },
-        "async_set_current_limit",
+        SERVICE_REBOOT_WALLBOX,
+        {},
+        "reboot_wallbox",
     )
 
 class AlfenMainSensor(Entity):
@@ -84,20 +75,8 @@ class AlfenMainSensor(Entity):
     def icon(self):
         return "mdi:car-electric"
 
-    @property
-    def state(self):
-        """Return the state of the sensor."""
-        return self._device.status.mode.name
-
-    @property
-    def modes(self):
-        return [f.name for f in Mode]
-
-    async def async_set_mode(self, mode):
-        await self._device.set_mode(Mode[mode])
-
-    async def async_set_current_limit(self, limit):
-        await self._device.set_current_limit(limit)
+    async def async_reboot_wallbox(self):
+        await self._device.reboot_wallbox()
 
     async def async_update(self):
         await self._device.async_update()
@@ -106,15 +85,6 @@ class AlfenMainSensor(Entity):
     def device_info(self):
         """Return a device description for device registry."""
         return self._device.device_info
-
-    @property
-    def device_state_attributes(self):
-        attrs = {}
-        try:
-            attrs[ATTR_MODES] = self.modes
-        except KeyError:
-            pass
-        return attrs
         
 
 class AlfenSensor(SensorEntity):
@@ -124,9 +94,8 @@ class AlfenSensor(SensorEntity):
         self._name = f"{device.name} {name}"
         self._sensor = sensor
         self._unit = unit
-        if self._sensor == "latest_reading" or self._sensor == "latest_reading_k":
+        if self._sensor == "active_power_total":
             _LOGGER.info(f'Initiating State sensors {self._name}')
-            self._attr_state_class = STATE_CLASS_TOTAL_INCREASING #STATE_CLASS_MEASUREMENT
             self._attr_device_class = DEVICE_CLASS_ENERGY
 
 
@@ -160,29 +129,6 @@ class AlfenSensor(SensorEntity):
             icon = "mdi:flash"
         elif self._sensor == "latest_reading_k":
             icon = "mdi:flash"
-        elif self._sensor == "status":
-            switcher = {
-                Status.CABLE_FAULT: "mdi:alert",
-                Status.CHANGING: "mdi:update",
-                Status.CHARGING: "mdi:battery-charging",
-                Status.CHARGING_CANCELLED: "mdi:cancel",
-                Status.CHARGING_FINISHED: "mdi:battery",
-                Status.CHARGING_PAUSED: "mdi:pause",
-                Status.CONNECTED: "mdi:power-plug",
-                Status.CONTACTOR_FAULT: "mdi:alert",
-                Status.DISABLED: "mdi:stop-circle-outline",
-                Status.CRITICAL_TEMPERATURE: "mdi:alert",
-                Status.DC_ERROR: "mdi:alert",
-                Status.INITIALIZATION: "mdi:timer-sand",
-                Status.LOCK_FAULT: "mdi:alert",
-                Status.NOT_CONNECTED: "mdi:power-plug-off",
-                Status.OVERHEAT: "mdi:alert",
-                Status.RCD_FAULT: "mdi:alert",
-                Status.SEARCH_COMM: "mdi:help",
-                Status.VENT_FAULT: "mdi:alert",
-                Status.UNAVAILABLE: "mdi:alert"
-            }
-            icon = switcher.get(self._device.status.status, None)
         elif self._sensor == "nr_of_phases":
             if self.state == 1:
                 icon = "mdi:record-circle-outline"
@@ -201,14 +147,6 @@ class AlfenSensor(SensorEntity):
         return self._unit
 
     @property
-    def state(self):
-        """Return the state of the sensor."""
-        if self._sensor == 'status':
-            return self.status_as_str()
-
-        return self._device.status.__dict__[self._sensor]
-
-    @property
     def unit_of_measurement(self):
         return self._unit
 
@@ -219,30 +157,3 @@ class AlfenSensor(SensorEntity):
     def device_info(self):
         """Return a device description for device registry."""
         return self._device.device_info
-
-    
-
-    def status_as_str(self):
-        switcher = {
-            Status.CABLE_FAULT: "Cable fault",
-            Status.CHANGING: "Changing...",
-            Status.CHARGING: "Charging",
-            Status.CHARGING_CANCELLED: "Charging cancelled",
-            Status.CHARGING_FINISHED: "Charging finished",
-            Status.CHARGING_PAUSED: "Charging paused",
-            Status.DISABLED: "Charging disabled",
-            Status.CONNECTED: "Vehicle connected",
-            Status.CONTACTOR_FAULT: "Contactor fault",
-            Status.CRITICAL_TEMPERATURE: "Overtemperature, charging cancelled",
-            Status.DC_ERROR: "DC error",
-            Status.INITIALIZATION: "Charger starting...",
-            Status.LOCK_FAULT: "Lock fault",
-            Status.NOT_CONNECTED: "Vehicle not connected",
-            Status.OVERHEAT: "Overtemperature, charging temporarily restricted to 6A",
-            Status.RCD_FAULT: "RCD fault",
-            Status.SEARCH_COMM: "Vehicle connected",
-            Status.VENT_FAULT: "Ventilation required",
-            Status.UNAVAILABLE: "Unavailable"
-        }
-        return switcher.get(self._device.status.status, "Unknown")
-

@@ -14,6 +14,8 @@ from homeassistant.const import (
     ATTR_NAME,
     CONF_HOST,
     CONF_NAME,
+    CONF_USERNAME,
+    CONF_PASSWORD,
 )
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryNotReady
@@ -42,7 +44,7 @@ async def async_setup(hass: HomeAssistant, config: Dict) -> bool:
 
 async def async_setup_entry(hass: HomeAssistantType, entry: ConfigEntry):
     conf = entry.data
-    device = await alfen_setup(hass, conf[CONF_HOST], conf[CONF_NAME])
+    device = await alfen_setup(hass, conf[CONF_HOST], conf[CONF_NAME], conf[CONF_USERNAME], conf[CONF_PASSWORD])
     if not device:
         return False
     hass.data.setdefault(DOMAIN, {}).update({entry.entry_id: device})
@@ -68,12 +70,12 @@ async def async_unload_entry(hass, config_entry):
         hass.data.pop(DOMAIN)
     return True
 
-async def alfen_setup(hass, host, name):
+async def alfen_setup(hass, host, name, username, password):
     """Create a Alfen instance only once."""
     session = hass.helpers.aiohttp_client.async_get_clientsession()
     try:
         with timeout(TIMEOUT):
-            device = AlfenDevice(host, name, session)
+            device = AlfenDevice(host, name, session, username, password)
             await device.init()
     except asyncio.TimeoutError:
         _LOGGER.debug("Connection to %s timed out", host)

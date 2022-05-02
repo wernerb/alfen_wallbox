@@ -9,59 +9,29 @@ import asyncio
 from homeassistant.util import Throttle
 from .const import GARO_PRODUCT_MAP, DOMAIN
 
-current_milli_time = lambda: int(round(time.time() * 1000))
-
-MODE_ON, MODE_OFF, MODE_SCHEMA = ('ALWAYS_ON', 'ALWAYS_OFF', 'SCHEMA')
-STATUS_CHANGING, STATUS_NOT_CONNECTED, STATUS_CONNECTED, STATUS_SEARCH_COMM = ('CHANGING','NOT_CONNECTED','CONNECTED','SEARCH_COMM')
-
 HEADER_JSON = {'content-type': 'application/json; charset=utf-8'}
 
 _LOGGER = logging.getLogger(__name__)
-
-class Mode(Enum):
-    On = MODE_ON
-    Off = MODE_OFF
-    Schema = MODE_SCHEMA
-
-
-class Status(Enum):
-    CHANGING = 'CHANGING'
-    NOT_CONNECTED = 'NOT_CONNECTED'
-    CONNECTED = 'CONNECTED'
-    SEARCH_COMM = 'SEARCH_COMM'
-    RCD_FAULT = 'RCD_FAULT'
-    CHARGING = 'CHARGING'
-    CHARGING_PAUSED = 'CHARGING_PAUSED'
-    CHARGING_FINISHED = 'CHARGING_FINISHED'
-    CHARGING_CANCELLED = 'CHARGING_CANCELLED'
-    DISABLED = 'DISABLED'
-    OVERHEAT = 'OVERHEAT'
-    CRITICAL_TEMPERATURE = 'CRITICAL_TEMPERATURE'
-    INITIALIZATION = 'INITIALIZATION'
-    CABLE_FAULT = 'CABLE_FAULT'
-    LOCK_FAULT = 'LOCK_FAULT'
-    CONTACTOR_FAULT = 'CONTACTOR_FAULT'
-    VENT_FAULT = 'VENT_FAULT'
-    DC_ERROR = 'DC_ERROR'
-    UNKNOWN = 'UNKNOWN'
-    UNAVAILABLE = 'UNAVAILABLE'
 
 MIN_TIME_BETWEEN_UPDATES = timedelta(seconds=30)
 
 class AlfenDevice:
 
-    def __init__(self, host, name, session):
+    def __init__(self, host, name, session, username, password):
         self.host = host
         self.name = name
         self._status = None
         self._session = session
-        self._pre_v1_3 = False
+        self.username = username
+        if self.username is None:
+            self.username = 'admin'
+        self.password = password
     
     async def init(self):
         await self.async_get_info()
-        self.id = 'alfen_{}'.format(self.info.serial)
+        self.id = 'alfen_{}'.format(self.info.identity)
         if self.name is None:
-            self.name = f'{self.info.model} ({self.host})'
+            self.name = f'{self.info.identity} ({self.host})'
         await self.async_update()
 
     @property
@@ -76,6 +46,7 @@ class AlfenDevice:
             "manufacturer": "Alfen",
             "model": self.info.model,
             "name": self.name,
+            "firmware": self.info.firmware_version
         }
 
     def _request(self, parameter_list):
@@ -86,88 +57,44 @@ class AlfenDevice:
         await self._do_update()
 
     async def _do_update(self):
-        response = await self._session.request(method='GET', url=self.__get_url('status', True))
-        if response.status != 200 and not self._pre_v1_3:
-            self._pre_v1_3 = True
-            _LOGGER.info('Switching to pre v1.3.1 endpoint')
-            response = await self._session.request(method='GET', url=self.__get_url('status', True))
-            
-
+        await self._session.request(method='POST', url=self.__get_url('login'), json={'username': self.username, 'password': self.password})
+        response = await self._session.request(method='GET', url=self.__get_url('prop?ids=2060_0,2056_0,2221_3,2221_4,2221_5,2221_A,2221_B,2221_C,2221_16,2201_0'))
+        self._session.request(method='POST', url=self.__get_url('logout'))
         response_json = await response.json()
         self._status = AlfenStatus(response_json, self._status)
 
     async def async_get_info(self):
-        response = await self._session.request(method='GET', url=self.__get_url('config', True))
+        response = await self._session.request(method='GET', url=self.__get_url('info'))
         _LOGGER.info(f'Response {response}')
-        if response.status != 200 and not self._pre_v1_3:
-            self._pre_v1_3 = True
-            _LOGGER.info('Switching to pre v1.3.1 endpoint')
-            response = await self._session.request(method='GET', url=self.__get_url('config', True))
                 
         response_json = await response.json()
         self.info = AlfenDeviceInfo(response_json)
 
-    async def set_mode(self, mode: Mode):
-        if self._pre_v1_3:
-            response = await self._session.post(self.__get_url('mode'), data=mode.value, headers = HEADER_JSON)
-        else:
-            response = await self._session.post(self.__get_url(f'mode/{mode.value}'), headers = HEADER_JSON)
-        await response.text()
-        await self._do_update()
+    async def reboot_wallbox(self):
+        await self._session.post(self.__get_url('cmd'), headers = HEADER_JSON, json={'command': 'reboot'})
 
-    async def set_current_limit(self, limit):
-        response = await self._session.request(method='GET', url=self.__get_url('config', True))
-        response_json = await response.json()
-        response_json['reducedCurrentIntervals'] = [{
-            'chargeLimit': str(limit),
-            'schemaId': 1,
-            'start': '00:00:00',
-            'stop':'24:00:00',
-            'weekday': 8
-        }]
-        #_LOGGER.warning(f'Set limit: {response_json}')
-        response = await self._session.post(self.__get_url('config'), json=response_json, headers = HEADER_JSON)
-        await response.text()
-        await self._do_update()
-
-
-    def __get_url(self, action, add_tick = False):
-        if self._pre_v1_3:
-            return 'http://{}:2222/rest/chargebox/{}{}'.format(self.host, action, '' if add_tick == False else '?_={}'.format(current_milli_time()))
-        return 'http://{}:8080/servlet/rest/chargebox/{}{}'.format(self.host, action, '' if add_tick == False else '?_={}'.format(current_milli_time()))
+    def __get_url(self, action):
+        return 'https://{}/servlet/api/{}'.format(self.host, action)
 
 class AlfenStatus:
 
     def __init__(self,response, prev_status):
-        self.ocpp_state = response['ocppState']
-        self.free_charging = response['freeCharging']
-        self.ocpp_connection_state = response['ocppConnectionState']
-        self.status = Status(response['connector'])
-        self.mode = Mode(response['mode'])
-        self.current_limit = response['currentLimit']
-        self.factory_current_limit = response['factoryCurrentLimit']
-        self.switch_current_limit = response['switchCurrentLimit']
-        self.power_mode = response['powerMode']
-        self.current_charging_current = max(0,response['currentChargingCurrent'] / 1000)
-        self.current_charging_power = max(0,response['currentChargingPower'])
-        if self.current_charging_power > 32000:
-            self.current_charging_power = 0
-        self.acc_session_energy = response['accSessionEnergy']
-        last_reading = response['latestReading']
-        if prev_status is not None and last_reading - prev_status.latest_reading > 500000:
-            last_reading = prev_status.latest_reading
-
-        self.latest_reading = last_reading
-        self.latest_reading_k = max(0,last_reading /1000)
-        self.current_temperature = response['currentTemperature']
-        self.pilot_level = response['pilotLevel']
-        self.session_start_value = response['sessionStartValue']
-        self.nr_of_phases = response['nrOfPhases']
+        self.uptime = 0
+        self.bootups = 0
+        self.voltage_l1 = 0
+        self.voltage_l2 = 0
+        self.voltage_l3 = 0
+        self.current_l1 = 0
+        self.current_l2 = 0
+        self.current_l3 = 0
+        self.active_power_total = 0
+        self.temperature = 0
 
 class AlfenDeviceInfo:
 
     def __init__(self,response):
-        self.serial = response['serialNumber']
-        self.productId = response['productId']
-        self.model = GARO_PRODUCT_MAP[int(self.productId)]
-        self.max_current = response['maxChargeCurrent']
+        self.identity = response['Identity']
+        self.firmware_version = response['FWVersion']
+        self.model = response['Model']
+        self.object_id = response['ObjectId']
+        self.type = response['Type']
