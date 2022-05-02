@@ -72,7 +72,7 @@ class AlfenDevice:
         await self._session.post(self.__get_url('cmd'), headers = HEADER_JSON, json={'command': 'reboot'})
 
     def __get_url(self, action):
-        return 'https://{}/servlet/api/{}'.format(self.host, action)
+        return 'https://{}/api/{}'.format(self.host, action)
 
 class AlfenStatus:
 
