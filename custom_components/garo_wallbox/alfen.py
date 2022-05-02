@@ -59,7 +59,7 @@ class AlfenDevice:
     
     async def init(self):
         await self.async_get_info()
-        self.id = 'garo_{}'.format(self.info.serial)
+        self.id = 'alfen_{}'.format(self.info.serial)
         if self.name is None:
             self.name = f'{self.info.model} ({self.host})'
         await self.async_update()
@@ -73,7 +73,7 @@ class AlfenDevice:
         """Return a device description for device registry."""
         return {
             "identifiers": { (DOMAIN, self.id) },
-            "manufacturer": "Garo",
+            "manufacturer": "Alfen",
             "model": self.info.model,
             "name": self.name,
         }
@@ -94,7 +94,7 @@ class AlfenDevice:
             
 
         response_json = await response.json()
-        self._status = GaroStatus(response_json, self._status)
+        self._status = AlfenStatus(response_json, self._status)
 
     async def async_get_info(self):
         response = await self._session.request(method='GET', url=self.__get_url('config', True))
@@ -105,7 +105,7 @@ class AlfenDevice:
             response = await self._session.request(method='GET', url=self.__get_url('config', True))
                 
         response_json = await response.json()
-        self.info = GaroDeviceInfo(response_json)
+        self.info = AlfenDeviceInfo(response_json)
 
     async def set_mode(self, mode: Mode):
         if self._pre_v1_3:
@@ -136,7 +136,7 @@ class AlfenDevice:
             return 'http://{}:2222/rest/chargebox/{}{}'.format(self.host, action, '' if add_tick == False else '?_={}'.format(current_milli_time()))
         return 'http://{}:8080/servlet/rest/chargebox/{}{}'.format(self.host, action, '' if add_tick == False else '?_={}'.format(current_milli_time()))
 
-class GaroStatus:
+class AlfenStatus:
 
     def __init__(self,response, prev_status):
         self.ocpp_state = response['ocppState']
@@ -164,7 +164,7 @@ class GaroStatus:
         self.session_start_value = response['sessionStartValue']
         self.nr_of_phases = response['nrOfPhases']
 
-class GaroDeviceInfo:
+class AlfenDeviceInfo:
 
     def __init__(self,response):
         self.serial = response['serialNumber']

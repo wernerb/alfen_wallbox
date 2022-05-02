@@ -1,4 +1,4 @@
-"""Config flow for the Garo Wallbox platform."""
+"""Config flow for the Alfen Wallbox platform."""
 import asyncio
 import logging
 
@@ -9,13 +9,13 @@ import voluptuous as vol
 from homeassistant import config_entries
 from homeassistant.const import CONF_HOST, CONF_NAME
 
-from .alfen import GaroDevice
+from .alfen import AlfenDevice
 
 from .const import KEY_IP, TIMEOUT
 
 _LOGGER = logging.getLogger(__name__)
 
-@config_entries.HANDLERS.register("garo_wallbox")
+@config_entries.HANDLERS.register("alfen_wallbox")
 class FlowHandler(config_entries.ConfigFlow):
     """Handle a config flow."""
 
@@ -35,7 +35,7 @@ class FlowHandler(config_entries.ConfigFlow):
         """Create device."""
 
         try:
-            device = GaroDevice(
+            device = AlfenDevice(
                 host, name, self.hass.helpers.aiohttp_client.async_get_clientsession()
             )
             with timeout(TIMEOUT):
