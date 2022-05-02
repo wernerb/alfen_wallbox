@@ -1,10 +1,5 @@
 # Alfen Wallbox (EVSE) - HomeAssistant Integration
 
-[![GitHub Release][releases-shield]][releases]
-[![License][license-shield]](LICENSE)
-
-[![hacs_badge](https://img.shields.io/badge/HACS-Default-orange.svg?style=for-the-badge)](https://github.com/custom-components/hacs)
-
 This is a custom component to allow control of Alfen Wallboxes in [HomeAssistant](https://home-assistant.io).
 The component is a fork of the [Garo Wallbox custom integration](https://github.com/sockless-coding/garo_wallbox).
 ## Installation
