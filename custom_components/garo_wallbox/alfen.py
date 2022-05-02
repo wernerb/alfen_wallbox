@@ -86,26 +86,26 @@ class AlfenStatus:
 
     def __init__(self,response, prev_status):
         for prop in response['properties']:
-                    if prop['id'] == '2060_0':
-                        self.uptime = prop['value']
-                    elif prop['id'] == '2056_0':
-                        self.bootups = prop['value']
-                    elif prop['id'] == '2221_3':
-                        self.voltage_l1 = prop['value']
-                    elif prop['id'] == '2221_4':
-                        self.voltage_l2 = prop['value']
-                    elif prop['id'] == '2221_5':
-                        self.voltage_l3 = prop['value']
-                    elif prop['id'] == '2221_A':
-                        self.current_l1 = prop['value']
-                    elif prop['id'] == '2221_B':
-                        self.current_l2 = prop['value']
-                    elif prop['id'] == '2221_C':
-                        self.current_l3 = prop['value']          
-                    elif prop['id'] == '2221_16':
-                        self.active_power_total = prop['value']
-                    elif prop['id'] == '2201_0':
-                        self.temperature = prop['value']
+            if prop['id'] == '2060_0':
+                self.uptime = prop['value']
+            elif prop['id'] == '2056_0':
+                self.bootups = prop['value']
+            elif prop['id'] == '2221_3':
+                self.voltage_l1 = prop['value']
+            elif prop['id'] == '2221_4':
+                self.voltage_l2 = prop['value']
+            elif prop['id'] == '2221_5':
+                self.voltage_l3 = prop['value']
+            elif prop['id'] == '2221_A':
+                self.current_l1 = prop['value']
+            elif prop['id'] == '2221_B':
+                self.current_l2 = prop['value']
+            elif prop['id'] == '2221_C':
+                self.current_l3 = prop['value']          
+            elif prop['id'] == '2221_16':
+                self.active_power_total = prop['value']
+            elif prop['id'] == '2201_0':
+                self.temperature = prop['value']
 
 class AlfenDeviceInfo:
 
