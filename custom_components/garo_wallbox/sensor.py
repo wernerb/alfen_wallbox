@@ -33,7 +33,6 @@ async def async_setup_entry(hass, entry, async_add_entities):
     """Set up using config_entry."""
     device = hass.data[ALFEN_DOMAIN].get(entry.entry_id)
     async_add_entities([
-        AlfenMainSensor(device),
         AlfenSensor(device, 'Uptime', 'uptime'),
         AlfenSensor(device, 'Bootups', 'bootups'),
         AlfenSensor(device, "Voltage L1", 'voltage_l1', "V"),
@@ -53,40 +52,6 @@ async def async_setup_entry(hass, entry, async_add_entities):
         {},
         "reboot_wallbox",
     )
-
-class AlfenMainSensor(Entity):
-    def __init__(self, device: AlfenDevice):
-        """Initialize the sensor."""
-        self._device = device
-        self._name = f"{device.name}"
-        self._sensor = "sensor"
-
-    @property
-    def unique_id(self):
-        """Return a unique ID."""
-        return f"{self._device.id}-{self._sensor}"
-
-    @property
-    def name(self):
-        """Return the name of the sensor."""
-        return self._name
-
-    @property
-    def icon(self):
-        return "mdi:car-electric"
-
-    async def async_reboot_wallbox(self):
-        await self._device.reboot_wallbox()
-
-    async def async_update(self):
-        await self._device.async_update()
-
-    @property
-    def device_info(self):
-        """Return a device description for device registry."""
-        return self._device.device_info
-        
-
 class AlfenSensor(SensorEntity):
     def __init__(self, device: AlfenDevice, name, sensor, unit = None):
         """Initialize the sensor."""
@@ -132,9 +97,22 @@ class AlfenSensor(SensorEntity):
         return icon
 
     @property
+    def native_value(self):
+        """Return the state of the sensor."""
+        return round(self.state, 2)
+
+    @property
     def native_unit_of_measurement(self):
         """Return the unit the value is expressed in."""
         return self._unit
+
+    @property
+    def state(self):
+        """Return the state of the sensor."""
+        if self._sensor == 'status':
+            return self.status_as_str()
+
+        return self._device.status.__dict__[self._sensor]
 
     @property
     def unit_of_measurement(self):
