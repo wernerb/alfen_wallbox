@@ -7,7 +7,7 @@ from datetime import timedelta
 import asyncio
 
 from homeassistant.util import Throttle
-from .const import GARO_PRODUCT_MAP, DOMAIN
+from .const import DOMAIN
 
 HEADER_JSON = {'content-type': 'application/json; charset=utf-8'}
 
