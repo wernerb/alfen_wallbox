@@ -34,8 +34,8 @@ async def async_setup_entry(hass, entry, async_add_entities):
     device = hass.data[ALFEN_DOMAIN].get(entry.entry_id)
     async_add_entities([
         AlfenMainSensor(device),
-        AlfenSensor(device, 'Status', 'status'),
-        AlfenSensor(device, 'Uptime', 'uptime'),
+        AlfenSensor(device, 'Status Code', 'status'),
+        AlfenSensor(device, 'Uptime', 'uptime', 's'),
         AlfenSensor(device, 'Bootups', 'bootups'),
         AlfenSensor(device, "Voltage L1", 'voltage_l1', "V"),
         AlfenSensor(device, "Voltage L2", 'voltage_l2', "V"),
@@ -99,7 +99,9 @@ class AlfenSensor(SensorEntity):
         if self._sensor == "active_power_total":
             _LOGGER.info(f'Initiating State sensors {self._name}')
             self._attr_device_class = DEVICE_CLASS_ENERGY
-
+        elif self._sensor == "uptime":
+            _LOGGER.info(f'Initiating State sensors {self._name}')
+            self._attr_state_class = STATE_CLASS_TOTAL_INCREASING #STATE_CLASS_MEASUREMENT
 
     @property
     def unique_id(self):
@@ -115,22 +117,18 @@ class AlfenSensor(SensorEntity):
     def icon(self):
         """Return the icon of the sensor."""
         icon = None
-        if self._sensor == "current_temperature":
+        if self._sensor == "temperature":
             icon = "mdi:thermometer"
-        elif self._sensor == "current_charging_current":
+        elif self._sensor.startswith('current_'):
             icon = "mdi:flash"
-        elif self._sensor == "current_charging_power":
-            icon = "mdi:flash"
-        elif self._sensor == "current_limit":
-            icon = "mdi:flash"
-        elif self._sensor == "pilot_level":
-            icon = "mdi:flash"
-        elif self._sensor == "acc_session_energy":
-            icon = "mdi:flash"
-        elif self._sensor == "latest_reading":            
-            icon = "mdi:flash"
-        elif self._sensor == "latest_reading_k":
-            icon = "mdi:flash"
+        elif self._sensor.startswith('voltage_'):
+            icon = "mdi:flash-outline"
+        elif self._sensor == "uptime":
+            icon = "mdi:timer-outline"     
+        elif self._sensor == "bootups":
+            icon = "mdi:reload"       
+        elif self._sensor == "active_power_total":
+            icon = "mdi:circle-slice-3"                            
         return icon
 
     @property
@@ -147,9 +145,9 @@ class AlfenSensor(SensorEntity):
     def state(self):
         """Return the state of the sensor."""
         if self._sensor == 'status':
-            return self.status_as_str()
+            return self._device.status.__dict__[self._sensor]
 
-        return self._device.status.__dict__[self._sensor]
+        return self.status_as_str()
 
     @property
     def unit_of_measurement(self):
