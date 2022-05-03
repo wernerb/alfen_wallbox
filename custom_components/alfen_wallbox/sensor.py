@@ -34,6 +34,7 @@ async def async_setup_entry(hass, entry, async_add_entities):
     device = hass.data[ALFEN_DOMAIN].get(entry.entry_id)
     async_add_entities([
         AlfenMainSensor(device),
+        AlfenSensor(device, 'Status', 'status'),
         AlfenSensor(device, 'Uptime', 'uptime'),
         AlfenSensor(device, 'Bootups', 'bootups'),
         AlfenSensor(device, "Voltage L1", 'voltage_l1', "V"),
@@ -78,7 +79,7 @@ class AlfenMainSensor(Entity):
     def state(self):
         """Return the state of the sensor."""
         if self._device.status is not None:
-            return self._device.status.state
+            return self._device.status.status
         return None
 
     @property
@@ -165,3 +166,12 @@ class AlfenSensor(SensorEntity):
     def device_info(self):
         """Return a device description for device registry."""
         return self._device.device_info
+
+    def status_as_str(self):
+        switcher = {
+            4: "Available",
+            7: "Cable connected",
+            10: "Vehicle connected",
+            11: "Charging",
+        }
+        return switcher.get(self._device.status.status, "Unknown")        

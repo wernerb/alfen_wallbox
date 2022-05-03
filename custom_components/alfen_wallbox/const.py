@@ -27,10 +27,3 @@ ALFEN_PRODUCT_MAP = {
     'NG920-61021': 'Eve Double Pro-line, 2 x type 2 socket, 3 phase, max. 1x32A input current',
     'NG920-61022': 'Eve Double Pro-line, 2 x type 2 socket, 3 phase, max. 2x32A input current',
 }
-
-ALFEN_STATUS_MAP = {
-    4: 'AVAILABLE',
-    7: 'CABLE_CONNECTED',
-    10: 'VEHICLE_CONNECTED',
-    11: 'NORMAL_CHARGING',
-}

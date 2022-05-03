@@ -6,7 +6,7 @@ from enum import Enum
 from datetime import timedelta
 
 from homeassistant.util import Throttle
-from .const import DOMAIN, ALFEN_PRODUCT_MAP, ALFEN_STATUS_MAP
+from .const import DOMAIN, ALFEN_PRODUCT_MAP
 
 HEADER_JSON = {'content-type': 'alfen/json; charset=utf-8'}
 
@@ -88,7 +88,6 @@ class AlfenStatus:
         for prop in response['properties']:
             _LOGGER.debug('Prop')
             _LOGGER.debug(prop)
-            self.state = 'UNKNOWN';
 
             if prop['id'] == '2060_0':
                 self.uptime = max(0, prop['value'] / 1000)
@@ -111,9 +110,7 @@ class AlfenStatus:
             elif prop['id'] == '2201_0':
                 self.temperature = round(prop['value'], 2)    
             elif prop['id'] == '2501_2':
-                self.state_id = prop['value'] 
-                if ALFEN_STATUS_MAP[self.state_id] is not None:
-                    self.state = ALFEN_STATUS_MAP[self.state_id];
+                self.status = prop['value'] 
 class AlfenDeviceInfo:
 
     def __init__(self,response):
