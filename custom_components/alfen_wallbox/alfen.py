@@ -90,7 +90,7 @@ class AlfenStatus:
             _LOGGER.debug(prop)
 
             if prop['id'] == '2060_0':
-                self.uptime = max(0, prop['value'] / 1000)
+                self.uptime = max(0, prop['value'] / 1000 * 60)
             elif prop['id'] == '2056_0':
                 self.bootups = prop['value']
             elif prop['id'] == '2221_3':
@@ -106,7 +106,7 @@ class AlfenStatus:
             elif prop['id'] == '2221_C':
                 self.current_l3 = round(prop['value'], 2)          
             elif prop['id'] == '2221_16':
-                self.active_power_total = round(prop['value'] / 1000 * 60, 2)
+                self.active_power_total = round(prop['value'] / 1000, 2)
             elif prop['id'] == '2201_0':
                 self.temperature = round(prop['value'], 2)    
             elif prop['id'] == '2501_2':
