@@ -20,7 +20,7 @@ from homeassistant.helpers import config_validation as cv, entity_platform, serv
 from . import DOMAIN as ALFEN_DOMAIN
 
 from .alfen import AlfenDevice
-from .const import SERVICE_REBOOT_WALLBOX, ALFEN_STATUS_MAP
+from .const import SERVICE_REBOOT_WALLBOX
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -81,10 +81,6 @@ class AlfenMainSensor(Entity):
         if self._device.status is not None:
             return self._device.status.status
         return None
-
-    @property
-    def modes(self):
-        return [f for f in ALFEN_STATUS_MAP.values()]
 
     async def async_update(self):
         await self._device.async_update()
