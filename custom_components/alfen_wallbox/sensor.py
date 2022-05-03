@@ -107,10 +107,11 @@ class AlfenSensor(SensorEntity):
         self._unit = unit
         if self._sensor == "active_power_total":
             _LOGGER.info(f'Initiating State sensors {self._name}')
-            self._attr_device_class = DEVICE_CLASS_ENERGY
+            self._attr_device_class = DEVICE_CLASS_POWER
+            self._attr_state_class = STATE_CLASS_MEASUREMENT
         elif self._sensor == "uptime":
             _LOGGER.info(f'Initiating State sensors {self._name}')
-            self._attr_state_class = STATE_CLASS_TOTAL_INCREASING #STATE_CLASS_MEASUREMENT
+            self._attr_state_class = STATE_CLASS_TOTAL_INCREASING
 
     @property
     def unique_id(self):
