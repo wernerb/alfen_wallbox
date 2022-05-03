@@ -79,7 +79,7 @@ class AlfenMainSensor(Entity):
     def state(self):
         """Return the state of the sensor."""
         if self._device.status is not None:
-            return self._device.status.status
+            return self.status_as_str()
         return None
 
     async def async_update(self):
@@ -144,10 +144,7 @@ class AlfenSensor(SensorEntity):
     @property
     def state(self):
         """Return the state of the sensor."""
-        if self._sensor == 'status':
-            return self._device.status.__dict__[self._sensor]
-
-        return self.status_as_str()
+        return self._device.status.__dict__[self._sensor]
 
     @property
     def unit_of_measurement(self):
