@@ -135,7 +135,15 @@ Sample Response
 |2221_C| Current L3| A |
 |2221_16| Active power total | /1000 for kW |
 |2201_0| Temperature| C |
+|2501_2| State |  |
 
+### Alfen states (2501_2)
+|ID|Value|
+|----|----|
+|4|Charge point available|
+|7|Cable connected|
+|10|Vehicle connected, start (Charging stopped)|
+|11|Normal Charging|
 # Firmware
 `HTTP GET https://<HOST_IP>/api/firmware`
 
