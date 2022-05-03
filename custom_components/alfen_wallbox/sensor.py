@@ -20,7 +20,7 @@ from homeassistant.helpers import config_validation as cv, entity_platform, serv
 from . import DOMAIN as ALFEN_DOMAIN
 
 from .alfen import AlfenDevice
-from .const import SERVICE_REBOOT_WALLBOX
+from .const import SERVICE_REBOOT_WALLBOX, ALFEN_STATUS_MAP
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -33,6 +33,8 @@ async def async_setup_entry(hass, entry, async_add_entities):
     """Set up using config_entry."""
     device = hass.data[ALFEN_DOMAIN].get(entry.entry_id)
     async_add_entities([
+        AlfenMainSensor(device),
+        AlfenSensor(device, 'Status', 'state'),
         AlfenSensor(device, 'Uptime', 'uptime'),
         AlfenSensor(device, 'Bootups', 'bootups'),
         AlfenSensor(device, "Voltage L1", 'voltage_l1', "V"),
@@ -52,6 +54,43 @@ async def async_setup_entry(hass, entry, async_add_entities):
         {},
         "reboot_wallbox",
     )
+class AlfenMainSensor(Entity):
+    def __init__(self, device: AlfenDevice):
+        """Initialize the sensor."""
+        self._device = device
+        self._name = f"{device.name}"
+        self._sensor = "sensor"
+
+    @property
+    def unique_id(self):
+        """Return a unique ID."""
+        return f"{self._device.id}-{self._sensor}"
+
+    @property
+    def name(self):
+        """Return the name of the sensor."""
+        return self._name
+
+    @property
+    def icon(self):
+        return "mdi:car-electric"
+
+    @property
+    def state(self):
+        """Return the state of the sensor."""
+        return self._device.status.state
+
+    @property
+    def modes(self):
+        return [f for f in ALFEN_STATUS_MAP]
+
+    async def async_update(self):
+        await self._device.async_update()
+
+    @property
+    def device_info(self):
+        """Return a device description for device registry."""
+        return self._device.device_info 
 class AlfenSensor(SensorEntity):
     def __init__(self, device: AlfenDevice, name, sensor, unit = None):
         """Initialize the sensor."""

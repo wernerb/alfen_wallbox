@@ -125,7 +125,7 @@ Sample Response
 
 | Code | description | unit |
 | ----------- | ----------- | --- |
-|2060_0| system uptime| |
+|2060_0| system uptime| /1000 for minutes |
 |2056_0| Number of bootups| |
 |2221_3| Voltage L1| V |
 |2221_4| Voltage L2| V |
@@ -133,5 +133,20 @@ Sample Response
 |2221_A| Current L1| A |
 |2221_B| Current L2| A |
 |2221_C| Current L3| A |
-|2221_16| Active power total | kW |
+|2221_16| Active power total | /1000 for kW |
 |2201_0| Temperature| C |
+
+# Firmware
+`HTTP GET https://<HOST_IP>/api/firmware`
+
+Sample response
+```
+{
+    "OD_fileFirmwareUpdateStatus": {
+        "id": "2911_0",
+        "value": 0
+    },
+    "uploadInProgress": false,
+    "version": 2
+}
+```
