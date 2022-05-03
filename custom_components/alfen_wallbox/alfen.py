@@ -6,7 +6,7 @@ from enum import Enum
 from datetime import timedelta
 
 from homeassistant.util import Throttle
-from .const import DOMAIN
+from .const import DOMAIN, ALFEN_PRODUCT_MAP
 
 HEADER_JSON = {'content-type': 'alfen/json; charset=utf-8'}
 
@@ -116,6 +116,11 @@ class AlfenDeviceInfo:
     def __init__(self,response):
         self.identity = response['Identity']
         self.firmware_version = response['FWVersion']
-        self.model = response['Model']
+        self.model_id = response['Model']
+        if ALFEN_PRODUCT_MAP[self.modelId] is None:
+            self.model = self.model_id
+        else:
+            self.model = f'{ALFEN_PRODUCT_MAP[self.modelId]} ({self.model_id})'
+
         self.object_id = response['ObjectId']
         self.type = response['Type']
