@@ -34,7 +34,6 @@ async def async_setup_entry(hass, entry, async_add_entities):
     device = hass.data[ALFEN_DOMAIN].get(entry.entry_id)
     async_add_entities([
         AlfenMainSensor(device),
-        AlfenSensor(device, 'Status', 'state'),
         AlfenSensor(device, 'Uptime', 'uptime'),
         AlfenSensor(device, 'Bootups', 'bootups'),
         AlfenSensor(device, "Voltage L1", 'voltage_l1', "V"),
