@@ -78,11 +78,13 @@ class AlfenMainSensor(Entity):
     @property
     def state(self):
         """Return the state of the sensor."""
-        return self._device.status.state
+        if self._device.status is not None:
+            return self._device.status.state
+        return None
 
     @property
     def modes(self):
-        return [f for f in ALFEN_STATUS_MAP]
+        return [f for f in ALFEN_STATUS_MAP.values()]
 
     async def async_update(self):
         await self._device.async_update()
