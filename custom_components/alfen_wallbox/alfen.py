@@ -88,6 +88,8 @@ class AlfenStatus:
         for prop in response['properties']:
             _LOGGER.debug('Prop')
             _LOGGER.debug(prop)
+            self.state = 'UNKNOWN';
+
             if prop['id'] == '2060_0':
                 self.uptime = max(0, prop['value'] / 1000)
             elif prop['id'] == '2056_0':
@@ -110,7 +112,8 @@ class AlfenStatus:
                 self.temperature = round(prop['value'], 2)    
             elif prop['id'] == '2501_2':
                 self.state_id = prop['value'] 
-                self.state = ALFEN_STATUS_MAP[int(self.state_id)];
+                if ALFEN_STATUS_MAP[self.state_id] is not None:
+                    self.state = ALFEN_STATUS_MAP[self.state_id];
 class AlfenDeviceInfo:
 
     def __init__(self,response):
