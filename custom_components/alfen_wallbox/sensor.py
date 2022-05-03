@@ -89,6 +89,15 @@ class AlfenMainSensor(Entity):
     def device_info(self):
         """Return a device description for device registry."""
         return self._device.device_info 
+
+    def status_as_str(self):
+        switcher = {
+            4: "Available",
+            7: "Cable connected",
+            10: "Vehicle connected",
+            11: "Charging",
+        }
+        return switcher.get(self._device.status.status, "Unknown")      
 class AlfenSensor(SensorEntity):
     def __init__(self, device: AlfenDevice, name, sensor, unit = None):
         """Initialize the sensor."""
@@ -157,12 +166,3 @@ class AlfenSensor(SensorEntity):
     def device_info(self):
         """Return a device description for device registry."""
         return self._device.device_info
-
-    def status_as_str(self):
-        switcher = {
-            4: "Available",
-            7: "Cable connected",
-            10: "Vehicle connected",
-            11: "Charging",
-        }
-        return switcher.get(self._device.status.status, "Unknown")        
