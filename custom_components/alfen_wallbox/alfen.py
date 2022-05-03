@@ -106,7 +106,7 @@ class AlfenStatus:
             elif prop['id'] == '2221_C':
                 self.current_l3 = round(prop['value'], 2)          
             elif prop['id'] == '2221_16':
-                self.active_power_total = round(prop['value'] / 1000, 2)
+                self.active_power_total = round(prop['value'] / 1000 * 60, 2)
             elif prop['id'] == '2201_0':
                 self.temperature = round(prop['value'], 2)    
             elif prop['id'] == '2501_2':
