@@ -3,6 +3,9 @@
 This is a custom component to allow control of Alfen Wallboxes in [HomeAssistant](https://home-assistant.io).
 
 The component is a fork of the [Garo Wallbox custom integration](https://github.com/sockless-coding/garo_wallbox).
+
+![Screenshot](https://github.com/egnerfl/alfen_wallbox/blob/master/doc/Screen%20Shot%202022-05-03%20at%2017.24.29.png)
+
 ## Installation
 
 ### Install using HACS (recomended)
