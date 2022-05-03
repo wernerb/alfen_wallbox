@@ -117,10 +117,11 @@ class AlfenDeviceInfo:
         self.identity = response['Identity']
         self.firmware_version = response['FWVersion']
         self.model_id = response['Model']
-        if ALFEN_PRODUCT_MAP[self.modelId] is None:
+
+        if ALFEN_PRODUCT_MAP[self.model_id] is None:
             self.model = self.model_id
         else:
-            self.model = f'{ALFEN_PRODUCT_MAP[self.modelId]} ({self.model_id})'
+            self.model = f'{ALFEN_PRODUCT_MAP[self.model_id]} ({self.model_id})'
 
         self.object_id = response['ObjectId']
         self.type = response['Type']
