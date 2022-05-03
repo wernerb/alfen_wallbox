@@ -44,7 +44,7 @@ class AlfenDevice:
             "manufacturer": "Alfen",
             "model": self.info.model,
             "name": self.name,
-            "firmware_version": self.info.firmware_version
+            "sw_version": self.info.firmware_version
         }
 
     def _request(self, parameter_list):
