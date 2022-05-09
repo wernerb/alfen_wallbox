@@ -31,6 +31,7 @@ To measure the energy consumption of the Wallbox you can combine the `_active_po
     unique_id: alfen_wallbox_energy_total
     unit_prefix: k
     round: 2
+    method: left
 ```
 
 This way you can monitor the energy consumption in the Home Assistant Energy Dashboard.
