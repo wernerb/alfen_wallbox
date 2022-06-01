@@ -4,7 +4,7 @@ This is a custom component to allow control of Alfen Wallboxes in [HomeAssistant
 
 The component is a fork of the [Garo Wallbox custom integration](https://github.com/sockless-coding/garo_wallbox).
 
-![Screenshot](https://github.com/egnerfl/alfen_wallbox/blob/master/doc/screenshot.png)
+![Screenshot](https://github.com/egnerfl/alfen_wallbox/blob/master/doc/Screen%20Shot%202022-06-01%20at%2013.34.44.png)
 
 > After reverse engineering the API myself I found out that there is already a python libary wrapping the Alfen API.
 > https://gitlab.com/LordGaav/alfen-eve/-/tree/develop/alfeneve
