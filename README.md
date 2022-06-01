@@ -6,6 +6,9 @@ The component is a fork of the [Garo Wallbox custom integration](https://github.
 
 ![Screenshot](https://github.com/egnerfl/alfen_wallbox/blob/master/doc/screenshot.png)
 
+> After reverse engineering the API myself I found out that there is already a python libary wrapping the Alfen API.
+> https://gitlab.com/LordGaav/alfen-eve/-/tree/develop/alfeneve
+
 ## Installation
 
 ### Install using HACS (recomended)
