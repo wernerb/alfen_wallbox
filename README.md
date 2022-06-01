@@ -23,18 +23,5 @@ Clone or copy this repository and copy the folder 'custom_components/alfen_wallb
 Once installed the Alfen Wallbox integration can be configured via the Home Assistant integration interface 
 where you can enter the IP address of the device.
 
-### Energy consumption
-
-To measure the energy consumption of the Wallbox you can combine the `_active_power_total` sensor with the [Riemann sum integral - Integration](https://www.home-assistant.io/integrations/integration/).
-
-``` yaml
-  - platform: integration
-    source: sensor.alfen_wallbox_active_power_total
-    name: Alfen Wallbox Energy Total
-    unique_id: alfen_wallbox_energy_total
-    unit_prefix: k
-    round: 2
-    method: left
-```
-
-This way you can monitor the energy consumption in the Home Assistant Energy Dashboard.
+### Home Assistant Energy Dashboard
+The wallbox can be added to the Home Assistant Energy Dashboard using the `_meter_reading` sensor.
