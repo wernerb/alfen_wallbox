@@ -44,6 +44,7 @@ async def async_setup_entry(hass, entry, async_add_entities):
         AlfenSensor(device, "Current L2", 'current_l2', "A"),
         AlfenSensor(device, "Current L3", 'current_l3', "A"),
         AlfenSensor(device, "Active Power Total", 'active_power_total', "W"),
+        AlfenSensor(device, "Meter Reading", 'meter_reading', "Wh"),
         AlfenSensor(device, "Temperature", 'temperature', TEMP_CELSIUS),
     ])
 
@@ -112,6 +113,10 @@ class AlfenSensor(SensorEntity):
         elif self._sensor == "uptime":
             _LOGGER.info(f'Initiating State sensors {self._name}')
             self._attr_state_class = STATE_CLASS_TOTAL_INCREASING
+        elif self._sensor == "meter_reading":
+            _LOGGER.info(f'Initiating State sensors {self._name}')
+            self._attr_device_class = DEVICE_CLASS_ENERGY
+            self._attr_state_class = STATE_CLASS_MEASUREMENT            
 
     @property
     def unique_id(self):
