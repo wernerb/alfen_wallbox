@@ -44,7 +44,7 @@ async def async_setup_entry(hass, entry, async_add_entities):
         AlfenSensor(device, "Current L2", 'current_l2', "A"),
         AlfenSensor(device, "Current L3", 'current_l3', "A"),
         AlfenSensor(device, "Active Power Total", 'active_power_total', "W"),
-        AlfenSensor(device, "Meter Reading", 'meter_reading', "Wh"),
+        AlfenSensor(device, "Meter Reading", 'meter_reading', "kWh"),
         AlfenSensor(device, "Temperature", 'temperature', TEMP_CELSIUS),
     ])
 
