@@ -112,7 +112,7 @@ class AlfenStatus:
             elif prop['id'] == '2501_2':
                 self.status = prop['value'] 
             elif prop['id'] == '2221_22':
-                self.meter_reading = prop['value'] / 1000
+                self.meter_reading = round((prop['value'] / 1000), 2)
 class AlfenDeviceInfo:
 
     def __init__(self,response):
