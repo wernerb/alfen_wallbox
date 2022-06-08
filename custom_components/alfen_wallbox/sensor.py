@@ -116,7 +116,7 @@ class AlfenSensor(SensorEntity):
         elif self._sensor == "meter_reading":
             _LOGGER.info(f'Initiating State sensors {self._name}')
             self._attr_device_class = DEVICE_CLASS_ENERGY
-            self._attr_state_class = STATE_CLASS_MEASUREMENT            
+            self._attr_state_class = STATE_CLASS_TOTAL_INCREASING            
 
     @property
     def unique_id(self):
