@@ -83,14 +83,14 @@ class AlfenDevice:
 
     async def set_current_limit(self, limit):
         _LOGGER.debug(f'Set current limit {limit}A')
-        if limit > 16 | limit < 1:
+        if limit > 32 | limit < 1:
             return self.async_abort(reason="invalid_current_limit")
 
         await self._session.request(ssl=False, method='POST', headers = HEADER_JSON, url=self.__get_url('login'), json={'username': self.username, 'password': self.password})
         response = await self._session.request(ssl=False, method='POST', headers = POST_HEADER_JSON, url=self.__get_url('prop'), json={'2129_0': {'id': '2129_0', 'value': limit}})
         _LOGGER.debug(f'Set current limit response {response}')
+        self.status.current_limit = limit
         await self._session.request(ssl=False, method='POST', headers = HEADER_JSON, url=self.__get_url('logout'))
-        await self._do_update()
 
     def __get_url(self, action):
         return 'https://{}/api/{}'.format(self.host, action)
