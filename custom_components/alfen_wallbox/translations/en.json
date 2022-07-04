@@ -16,7 +16,7 @@
         "device_timeout": "Timeout connecting to the device.",
         "device_fail": "Unexpected error creating device.",
         "already_configured": "Device is already configured.",
-        "invalid_current_limit": "Invalid current limit (0 - 16A)."
+        "invalid_current_limit": "Invalid current limit (1 - 16A)."
       }
     }
   }
