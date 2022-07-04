@@ -46,6 +46,7 @@ async def async_setup_entry(hass, entry, async_add_entities):
         AlfenSensor(device, "Active Power Total", 'active_power_total', "W"),
         AlfenSensor(device, "Meter Reading", 'meter_reading', "kWh"),
         AlfenSensor(device, "Temperature", 'temperature', TEMP_CELSIUS),
+        AlfenSensor(device, "Current Limit", 'current_limit', "A"),
     ])
 
     platform = entity_platform.current_platform.get()

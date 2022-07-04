@@ -56,7 +56,7 @@ class AlfenDevice:
 
     async def _do_update(self):
         await self._session.request(ssl=False, method='POST', headers = HEADER_JSON, url=self.__get_url('login'), json={'username': self.username, 'password': self.password})
-        response = await self._session.request(ssl=False, method='GET', headers = HEADER_JSON, url=self.__get_url('prop?ids=2060_0,2056_0,2221_3,2221_4,2221_5,2221_A,2221_B,2221_C,2221_16,2201_0,2501_2,2221_22'))
+        response = await self._session.request(ssl=False, method='GET', headers = HEADER_JSON, url=self.__get_url('prop?ids=2060_0,2056_0,2221_3,2221_4,2221_5,2221_A,2221_B,2221_C,2221_16,2201_0,2501_2,2221_22,2062_0'))
 
         _LOGGER.debug(f'Status Response {response}')
         self._session.request(ssl=False, method='POST', headers = HEADER_JSON, url=self.__get_url('logout'))
@@ -113,6 +113,8 @@ class AlfenStatus:
                 self.status = prop['value'] 
             elif prop['id'] == '2221_22':
                 self.meter_reading = round((prop['value'] / 1000), 2)
+            elif prop['id'] == '2062_0':
+                self.current_limit = prop['value'] 
 class AlfenDeviceInfo:
 
     def __init__(self,response):
