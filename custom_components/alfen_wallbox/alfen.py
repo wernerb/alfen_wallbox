@@ -68,10 +68,10 @@ class AlfenDevice:
 
     async def async_get_info(self):
         response = await self._session.request(ssl=False, method='GET', url=self.__get_url('info'))
-        _LOGGER.debug(f'Response {response}')
+        # _LOGGER.debug(f'Response {response}')
                 
         response_json = await response.json(content_type='alfen/json')
-        _LOGGER.debug(response_json)
+        # _LOGGER.debug(response_json)
 
         self.info = AlfenDeviceInfo(response_json)
 
@@ -99,8 +99,8 @@ class AlfenStatus:
 
     def __init__(self,response, prev_status):
         for prop in response['properties']:
-            _LOGGER.debug('Prop')
-            _LOGGER.debug(prop)
+            # _LOGGER.debug('Prop')
+            # _LOGGER.debug(prop)
 
             if prop['id'] == '2060_0':
                 self.uptime = max(0, prop['value'] / 1000 * 60)

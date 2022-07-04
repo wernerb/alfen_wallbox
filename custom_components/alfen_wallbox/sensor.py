@@ -92,8 +92,8 @@ class AlfenMainSensor(Entity):
             return self.status_as_str()
         return None
 
-    async def async_reboot_wallbox(self, mode):
-        await self._device.reboot_wallbox
+    async def async_reboot_wallbox(self):
+        await self._device.reboot_wallbox()
 
     async def async_set_current_limit(self, limit):
         await self._device.set_current_limit(limit)
