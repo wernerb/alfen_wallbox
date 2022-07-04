@@ -9,6 +9,7 @@ from homeassistant.util import Throttle
 from .const import DOMAIN, ALFEN_PRODUCT_MAP
 
 HEADER_JSON = {'content-type': 'alfen/json; charset=utf-8'}
+POST_HEADER_JSON = {'content-type': 'application/json'}
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -76,15 +77,18 @@ class AlfenDevice:
 
     async def reboot_wallbox(self):
         await self._session.request(ssl=False, method='POST', headers = HEADER_JSON, url=self.__get_url('login'), json={'username': self.username, 'password': self.password})
-        await self._session.post(self.__get_url('cmd'), headers = HEADER_JSON, json={'command': 'reboot'})
+        response = await self._session.post(self.__get_url('cmd'), headers = POST_HEADER_JSON, json={'command': 'reboot'})
+        _LOGGER.debug(f'Reboot response {response}')
         self._session.request(ssl=False, method='POST', headers = HEADER_JSON, url=self.__get_url('logout'))
 
     async def set_current_limit(self, limit):
-        if limit > 16 | limit < 0:
+        _LOGGER.debug(f'Set current limit {limit}A')
+        if limit > 16 | limit < 1:
             return self.async_abort(reason="invalid_current_limit")
 
         await self._session.request(ssl=False, method='POST', headers = HEADER_JSON, url=self.__get_url('login'), json={'username': self.username, 'password': self.password})
-        await self._session.post(self.__get_url('prop'), headers = HEADER_JSON, json={'2129_0': {'id': '2129_0', 'value': limit}})
+        response = await self._session.post(self.__get_url('prop'), headers = POST_HEADER_JSON, json={'2129_0': {'id': '2129_0', 'value': limit}})
+        _LOGGER.debug(f'Set current limit response {response}')
         await self._session.request(ssl=False, method='POST', headers = HEADER_JSON, url=self.__get_url('logout'))
         await self._do_update()
 
