@@ -77,7 +77,7 @@ class AlfenDevice:
 
     async def reboot_wallbox(self):
         await self._session.request(ssl=False, method='POST', headers = HEADER_JSON, url=self.__get_url('login'), json={'username': self.username, 'password': self.password})
-        response = await self._session.post(self.__get_url('cmd'), headers = POST_HEADER_JSON, json={'command': 'reboot'})
+        response = await self._session.request(ssl=False, method='POST', headers = POST_HEADER_JSON, url=self.__get_url('cmd'), json={'command': 'reboot'})
         _LOGGER.debug(f'Reboot response {response}')
         self._session.request(ssl=False, method='POST', headers = HEADER_JSON, url=self.__get_url('logout'))
 
@@ -87,7 +87,7 @@ class AlfenDevice:
             return self.async_abort(reason="invalid_current_limit")
 
         await self._session.request(ssl=False, method='POST', headers = HEADER_JSON, url=self.__get_url('login'), json={'username': self.username, 'password': self.password})
-        response = await self._session.post(self.__get_url('prop'), headers = POST_HEADER_JSON, json={'2129_0': {'id': '2129_0', 'value': limit}})
+        response = await self._session.request(ssl=False, method='POST', headers = POST_HEADER_JSON, url=self.__get_url('prop'), json={'2129_0': {'id': '2129_0', 'value': limit}})
         _LOGGER.debug(f'Set current limit response {response}')
         await self._session.request(ssl=False, method='POST', headers = HEADER_JSON, url=self.__get_url('logout'))
         await self._do_update()
