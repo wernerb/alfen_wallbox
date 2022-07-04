@@ -20,7 +20,7 @@ from homeassistant.helpers import config_validation as cv, entity_platform, serv
 from . import DOMAIN as ALFEN_DOMAIN
 
 from .alfen import AlfenDevice
-from .const import SERVICE_REBOOT_WALLBOX
+from .const import SERVICE_REBOOT_WALLBOX, SERVICE_SET_CURRENT_LIMIT
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -54,7 +54,15 @@ async def async_setup_entry(hass, entry, async_add_entities):
     platform.async_register_entity_service(
         SERVICE_REBOOT_WALLBOX,
         {},
-        "reboot_wallbox",
+        "async_reboot_wallbox",
+    )
+
+    platform.async_register_entity_service(
+        SERVICE_SET_CURRENT_LIMIT,
+        {
+            vol.Required('limit'): cv.positive_int,
+        },
+        "async_set_current_limit",
     )
 class AlfenMainSensor(Entity):
     def __init__(self, device: AlfenDevice):
@@ -83,6 +91,12 @@ class AlfenMainSensor(Entity):
         if self._device.status is not None:
             return self.status_as_str()
         return None
+
+    async def async_reboot_wallbox(self, mode):
+        await self._device.reboot_wallbox
+
+    async def async_set_current_limit(self, limit):
+        await self._device.set_current_limit(limit)
 
     async def async_update(self):
         await self._device.async_update()

@@ -79,6 +79,15 @@ class AlfenDevice:
         await self._session.post(self.__get_url('cmd'), headers = HEADER_JSON, json={'command': 'reboot'})
         self._session.request(ssl=False, method='POST', headers = HEADER_JSON, url=self.__get_url('logout'))
 
+    async def set_current_limit(self, limit):
+        if limit > 16 | limit < 0:
+            return self.async_abort(reason="invalid_current_limit")
+
+        await self._session.request(ssl=False, method='POST', headers = HEADER_JSON, url=self.__get_url('login'), json={'username': self.username, 'password': self.password})
+        await self._session.post(self.__get_url('prop'), headers = HEADER_JSON, json={'2062_0': {'id': '2062_0', 'value': limit}})
+        await self._session.request(ssl=False, method='POST', headers = HEADER_JSON, url=self.__get_url('logout'))
+        await self._do_update()
+
     def __get_url(self, action):
         return 'https://{}/api/{}'.format(self.host, action)
 

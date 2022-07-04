@@ -7,6 +7,7 @@ KEY_IP = "ip"
 TIMEOUT = 60
 
 SERVICE_REBOOT_WALLBOX = "reboot_wallbox"
+SERVICE_SET_CURRENT_LIMIT = "set_current_limit"
 
 ALFEN_PRODUCT_MAP = {
     'NG910-60123': 'Eve Single Pro-Line DE, 3 phase, display, type 2 socket',
