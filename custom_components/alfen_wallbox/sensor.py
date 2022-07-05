@@ -112,6 +112,7 @@ class AlfenMainSensor(Entity):
             7: "Cable connected",
             10: "Vehicle connected",
             11: "Charging",
+            36: "Paused",
         }
         return switcher.get(self._device.status.status, "Unknown")      
 class AlfenSensor(SensorEntity):
