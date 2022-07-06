@@ -90,6 +90,7 @@ class AlfenDevice:
         response = await self._session.request(ssl=False, method='POST', headers = POST_HEADER_JSON, url=self.__get_url('prop'), json={'2129_0': {'id': '2129_0', 'value': limit}})
         _LOGGER.debug(f'Set current limit response {response}')
         await self._session.request(ssl=False, method='POST', headers = HEADER_JSON, url=self.__get_url('logout'))
+        await self._do_update()
 
     def __get_url(self, action):
         return 'https://{}/api/{}'.format(self.host, action)
