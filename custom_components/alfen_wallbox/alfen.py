@@ -2,6 +2,7 @@ import logging
 
 import requests
 import time
+import ssl
 from enum import Enum
 from datetime import timedelta
 
@@ -25,6 +26,12 @@ class AlfenDevice:
         if self.username is None:
             self.username = 'admin'
         self.password = password
+        # Default ciphers needed as of python 3.10
+        context = ssl.create_default_context()
+        context.set_ciphers("DEFAULT")
+        context.check_hostname = False
+        context.verify_mode = ssl.CERT_NONE
+        self.ssl = context        
     
     async def init(self):
         await self.async_get_info()
@@ -56,18 +63,18 @@ class AlfenDevice:
         await self._do_update()
 
     async def _do_update(self):
-        await self._session.request(ssl=False, method='POST', headers = HEADER_JSON, url=self.__get_url('login'), json={'username': self.username, 'password': self.password})
-        response = await self._session.request(ssl=False, method='GET', headers = HEADER_JSON, url=self.__get_url('prop?ids=2060_0,2056_0,2221_3,2221_4,2221_5,2221_A,2221_B,2221_C,2221_16,2201_0,2501_2,2221_22,2129_0'))
+        await self._session.request(ssl=self.ssl, method='POST', headers = HEADER_JSON, url=self.__get_url('login'), json={'username': self.username, 'password': self.password})
+        response = await self._session.request(ssl=self.ssl, method='GET', headers = HEADER_JSON, url=self.__get_url('prop?ids=2060_0,2056_0,2221_3,2221_4,2221_5,2221_A,2221_B,2221_C,2221_16,2201_0,2501_2,2221_22,2129_0'))
 
         _LOGGER.debug(f'Status Response {response}')
-        self._session.request(ssl=False, method='POST', headers = HEADER_JSON, url=self.__get_url('logout'))
+        self._session.request(ssl=self.ssl, method='POST', headers = HEADER_JSON, url=self.__get_url('logout'))
         response_json = await response.json(content_type='alfen/json')
         _LOGGER.debug(response_json)
 
         self._status = AlfenStatus(response_json, self._status)
 
     async def async_get_info(self):
-        response = await self._session.request(ssl=False, method='GET', url=self.__get_url('info'))
+        response = await self._session.request(ssl=self.ssl, method='GET', url=self.__get_url('info'))
         _LOGGER.debug(f'Response {response}')
                 
         response_json = await response.json(content_type='alfen/json')
@@ -76,20 +83,20 @@ class AlfenDevice:
         self.info = AlfenDeviceInfo(response_json)
 
     async def reboot_wallbox(self):
-        await self._session.request(ssl=False, method='POST', headers = HEADER_JSON, url=self.__get_url('login'), json={'username': self.username, 'password': self.password})
-        response = await self._session.request(ssl=False, method='POST', headers = POST_HEADER_JSON, url=self.__get_url('cmd'), json={'command': 'reboot'})
+        await self._session.request(ssl=self.ssl, method='POST', headers = HEADER_JSON, url=self.__get_url('login'), json={'username': self.username, 'password': self.password})
+        response = await self._session.request(ssl=self.ssl, method='POST', headers = POST_HEADER_JSON, url=self.__get_url('cmd'), json={'command': 'reboot'})
         _LOGGER.debug(f'Reboot response {response}')
-        self._session.request(ssl=False, method='POST', headers = HEADER_JSON, url=self.__get_url('logout'))
+        self._session.request(ssl=self.ssl, method='POST', headers = HEADER_JSON, url=self.__get_url('logout'))
 
     async def set_current_limit(self, limit):
         _LOGGER.debug(f'Set current limit {limit}A')
         if limit > 32 | limit < 1:
             return self.async_abort(reason="invalid_current_limit")
 
-        await self._session.request(ssl=False, method='POST', headers = HEADER_JSON, url=self.__get_url('login'), json={'username': self.username, 'password': self.password})
-        response = await self._session.request(ssl=False, method='POST', headers = POST_HEADER_JSON, url=self.__get_url('prop'), json={'2129_0': {'id': '2129_0', 'value': limit}})
+        await self._session.request(ssl=self.ssl, method='POST', headers = HEADER_JSON, url=self.__get_url('login'), json={'username': self.username, 'password': self.password})
+        response = await self._session.request(ssl=self.ssl, method='POST', headers = POST_HEADER_JSON, url=self.__get_url('prop'), json={'2129_0': {'id': '2129_0', 'value': limit}})
         _LOGGER.debug(f'Set current limit response {response}')
-        await self._session.request(ssl=False, method='POST', headers = HEADER_JSON, url=self.__get_url('logout'))
+        await self._session.request(ssl=self.ssl, method='POST', headers = HEADER_JSON, url=self.__get_url('logout'))
         await self._do_update()
 
     def __get_url(self, action):
