@@ -68,7 +68,7 @@ class AlfenDevice:
 
         _LOGGER.debug(f'Status Response {response}')
         self._session.request(ssl=self.ssl, method='POST', headers = HEADER_JSON, url=self.__get_url('logout'))
-        response_json = await response.json(content_type='alfen/json')
+        response_json = await response.json()
         _LOGGER.debug(response_json)
 
         self._status = AlfenStatus(response_json, self._status)
@@ -77,7 +77,7 @@ class AlfenDevice:
         response = await self._session.request(ssl=self.ssl, method='GET', url=self.__get_url('info'))
         _LOGGER.debug(f'Response {response}')
                 
-        response_json = await response.json(content_type='alfen/json')
+        response_json = await response.json()
         _LOGGER.debug(response_json)
 
         self.info = AlfenDeviceInfo(response_json)
