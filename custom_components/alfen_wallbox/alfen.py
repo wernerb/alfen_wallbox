@@ -76,11 +76,23 @@ class AlfenDevice:
     async def async_get_info(self):
         response = await self._session.request(ssl=self.ssl, method='GET', url=self.__get_url('info'))
         _LOGGER.debug(f'Response {response}')
-                
-        response_json = await response.json(content_type=None)
-        _LOGGER.debug(response_json)
 
-        self.info = AlfenDeviceInfo(response_json)
+        if response.status != 200:
+            _LOGGER.debug('Info API not available, use generic info')
+
+            generic_info = {
+                'Identity': self.host,
+                'FWVersion': '?',
+                'Model': 'Generic Alfen Wallbox',
+                'ObjectId': '?',
+                'Type': '?'
+            }
+            self.info = AlfenDeviceInfo(generic_info)
+        else:    
+            response_json = await response.json(content_type=None)
+            _LOGGER.debug(response_json)
+
+            self.info = AlfenDeviceInfo(response_json)
 
     async def reboot_wallbox(self):
         await self._session.request(ssl=self.ssl, method='POST', headers = HEADER_JSON, url=self.__get_url('login'), json={'username': self.username, 'password': self.password})
