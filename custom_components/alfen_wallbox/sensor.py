@@ -20,7 +20,7 @@ from homeassistant.helpers import config_validation as cv, entity_platform, serv
 from . import DOMAIN as ALFEN_DOMAIN
 
 from .alfen import AlfenDevice
-from .const import SERVICE_REBOOT_WALLBOX, SERVICE_SET_CURRENT_LIMIT
+from .const import SERVICE_REBOOT_WALLBOX, SERVICE_SET_CURRENT_LIMIT, SERVICE_ENABLE_RFID_AUTHORIZATION_MODE, SERVICE_DISABLE_RFID_AUTHORIZATION_MODE
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -47,6 +47,7 @@ async def async_setup_entry(hass, entry, async_add_entities):
         AlfenSensor(device, "Meter Reading", 'meter_reading', "kWh"),
         AlfenSensor(device, "Temperature", 'temperature', TEMP_CELSIUS),
         AlfenSensor(device, "Current Limit", 'current_limit', "A"),
+        AlfenSensor(device, 'Authorization Mode', 'auth_mode'),
     ])
 
     platform = entity_platform.current_platform.get()
@@ -64,6 +65,19 @@ async def async_setup_entry(hass, entry, async_add_entities):
         },
         "async_set_current_limit",
     )
+
+    platform.async_register_entity_service(
+        SERVICE_ENABLE_RFID_AUTHORIZATION_MODE,
+        {},
+        "async_enable_rfid_auth_mode",
+    )
+
+    platform.async_register_entity_service(
+        SERVICE_DISABLE_RFID_AUTHORIZATION_MODE,
+        {},
+        "async_disable_rfid_auth_mode",
+    )
+
 class AlfenMainSensor(Entity):
     def __init__(self, device: AlfenDevice):
         """Initialize the sensor."""
@@ -98,6 +112,12 @@ class AlfenMainSensor(Entity):
     async def async_set_current_limit(self, limit):
         await self._device.set_current_limit(limit)
 
+    async def async_enable_rfid_auth_mode(self):
+        await self._device.set_rfid_auth_mode(True)               
+
+    async def async_disable_rfid_auth_mode(self):
+        await self._device.set_rfid_auth_mode(False)
+
     async def async_update(self):
         await self._device.async_update()
 
@@ -114,7 +134,8 @@ class AlfenMainSensor(Entity):
             11: "Charging",
             36: "Paused",
         }
-        return switcher.get(self._device.status.status, "Unknown")      
+        return switcher.get(self._device.status.status, "Unknown")
+
 class AlfenSensor(SensorEntity):
     def __init__(self, device: AlfenDevice, name, sensor, unit = None):
         """Initialize the sensor."""

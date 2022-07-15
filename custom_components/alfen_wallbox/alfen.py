@@ -64,7 +64,7 @@ class AlfenDevice:
 
     async def _do_update(self):
         await self._session.request(ssl=self.ssl, method='POST', headers = HEADER_JSON, url=self.__get_url('login'), json={'username': self.username, 'password': self.password})
-        response = await self._session.request(ssl=self.ssl, method='GET', headers = HEADER_JSON, url=self.__get_url('prop?ids=2060_0,2056_0,2221_3,2221_4,2221_5,2221_A,2221_B,2221_C,2221_16,2201_0,2501_2,2221_22,2129_0'))
+        response = await self._session.request(ssl=self.ssl, method='GET', headers = HEADER_JSON, url=self.__get_url('prop?ids=2060_0,2056_0,2221_3,2221_4,2221_5,2221_A,2221_B,2221_C,2221_16,2201_0,2501_2,2221_22,2129_0,2126_0'))
 
         _LOGGER.debug(f'Status Response {response}')
         self._session.request(ssl=self.ssl, method='POST', headers = HEADER_JSON, url=self.__get_url('logout'))
@@ -111,6 +111,19 @@ class AlfenDevice:
         await self._session.request(ssl=self.ssl, method='POST', headers = HEADER_JSON, url=self.__get_url('logout'))
         await self._do_update()
 
+    async def set_rfid_auth_mode(self, enabled):
+        _LOGGER.debug(f'Set RFID Auth Mode {enabled}A')
+
+        value = 0
+        if enabled:
+            value = 2
+
+        await self._session.request(ssl=self.ssl, method='POST', headers = HEADER_JSON, url=self.__get_url('login'), json={'username': self.username, 'password': self.password})
+        response = await self._session.request(ssl=self.ssl, method='POST', headers = POST_HEADER_JSON, url=self.__get_url('prop'), json={'2126_0': {'id': '2126_0', 'value': value}})
+        _LOGGER.debug(f'Set RFID Auth Mode {response}')
+        await self._session.request(ssl=self.ssl, method='POST', headers = HEADER_JSON, url=self.__get_url('logout'))
+        await self._do_update()        
+
     def __get_url(self, action):
         return 'https://{}/api/{}'.format(self.host, action)
 
@@ -147,6 +160,16 @@ class AlfenStatus:
                 self.meter_reading = round((prop['value'] / 1000), 2)
             elif prop['id'] == '2129_0':
                 self.current_limit = prop['value'] 
+            elif prop['id'] == '2126_0':
+                self.auth_mode = self.auth_mode_as_str(prop['value']) 
+
+    def auth_mode_as_str(self, code):
+        switcher = {
+            0: "Plug and Charge",
+            2: "RFID"
+        }
+        return switcher.get(code, "Unknown")                
+
 class AlfenDeviceInfo:
 
     def __init__(self,response):
