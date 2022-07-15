@@ -13,3 +13,17 @@ set_current_limit:
       example: "alfen_wallbox.garage"
     limit:
       description: New limit.
+
+enable_rfid_authorization_mode:
+  description: Enables RFID auth mode
+  fields:
+    entity_id:
+      description: Name(s) of entities to change.
+      example: "alfen_wallbox.garage"
+
+disable_rfid_authorization_mode:
+  description: Disables RFID auth mode
+  fields:
+    entity_id:
+      description: Name(s) of entities to change.
+      example: "alfen_wallbox.garage"      
