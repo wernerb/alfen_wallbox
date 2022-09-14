@@ -1,5 +1,16 @@
 # Alfen API endpoints
 
+## General info
+All `GET` requests will deliver content with the content type `{'content-type': 'alfen/json; charset=utf-8'}`.
+
+For `POST` requests you have to use `{'content-type': 'application/json'}`.
+
+Before each request you have to login first and logout afterwards. The sessions are managed by the wallbox and you don't need to set a session token or something similar, I guess the wallbox uses the IP adress to authenticate the requests.
+
+The info API doesn't need authentication / a login request.
+
+The wallbox uses an invalid self signed certificate, you need to disable all SSL checks to perform the API calls.
+
 ## Login
 `HTTP POST https://<HOST_IP>/api/login`
 ```
@@ -27,7 +38,21 @@
 
 >Default offset (256)
 
-# Props
+# Props (POST)
+
+`HTTP POST https://<HOST_IP>/api/prop`
+
+Sample Request
+```
+{
+    "216C_0": {
+        "id": "216C_0",
+        "value": 2
+    }
+}
+```
+
+# Props (GET)
 `HTTP GET https://<HOST_IP>/api/prop?ids=<PROP_CODES>`
 
 Sample Response
