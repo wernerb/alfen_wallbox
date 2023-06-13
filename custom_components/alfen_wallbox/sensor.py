@@ -20,7 +20,7 @@ from homeassistant.helpers import config_validation as cv, entity_platform, serv
 from . import DOMAIN as ALFEN_DOMAIN
 
 from .alfen import AlfenDevice
-from .const import SERVICE_REBOOT_WALLBOX, SERVICE_SET_CURRENT_LIMIT, SERVICE_ENABLE_RFID_AUTHORIZATION_MODE, SERVICE_DISABLE_RFID_AUTHORIZATION_MODE
+from .const import SERVICE_REBOOT_WALLBOX, SERVICE_SET_CURRENT_LIMIT, SERVICE_ENABLE_RFID_AUTHORIZATION_MODE, SERVICE_DISABLE_RFID_AUTHORIZATION_MODE, SERVICE_SET_CURRENT_PHASE
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -37,17 +37,23 @@ async def async_setup_entry(hass, entry, async_add_entities):
         AlfenSensor(device, 'Status Code', 'status'),
         AlfenSensor(device, 'Uptime', 'uptime', 's'),
         AlfenSensor(device, 'Bootups', 'bootups'),
-        AlfenSensor(device, "Voltage L1", 'voltage_l1', "V"),
-        AlfenSensor(device, "Voltage L2", 'voltage_l2', "V"),
-        AlfenSensor(device, "Voltage L3", 'voltage_l3', "V"),
-        AlfenSensor(device, "Current L1", 'current_l1', "A"),
-        AlfenSensor(device, "Current L2", 'current_l2', "A"),
-        AlfenSensor(device, "Current L3", 'current_l3', "A"),
-        AlfenSensor(device, "Active Power Total", 'active_power_total', "W"),
-        AlfenSensor(device, "Meter Reading", 'meter_reading', "kWh"),
+        AlfenSensor(device, "Voltage L1", 'voltage_l1', 'V'),
+        AlfenSensor(device, "Voltage L2", 'voltage_l2', 'V'),
+        AlfenSensor(device, "Voltage L3", 'voltage_l3', 'V'),
+        AlfenSensor(device, "Current L1", 'current_l1', 'A'),
+        AlfenSensor(device, "Current L2", 'current_l2', 'A'),
+        AlfenSensor(device, "Current L3", 'current_l3', 'A'),
+        AlfenSensor(device, "Active Power Total", 'active_power_total', 'W'),
+        AlfenSensor(device, "Meter Reading", 'meter_reading', 'kWh'),
         AlfenSensor(device, "Temperature", 'temperature', TEMP_CELSIUS),
-        AlfenSensor(device, "Current Limit", 'current_limit', "A"),
+        AlfenSensor(device, "Current Limit", 'current_limit', 'A'),
         AlfenSensor(device, 'Authorization Mode', 'auth_mode'),
+        AlfenSensor(device, 'Active Load Balancing Safe Current', 'alb_safe_current', 'A'),
+        AlfenSensor(device, 'Active Load Balancing Phase Connection', 'alb_phase_connection'),
+        AlfenSensor(device, 'Maximum Smart Meter current', 'max_station_current', 'A'),
+        AlfenSensor(device, 'Load Balacing Mode', 'load_balancing_mode'),
+        AlfenSensor(device, 'Main Static Load Balacing Max Current', 'main_static_lb_max_current', 'A'),
+        AlfenSensor(device, 'Main Active Load Balacing Max Current', 'main_active_lb_max_current', 'A'),
     ])
 
     platform = entity_platform.current_platform.get()
@@ -64,6 +70,14 @@ async def async_setup_entry(hass, entry, async_add_entities):
             vol.Required('limit'): cv.positive_int,
         },
         "async_set_current_limit",
+    )
+
+    platform.async_register_entity_service(
+        SERVICE_SET_CURRENT_PHASE,
+        {
+            vol.Required('phase'): str,
+        },
+        "async_set_current_phase",
     )
 
     platform.async_register_entity_service(
@@ -121,6 +135,9 @@ class AlfenMainSensor(Entity):
     async def async_update(self):
         await self._device.async_update()
 
+    async def async_set_current_phase(self, phase):
+        await self._device.set_current_phase(phase)
+
     @property
     def device_info(self):
         """Return a device description for device registry."""
@@ -128,13 +145,48 @@ class AlfenMainSensor(Entity):
 
     def status_as_str(self):
         switcher = {
+            0: "Unknown",
+            1: "Off",
+            2: "Booting",
+            3: "Booting Check Mains",
             4: "Available",
-            7: "Cable connected",
+            5: "Prep. Authorising",
+            6: "Prep. Authorised",
+            7: "Prep. Cable connected",
+            8: "Prep EV Connected",
+            9: "Charging Preparing",
             10: "Vehicle connected",
-            11: "Charging",
-            17: "Session end", #(Unit with socket only?) Cable still connected to EVSE after charging, but car disconnected. Screen shows charging stats until cable disconnected from EVSE.
-            34: "Blocked", #EVSE is blocked through management interface of CPO.
-            36: "Paused",
+            11: "Charging Active Normal",
+            12: "Charging Active Simplified",
+            13: "Charging Suyspended Over Current",
+            14: "Charging Suspended HF Switching",
+            15: "Charging Suspended EV Disconnected",
+            16: "Finish Wait Vehicle",
+            17: "Finished Wait Disconnect",
+            18: "Error Protective Earth",
+            19: "Error Powerline Fault",
+            20: "Error Contactor Fault",
+            21: "Error Charging",
+            22: "Error Power Failure",
+            23: "Error Temperature",
+            24: "Error Illegal CP Value",
+            25: "Error Illegal PP Value",
+            26: "Error Too Many Restarts",
+            27: "Error",
+            28: "Error Message",
+            29: "Error Message Not Authorised",
+            30: "Error Message Cable Not Supported",
+            31: "Error Message S2 Not Opened",
+            32: "Error Message Time Out",
+            33: "Reserved",
+            34: "In Operative",
+            35: "Load Balacing Limited",
+            36: "Load Balacing Forced Off",
+            38: "Not Charging",
+            39: "Solar Charging Wait",
+            41: "Solar Charging Full",
+            42: "Charger Ready, Wait for Charging",
+            43: "Solar Charging Partial",
         }
         return switcher.get(self._device.status.status, "Unknown")
 

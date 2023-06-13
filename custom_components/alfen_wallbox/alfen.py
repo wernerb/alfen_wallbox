@@ -64,7 +64,7 @@ class AlfenDevice:
 
     async def _do_update(self):
         await self._session.request(ssl=self.ssl, method='POST', headers = HEADER_JSON, url=self.__get_url('login'), json={'username': self.username, 'password': self.password})
-        response = await self._session.request(ssl=self.ssl, method='GET', headers = HEADER_JSON, url=self.__get_url('prop?ids=2060_0,2056_0,2221_3,2221_4,2221_5,2221_A,2221_B,2221_C,2221_16,2201_0,2501_2,2221_22,2129_0,2126_0'))
+        response = await self._session.request(ssl=self.ssl, method='GET', headers = HEADER_JSON, url=self.__get_url('prop?ids=2060_0,2056_0,2221_3,2221_4,2221_5,2221_A,2221_B,2221_C,2221_16,2201_0,2501_2,2221_22,2129_0,2126_0,2068_0,2069_0,2062_0,2064_0,212B_0,212D_0'))
 
         _LOGGER.debug(f'Status Response {response}')
         self._session.request(ssl=self.ssl, method='POST', headers = HEADER_JSON, url=self.__get_url('logout'))
@@ -124,6 +124,16 @@ class AlfenDevice:
         await self._session.request(ssl=self.ssl, method='POST', headers = HEADER_JSON, url=self.__get_url('logout'))
         await self._do_update()        
 
+    async def set_current_phase(self, phase):
+        _LOGGER.debug(f'Set current phase {phase}')
+        if phase != "L1" and phase != "L2" and phase != "L3":
+            return self.async_abort(reason="invalid phase mapping allowed value: L1, L2, L3")
+        await self._session.request(ssl=self.ssl, method='POST', headers = HEADER_JSON, url=self.__get_url('login'), json={'username': self.username, 'password': self.password})
+        response = await self._session.request(ssl=self.ssl, method='POST', headers = POST_HEADER_JSON, url=self.__get_url('prop'), json={'2069_0': {'id': '2069_0', 'value': phase}})
+        _LOGGER.debug(f'Set current phase response {response}')
+        await self._session.request(ssl=self.ssl, method='POST', headers = HEADER_JSON, url=self.__get_url('logout'))
+        await self._do_update()
+
     def __get_url(self, action):
         return 'https://{}/api/{}'.format(self.host, action)
 
@@ -162,6 +172,18 @@ class AlfenStatus:
                 self.current_limit = prop['value'] 
             elif prop['id'] == '2126_0':
                 self.auth_mode = self.auth_mode_as_str(prop['value']) 
+            elif prop['id'] == '2068_0':
+                self.alb_safe_current = prop['value']
+            elif prop['id'] == '2069_0':
+                self.alb_phase_connection = prop['value']
+            elif prop['id'] == '2062_0':
+                self.max_station_current = prop['value']
+            elif prop['id'] == '2064_0':
+                self.load_balancing_mode = prop['value']
+            elif prop['id'] == '212B_0':
+                self.main_static_lb_max_current = prop['value']
+            elif prop['id'] == '212D_0':
+                self.main_active_lb_max_current = prop['value']
 
     def auth_mode_as_str(self, code):
         switcher = {
