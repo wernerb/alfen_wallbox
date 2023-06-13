@@ -20,8 +20,15 @@ from homeassistant.helpers import config_validation as cv, entity_platform, serv
 from . import DOMAIN as ALFEN_DOMAIN
 
 from .alfen import AlfenDevice
-from .const import SERVICE_REBOOT_WALLBOX, SERVICE_SET_CURRENT_LIMIT, SERVICE_ENABLE_RFID_AUTHORIZATION_MODE, SERVICE_DISABLE_RFID_AUTHORIZATION_MODE, SERVICE_SET_CURRENT_PHASE
-
+from .const import (
+    SERVICE_REBOOT_WALLBOX,
+    SERVICE_SET_CURRENT_LIMIT,
+    SERVICE_ENABLE_RFID_AUTHORIZATION_MODE,
+    SERVICE_DISABLE_RFID_AUTHORIZATION_MODE,
+    SERVICE_SET_CURRENT_PHASE,
+    SERVICE_ENABLE_PHASE_SWITCHING,
+    SERVICE_DISABLE_PHASE_SWITCHING,
+)
 _LOGGER = logging.getLogger(__name__)
 
 
@@ -54,6 +61,7 @@ async def async_setup_entry(hass, entry, async_add_entities):
         AlfenSensor(device, 'Load Balacing Mode', 'load_balancing_mode'),
         AlfenSensor(device, 'Main Static Load Balacing Max Current', 'main_static_lb_max_current', 'A'),
         AlfenSensor(device, 'Main Active Load Balacing Max Current', 'main_active_lb_max_current', 'A'),
+        AlfenSensor(device, 'Enable Phase Switching', 'enable_phase_switching'),
     ])
 
     platform = entity_platform.current_platform.get()
@@ -90,6 +98,18 @@ async def async_setup_entry(hass, entry, async_add_entities):
         SERVICE_DISABLE_RFID_AUTHORIZATION_MODE,
         {},
         "async_disable_rfid_auth_mode",
+    )
+
+    platform.async_register_entity_service(
+        SERVICE_ENABLE_PHASE_SWITCHING,
+        {},
+        "async_enable_phase_switching",
+    )
+
+    platform.async_register_entity_service(
+        SERVICE_DISABLE_PHASE_SWITCHING,
+        {},
+        "async_disable_phase_switching",
     )
 
 class AlfenMainSensor(Entity):
@@ -137,6 +157,12 @@ class AlfenMainSensor(Entity):
 
     async def async_set_current_phase(self, phase):
         await self._device.set_current_phase(phase)
+
+    async def async_enable_phase_switching(self):
+        await self._device.set_phase_switching(True)
+
+    async def async_disable_phase_switching(self):
+        await self._device.set_phase_switching(False)
 
     @property
     def device_info(self):
