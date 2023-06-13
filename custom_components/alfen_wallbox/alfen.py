@@ -194,9 +194,9 @@ class AlfenStatus:
             elif prop['id'] == '2064_0':
                 self.load_balancing_mode = prop['value']
             elif prop['id'] == '212B_0':
-                self.main_static_lb_max_current = prop['value']
+                self.main_static_lb_max_current = round(prop['value'],2)
             elif prop['id'] == '212D_0':
-                self.main_active_lb_max_current = prop['value']
+                self.main_active_lb_max_current = round(prop['value'],2)
             elif prop['id'] == '2185_0':
                 self.enable_phase_switching = prop['value']
 
