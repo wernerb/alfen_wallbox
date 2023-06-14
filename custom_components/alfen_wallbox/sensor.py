@@ -58,9 +58,9 @@ async def async_setup_entry(hass, entry, async_add_entities):
         AlfenSensor(device, 'Active Load Balancing Safe Current', 'alb_safe_current', 'A'),
         AlfenSensor(device, 'Active Load Balancing Phase Connection', 'alb_phase_connection'),
         AlfenSensor(device, 'Maximum Smart Meter current', 'max_station_current', 'A'),
-        AlfenSensor(device, 'Load Balacing Mode', 'load_balancing_mode'),
-        AlfenSensor(device, 'Main Static Load Balacing Max Current', 'main_static_lb_max_current', 'A'),
-        AlfenSensor(device, 'Main Active Load Balacing Max Current', 'main_active_lb_max_current', 'A'),
+        AlfenSensor(device, 'Load Balancing Mode', 'load_balancing_mode'),
+        AlfenSensor(device, 'Main Static Load Balancing Max Current', 'main_static_lb_max_current', 'A'),
+        AlfenSensor(device, 'Main Active Load Balancing Max Current', 'main_active_lb_max_current', 'A'),
         AlfenSensor(device, 'Enable Phase Switching', 'enable_phase_switching'),
     ])
 
@@ -206,12 +206,12 @@ class AlfenMainSensor(Entity):
             32: "Error Message Time Out",
             33: "Reserved",
             34: "In Operative",
-            35: "Load Balacing Limited",
-            36: "Load Balacing Forced Off",
+            35: "Load Balancing Limited",
+            36: "Load Balancing Forced Off",
             38: "Not Charging",
             39: "Solar Charging Wait",
             41: "Solar Charging Full",
-            42: "Charger Ready, Wait for Charging",
+            42: "Charger Ready, Wait for Current",
             43: "Solar Charging Partial",
         }
         return switcher.get(self._device.status.status, "Unknown")
