@@ -252,9 +252,9 @@ class AlfenSensor(SensorEntity):
         if self._sensor == "temperature":
             icon = "mdi:thermometer"
         elif self._sensor.startswith('current_'):
-            icon = "mdi:flash"
+            icon = "mdi:current-ac"
         elif self._sensor.startswith('voltage_'):
-            icon = "mdi:flash-outline"
+            icon = "mdi:flash"
         elif self._sensor == "uptime":
             icon = "mdi:timer-outline"     
         elif self._sensor == "bootups":
