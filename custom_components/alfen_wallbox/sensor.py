@@ -205,7 +205,7 @@ class AlfenMainSensor(Entity):
             31: "Error Message S2 Not Opened",
             32: "Error Message Time Out",
             33: "Reserved",
-            34: "In Operative",
+            34: "Inoperative",
             35: "Load Balancing Limited",
             36: "Load Balancing Forced Off",
             38: "Not Charging",
