@@ -268,7 +268,7 @@ class AlfenStatus:
             elif prop['id'] == '2078_2':
                 self.comm_bo_url_gprs_server_path = prop['value']
             elif prop['id'] == '2079_1':
-                self.comm_bo_url_gprs_dns_1 = prop['value']
+                self.comm_gprs_dns_1 = prop['value']
             elif prop['id'] == '207A_1':
                 self.comm_dhcp_address_2 = prop['value']
             elif prop['id'] == '207B_1':
@@ -278,11 +278,11 @@ class AlfenStatus:
             elif prop['id'] == '207D_1':
                 self.comm_ip_address_2 = prop['value']
             elif prop['id'] == '207E_1':
-                self.comm_bo_url_wired_dns_1 = prop['value']
+                self.comm_wired_dns_1 = prop['value']
             elif prop['id'] == '207F_1':
-                self.comm_bo_url_wired_dns_2 = prop['value']
+                self.comm_wired_dns_2 = prop['value']
             elif prop['id'] == '2080_1':
-                self.comm_bo_url_gprs_dns_2 = prop['value']
+                self.comm_gprs_dns_2 = prop['value']
             elif prop['id'] == '2081_0':
                 self.comm_protocol_name = prop['value']
             elif prop['id'] == '2082_0':
