@@ -67,7 +67,7 @@ class AlfenDevice:
         response = await self._session.request(ssl=self.ssl, method='GET', headers = HEADER_JSON, url=self.__get_url('prop?ids=2060_0,2056_0,2221_3,2221_4,2221_5,2221_A,2221_B,2221_C,2221_16,2201_0,2501_2,2221_22,2129_0,2126_0,2068_0,2069_0,2062_0,2064_0,212B_0,212D_0,2185_0'))
 
         _LOGGER.debug(f'Status Response {response}')
-        self._session.request(ssl=self.ssl, method='POST', headers = HEADER_JSON, url=self.__get_url('logout'))
+        await self._session.request(ssl=self.ssl, method='POST', headers = HEADER_JSON, url=self.__get_url('logout'))
         response_json = await response.json(content_type=None)
         _LOGGER.debug(response_json)
 
@@ -98,7 +98,7 @@ class AlfenDevice:
         await self._session.request(ssl=self.ssl, method='POST', headers = HEADER_JSON, url=self.__get_url('login'), json={'username': self.username, 'password': self.password})
         response = await self._session.request(ssl=self.ssl, method='POST', headers = POST_HEADER_JSON, url=self.__get_url('cmd'), json={'command': 'reboot'})
         _LOGGER.debug(f'Reboot response {response}')
-        self._session.request(ssl=self.ssl, method='POST', headers = HEADER_JSON, url=self.__get_url('logout'))
+        await self._session.request(ssl=self.ssl, method='POST', headers = HEADER_JSON, url=self.__get_url('logout'))
 
     async def set_current_limit(self, limit):
         _LOGGER.debug(f'Set current limit {limit}A')

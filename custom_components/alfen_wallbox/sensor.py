@@ -205,7 +205,7 @@ class AlfenMainSensor(Entity):
             31: "Error Message S2 Not Opened",
             32: "Error Message Time Out",
             33: "Reserved",
-            34: "In Operative",
+            34: "Inoperative",
             35: "Load Balancing Limited",
             36: "Load Balancing Forced Off",
             38: "Not Charging",
@@ -252,9 +252,9 @@ class AlfenSensor(SensorEntity):
         if self._sensor == "temperature":
             icon = "mdi:thermometer"
         elif self._sensor.startswith('current_'):
-            icon = "mdi:flash"
+            icon = "mdi:current-ac"
         elif self._sensor.startswith('voltage_'):
-            icon = "mdi:flash-outline"
+            icon = "mdi:flash"
         elif self._sensor == "uptime":
             icon = "mdi:timer-outline"     
         elif self._sensor == "bootups":
