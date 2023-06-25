@@ -5,6 +5,7 @@ import time
 import ssl
 from enum import Enum
 from datetime import timedelta
+import datetime
 
 from homeassistant.util import Throttle
 from .const import DOMAIN, ALFEN_PRODUCT_MAP
@@ -64,14 +65,37 @@ class AlfenDevice:
 
     async def _do_update(self):
         await self._session.request(ssl=self.ssl, method='POST', headers = HEADER_JSON, url=self.__get_url('login'), json={'username': self.username, 'password': self.password})
-        response = await self._session.request(ssl=self.ssl, method='GET', headers = HEADER_JSON, url=self.__get_url('prop?ids=2060_0,2056_0,2221_3,2221_4,2221_5,2221_A,2221_B,2221_C,2221_16,2201_0,2501_2,2221_22,2129_0,2126_0,2068_0,2069_0,2062_0,2064_0,212B_0,212D_0,2185_0'))
 
+        # max 32 ids each time
+        response = await self._session.request(
+            ssl=self.ssl,
+            method='GET',
+            headers = HEADER_JSON,
+            url=self.__get_url('prop?ids=2060_0,2056_0,2221_3,2221_4,2221_5,2221_A,2221_B,2221_C,2221_16,2201_0,2501_2,2221_22,2129_0,2126_0,2068_0,2069_0,2062_0,2064_0,212B_0,212D_0,2185_0,2053_0,2067_0,212F_1,212F_2,212F_3,2100_0,2101_0,2102_0,2104_0,2105_0'))
         _LOGGER.debug(f'Status Response {response}')
+
+        response2 = await self._session.request(
+            ssl=self.ssl,
+            method='GET',
+            headers = HEADER_JSON,
+            url=self.__get_url('prop?ids=2057_0,2112_0,2071_1,2071_2,2072_1,2073_1,2074_1,2075_1,2076_0,2078_1,2078_2,2079_1,2070_2,207A_1,207B_1,207C_1,207D_1,207E_1,207F_1,2080_1,2081_0,2082_0'))
+        _LOGGER.debug(f'Status Response {response2}')
+
         await self._session.request(ssl=self.ssl, method='POST', headers = HEADER_JSON, url=self.__get_url('logout'))
+
         response_json = await response.json(content_type=None)
         _LOGGER.debug(response_json)
 
-        self._status = AlfenStatus(response_json, self._status)
+        response_json2 = await response2.json(content_type=None)
+        _LOGGER.debug(response_json2)
+
+        response_json_combined = response_json
+        
+        response_json_combined['properties'] = response_json['properties'] + response_json2['properties']
+        response_json_combined['total'] =  response_json['total'] + response_json2['total']
+        _LOGGER.debug(response_json2)
+
+        self._status = AlfenStatus(response_json_combined, self._status)
 
     async def async_get_info(self):
         response = await self._session.request(ssl=self.ssl, method='GET', url=self.__get_url('info'))
@@ -199,6 +223,70 @@ class AlfenStatus:
                 self.main_active_lb_max_current = round(prop['value'],2)
             elif prop['id'] == '2185_0':
                 self.enable_phase_switching = prop['value']
+            elif prop['id'] == '2053_0':
+                self.charging_box_identifier = prop['value']
+            elif prop['id'] == '2057_0':
+                self.boot_reason = prop['value']
+            elif prop['id'] == '2067_0':
+                self.max_smart_meter_current = prop['value']
+            elif prop['id'] == '212F_1':
+                self.p1_measurements_1 = prop['value']
+            elif prop['id'] == '212F_2':
+                self.p1_measurements_2 = prop['value']
+            elif prop['id'] == '212F_3':
+                self.p1_measurements_3 = prop['value']
+            elif prop['id'] == '2100_0':
+                self.gprs_apn_name = prop['value']
+            elif prop['id'] == '2101_0':
+                self.gprs_apn_user = prop['value']
+            elif prop['id'] == '2102_0':
+                self.gprs_apn_password = prop['value']
+            elif prop['id'] == '2104_0':
+                self.gprs_sim_imsi = prop['value']
+            elif prop['id'] == '2105_0':
+                self.gprs_sim_iccid = prop['value']
+            elif prop['id'] == '2112_0':
+                self.gprs_provider = prop['value']
+            elif prop['id'] == '2104_0':
+                self.p1_measurements_3 = prop['value']
+            elif prop['id'] == '2071_1':
+                self.comm_bo_url_wired_server_domain_and_port = prop['value']
+            elif prop['id'] == '2071_2':
+                self.comm_bo_url_wired_server_path = prop['value']
+            elif prop['id'] == '2072_1':
+                self.comm_dhcp_address_1 = prop['value']
+            elif prop['id'] == '2073_1':
+                self.comm_netmask_address_1 = prop['value']
+            elif prop['id'] == '2074_1':
+                self.comm_gateway_address_1 = prop['value']
+            elif prop['id'] == '2075_1':
+                self.comm_ip_address_1 = prop['value']
+            elif prop['id'] == '2076_0':
+                self.comm_bo_short_name = prop['value']
+            elif prop['id'] == '2078_1':
+                self.comm_bo_url_gprs_server_domain_and_port = prop['value']
+            elif prop['id'] == '2078_2':
+                self.comm_bo_url_gprs_server_path = prop['value']
+            elif prop['id'] == '2079_1':
+                self.comm_bo_url_gprs_dns_1 = prop['value']
+            elif prop['id'] == '207A_1':
+                self.comm_dhcp_address_2 = prop['value']
+            elif prop['id'] == '207B_1':
+                self.comm_netmask_address_2 = prop['value']
+            elif prop['id'] == '207C_1':
+                self.comm_gateway_address_2 = prop['value']
+            elif prop['id'] == '207D_1':
+                self.comm_ip_address_2 = prop['value']
+            elif prop['id'] == '207E_1':
+                self.comm_bo_url_wired_dns_1 = prop['value']
+            elif prop['id'] == '207F_1':
+                self.comm_bo_url_wired_dns_2 = prop['value']
+            elif prop['id'] == '2080_1':
+                self.comm_bo_url_gprs_dns_2 = prop['value']
+            elif prop['id'] == '2081_0':
+                self.comm_protocol_name = prop['value']
+            elif prop['id'] == '2082_0':
+                self.comm_protocol_version = prop['value']
 
     def auth_mode_as_str(self, code):
         switcher = {
