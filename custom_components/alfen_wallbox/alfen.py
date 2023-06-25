@@ -78,7 +78,7 @@ class AlfenDevice:
             ssl=self.ssl,
             method='GET',
             headers = HEADER_JSON,
-            url=self.__get_url('prop?ids=2057_0,2112_0,2071_1,2071_2,2072_1,2073_1,2074_1,2075_1,2076_0,2078_1,2078_2,2079_1,2070_2,207A_1,207B_1,207C_1,207D_1,207E_1,207F_1,2080_1,2081_0,2082_0'))
+            url=self.__get_url('prop?ids=2057_0,2112_0,2071_1,2071_2,2072_1,2073_1,2074_1,2075_1,2076_0,2078_1,2078_2,2079_1,2070_2,207A_1,207B_1,207C_1,207D_1,207E_1,207F_1,2080_1,2081_0,2082_0,2110_0'))
         _LOGGER.debug(f'Status Response {response2}')
 
         await self._session.request(ssl=self.ssl, method='POST', headers = HEADER_JSON, url=self.__get_url('logout'))
@@ -287,6 +287,8 @@ class AlfenStatus:
                 self.comm_protocol_name = prop['value']
             elif prop['id'] == '2082_0':
                 self.comm_protocol_version = prop['value']
+            elif prop['id'] == '2110_0':
+                self.gprs_signal_strength = prop['value']
 
     def auth_mode_as_str(self, code):
         switcher = {
