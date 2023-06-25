@@ -230,11 +230,11 @@ class AlfenStatus:
             elif prop['id'] == '2067_0':
                 self.max_smart_meter_current = prop['value']
             elif prop['id'] == '212F_1':
-                self.p1_measurements_1 = prop['value']
+                self.p1_measurements_1 = round(prop['value'], 2)  
             elif prop['id'] == '212F_2':
-                self.p1_measurements_2 = prop['value']
+                self.p1_measurements_2 = round(prop['value'], 2)  
             elif prop['id'] == '212F_3':
-                self.p1_measurements_3 = prop['value']
+                self.p1_measurements_3 = round(prop['value'], 2)  
             elif prop['id'] == '2100_0':
                 self.gprs_apn_name = prop['value']
             elif prop['id'] == '2101_0':
