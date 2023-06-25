@@ -210,9 +210,9 @@ class AlfenMainSensor(Entity):
             36: "Load Balancing Forced Off",
             38: "Not Charging",
             39: "Solar Charging Wait",
-            41: "Solar Charging Full",
+            41: "Solar Charging",
             42: "Charger Ready, Wait for Current",
-            43: "Solar Charging Partial",
+            43: "Partial Solar Charging",
         }
         return switcher.get(self._device.status.status, "Unknown")
 
