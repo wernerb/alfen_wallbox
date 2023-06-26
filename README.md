@@ -6,6 +6,13 @@ The component is a fork of the [Garo Wallbox custom integration](https://github.
 
 ![image](https://github.com/leeyuentuen/alfen_wallbox/assets/1487966/a25af9bc-a6b3-496d-9c04-6812825cb375)
 
+Add Solar charging data:
+
+<img width="336" alt="image" src="https://github.com/leeyuentuen/alfen_wallbox/assets/1487966/4884a7ce-d06b-4ebb-bfb3-e37002fa6629">
+
+
+
+
 > After reverse engineering the API myself I found out that there is already a python libary wrapping the Alfen API.
 > https://gitlab.com/LordGaav/alfen-eve/-/tree/develop/alfeneve
 
