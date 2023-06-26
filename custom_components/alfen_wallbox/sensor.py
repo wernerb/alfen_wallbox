@@ -311,16 +311,22 @@ class AlfenSensor(SensorEntity):
         icon = None
         if self._sensor == "temperature":
             icon = "mdi:thermometer"
-        elif self._sensor.startswith('current_'):
+        elif (self._sensor.startswith('current_')) | (self._sensor.startswith('p1_measurements')) | ("_current" in self._sensor):
             icon = "mdi:current-ac"
         elif self._sensor.startswith('voltage_'):
             icon = "mdi:flash"
         elif self._sensor == "uptime":
-            icon = "mdi:timer-outline"     
+            icon = "mdi:timer-outline"
         elif self._sensor == "bootups":
-            icon = "mdi:reload"       
+            icon = "mdi:reload"
         elif self._sensor == "active_power_total":
-            icon = "mdi:circle-slice-3"                            
+            icon = "mdi:circle-slice-3"
+        elif ("gprs_" in self._sensor) | ("_address_1" in self._sensor):
+            icon = "mdi:antenna"
+        elif ("wired_" in self._sensor) | ("_address_2" in self._sensor):
+            icon = "mdi:cable-data"
+        elif self._sensor.startswith('lb_solar_charging'):
+            icon = "mdi:solar-power"
         return icon
 
     @property
