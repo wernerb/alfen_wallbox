@@ -10,8 +10,23 @@ Add Solar charging data:
 
 <img width="336" alt="image" src="https://github.com/leeyuentuen/alfen_wallbox/assets/1487966/4884a7ce-d06b-4ebb-bfb3-e37002fa6629">
 
+Example of running in Services:
 
+Changing Green Share %
+```
+service: alfen_wallbox.set_green_share
+data:
+  entity_id: sensor.wallbox
+  value: 95
+```
 
+Changing Comfort Charging Power in Watt
+```
+service: alfen_wallbox.set_comfort_power
+data:
+  entity_id: sensor.wallbox
+  value: 1450
+```
 
 > After reverse engineering the API myself I found out that there is already a python libary wrapping the Alfen API.
 > https://gitlab.com/LordGaav/alfen-eve/-/tree/develop/alfeneve
