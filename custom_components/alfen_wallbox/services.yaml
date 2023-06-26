@@ -50,3 +50,21 @@ disable_phase_switching:
     entity_id:
       description: Name(s) of entities to change.
       example: "alfen_wallbox.garage"
+
+set_green_share:
+  description: Set Green Share Percentage
+  fields:
+    entity_id:
+      description: Name(s) of entities to change.
+      example: "alfen_wallbox.garage"
+    value:
+      description: New value.
+
+set_comfort_power:
+  description: Set Solar Comfort Power
+  fields:
+    entity_id:
+      description: Name(s) of entities to change.
+      example: "alfen_wallbox.garage"
+    value:
+      description: New value.

@@ -28,6 +28,8 @@ from .const import (
     SERVICE_SET_CURRENT_PHASE,
     SERVICE_ENABLE_PHASE_SWITCHING,
     SERVICE_DISABLE_PHASE_SWITCHING,
+    SERVICE_SET_GREEN_SHARE,
+    SERVICE_SET_COMFORT_POWER,
 )
 _LOGGER = logging.getLogger(__name__)
 
@@ -94,6 +96,10 @@ async def async_setup_entry(hass, entry, async_add_entities):
         AlfenSensor(device, 'Wired DNS 2', 'comm_wired_dns_2'),
         AlfenSensor(device, 'Protocol Name', 'comm_protocol_name'),
         AlfenSensor(device, 'Protocol Version', 'comm_protocol_version'),
+        AlfenSensor(device, 'Solar Charging Mode', 'lb_solar_charging_mode'),
+        AlfenSensor(device, 'Solar Charging Green Share %', 'lb_solar_charging_green_share', '%'),
+        AlfenSensor(device, 'Solar Charging Comfort Level w', 'lb_solar_charging_comfort_level', 'W'),
+        AlfenSensor(device, 'Solar Charging Boost', 'lb_solar_charging_boost'),
     ])
 
     platform = entity_platform.current_platform.get()
@@ -142,6 +148,22 @@ async def async_setup_entry(hass, entry, async_add_entities):
         SERVICE_DISABLE_PHASE_SWITCHING,
         {},
         "async_disable_phase_switching",
+    )
+
+    platform.async_register_entity_service(
+        SERVICE_SET_GREEN_SHARE,
+        {
+            vol.Required('value'): cv.positive_int,
+        },
+        "async_set_green_share",
+    )
+
+    platform.async_register_entity_service(
+        SERVICE_SET_COMFORT_POWER,
+        {
+            vol.Required('value'): cv.positive_int,
+        },
+        "async_set_comfort_power",
     )
 
 class AlfenMainSensor(Entity):
@@ -196,6 +218,12 @@ class AlfenMainSensor(Entity):
     async def async_disable_phase_switching(self):
         await self._device.set_phase_switching(False)
 
+    async def async_set_green_share(self, value):
+        await self._device.set_green_share(value)
+
+    async def async_set_comfort_power(self, value):
+        await self._device.set_comfort_power(value)
+
     @property
     def device_info(self):
         """Return a device description for device registry."""
@@ -243,7 +271,7 @@ class AlfenMainSensor(Entity):
             38: "Not Charging",
             39: "Solar Charging Wait",
             41: "Solar Charging",
-            42: "Charger Ready, Wait for Current",
+            42: "Charge Point Ready, Waiting For Power",
             43: "Partial Solar Charging",
         }
         return switcher.get(self._device.status.status, "Unknown")
@@ -308,7 +336,8 @@ class AlfenSensor(SensorEntity):
     @property
     def state(self):
         """Return the state of the sensor."""
-        return self._device.status.__dict__[self._sensor]
+        if self._sensor in self._device.status.__dict__:
+            return self._device.status.__dict__[self._sensor]
 
     @property
     def unit_of_measurement(self):

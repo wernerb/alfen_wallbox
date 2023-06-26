@@ -13,6 +13,8 @@ SERVICE_DISABLE_RFID_AUTHORIZATION_MODE = "disable_rfid_authorization_mode"
 SERVICE_SET_CURRENT_PHASE = "set_current_phase"
 SERVICE_ENABLE_PHASE_SWITCHING = "enable_phase_switching"
 SERVICE_DISABLE_PHASE_SWITCHING = "disable_phase_switching"
+SERVICE_SET_GREEN_SHARE = "set_green_share"
+SERVICE_SET_COMFORT_POWER = "set_comfort_power"
 
 ALFEN_PRODUCT_MAP = {
     'NG910-60123': 'Eve Single Pro-Line DE, 3 phase, display, type 2 socket',

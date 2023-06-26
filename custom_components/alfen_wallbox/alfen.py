@@ -74,26 +74,27 @@ class AlfenDevice:
             url=self.__get_url('prop?ids=2060_0,2056_0,2221_3,2221_4,2221_5,2221_A,2221_B,2221_C,2221_16,2201_0,2501_2,2221_22,2129_0,2126_0,2068_0,2069_0,2062_0,2064_0,212B_0,212D_0,2185_0,2053_0,2067_0,212F_1,212F_2,212F_3,2100_0,2101_0,2102_0,2104_0,2105_0'))
         _LOGGER.debug(f'Status Response {response}')
 
+        response_json = await response.json(content_type=None)
+        _LOGGER.debug(response_json)
+
         response2 = await self._session.request(
             ssl=self.ssl,
             method='GET',
             headers = HEADER_JSON,
-            url=self.__get_url('prop?ids=2057_0,2112_0,2071_1,2071_2,2072_1,2073_1,2074_1,2075_1,2076_0,2078_1,2078_2,2079_1,2070_2,207A_1,207B_1,207C_1,207D_1,207E_1,207F_1,2080_1,2081_0,2082_0,2110_0'))
+            url=self.__get_url('prop?ids=2057_0,2112_0,2071_1,2071_2,2072_1,2073_1,2074_1,2075_1,2076_0,2078_1,2078_2,2079_1,2070_2,207A_1,207B_1,207C_1,207D_1,207E_1,207F_1,2080_1,2081_0,2082_0,2110_0,3280_1,3280_2,3280_3,3280_4'))
         _LOGGER.debug(f'Status Response {response2}')
-
-        await self._session.request(ssl=self.ssl, method='POST', headers = HEADER_JSON, url=self.__get_url('logout'))
-
-        response_json = await response.json(content_type=None)
-        _LOGGER.debug(response_json)
 
         response_json2 = await response2.json(content_type=None)
         _LOGGER.debug(response_json2)
 
+        await self._session.request(ssl=self.ssl, method='POST', headers = HEADER_JSON, url=self.__get_url('logout'))
+
         response_json_combined = response_json
+        if response_json2 is not None:
+            response_json_combined['properties'] = response_json['properties'] + response_json2['properties']
+            response_json_combined['total'] =  response_json['total'] + response_json2['total']
         
-        response_json_combined['properties'] = response_json['properties'] + response_json2['properties']
-        response_json_combined['total'] =  response_json['total'] + response_json2['total']
-        _LOGGER.debug(response_json2)
+        _LOGGER.debug(response_json_combined)
 
         self._status = AlfenStatus(response_json_combined, self._status)
 
@@ -168,6 +169,28 @@ class AlfenDevice:
         await self._session.request(ssl=self.ssl, method='POST', headers = HEADER_JSON, url=self.__get_url('login'), json={'username': self.username, 'password': self.password})
         response = await self._session.request(ssl=self.ssl, method='POST', headers = POST_HEADER_JSON, url=self.__get_url('prop'), json={'2185_0': {'id': '2185_0', 'value': value}})
         _LOGGER.debug(f'Set Phase Switching {response}')
+        await self._session.request(ssl=self.ssl, method='POST', headers = HEADER_JSON, url=self.__get_url('logout'))
+        await self._do_update()
+
+    async def set_green_share(self, value):
+        _LOGGER.debug(f'Set green share value {value}%')
+        if value < 0 | value > 100:
+            return self.async_abort(reason="invalid_value")
+
+        await self._session.request(ssl=self.ssl, method='POST', headers = HEADER_JSON, url=self.__get_url('login'), json={'username': self.username, 'password': self.password})
+        response = await self._session.request(ssl=self.ssl, method='POST', headers = POST_HEADER_JSON, url=self.__get_url('prop'), json={'3280_2': {'id': '3280_2', 'value': value}})
+        _LOGGER.debug(f'Set green share value response {response}')
+        await self._session.request(ssl=self.ssl, method='POST', headers = HEADER_JSON, url=self.__get_url('logout'))
+        await self._do_update()
+
+    async def set_comfort_power(self, value):
+        _LOGGER.debug(f'Set Comfort Level {value}W')
+        if value < 1400 | value > 5000:
+            return self.async_abort(reason="invalid_value")
+
+        await self._session.request(ssl=self.ssl, method='POST', headers = HEADER_JSON, url=self.__get_url('login'), json={'username': self.username, 'password': self.password})
+        response = await self._session.request(ssl=self.ssl, method='POST', headers = POST_HEADER_JSON, url=self.__get_url('prop'), json={'3280_3': {'id': '3280_3', 'value': value}})
+        _LOGGER.debug(f'Set green share value response {response}')
         await self._session.request(ssl=self.ssl, method='POST', headers = HEADER_JSON, url=self.__get_url('logout'))
         await self._do_update()
 
@@ -289,13 +312,29 @@ class AlfenStatus:
                 self.comm_protocol_version = prop['value']
             elif prop['id'] == '2110_0':
                 self.gprs_signal_strength = prop['value']
+            elif prop['id'] == '3280_1':
+                self.lb_solar_charging_mode = self.solar_charging_mode(prop['value'])
+            elif prop['id'] == '3280_2':
+                self.lb_solar_charging_green_share = prop['value']
+            elif prop['id'] == '3280_3':
+                self.lb_solar_charging_comfort_level = prop['value']
+            elif prop['id'] == '3280_4':
+                self.lb_solar_charging_boost = prop['value']
 
     def auth_mode_as_str(self, code):
         switcher = {
             0: "Plug and Charge",
             2: "RFID"
         }
-        return switcher.get(code, "Unknown")                
+        return switcher.get(code, "Unknown")
+
+    def solar_charging_mode(self, code):
+        switcher ={
+            0: "Disable",
+            1: "Comfort",
+            2: "Green"
+        }
+        return switcher.get(code, "Unknown")
 
 class AlfenDeviceInfo:
 
