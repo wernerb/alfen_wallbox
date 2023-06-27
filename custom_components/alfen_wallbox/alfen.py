@@ -64,7 +64,12 @@ class AlfenDevice:
         await self._do_update()
 
     async def _do_update(self):
-        await self._session.request(ssl=self.ssl, method='POST', headers = HEADER_JSON, url=self.__get_url('login'), json={'username': self.username, 'password': self.password})
+        await self._session.request(
+            ssl=self.ssl,
+            method='POST',
+            headers = HEADER_JSON,
+            url=self.__get_url('login'),
+            json={'username': self.username, 'password': self.password})
 
         # max 32 ids each time
         response = await self._session.request(
@@ -81,7 +86,7 @@ class AlfenDevice:
             ssl=self.ssl,
             method='GET',
             headers = HEADER_JSON,
-            url=self.__get_url('prop?ids=2057_0,2112_0,2071_1,2071_2,2072_1,2073_1,2074_1,2075_1,2076_0,2078_1,2078_2,2079_1,2070_2,207A_1,207B_1,207C_1,207D_1,207E_1,207F_1,2080_1,2081_0,2082_0,2110_0,3280_1,3280_2,3280_3,3280_4'))
+            url=self.__get_url('prop?ids=2057_0,2112_0,2071_1,2071_2,2072_1,2073_1,2074_1,2075_1,2076_0,2078_1,2078_2,2079_1,207A_1,207B_1,207C_1,207D_1,207E_1,207F_1,2080_1,2081_0,2082_0,2110_0,3280_1,3280_2,3280_3,3280_4'))
         _LOGGER.debug(f'Status Response {response2}')
 
         response_json2 = await response2.json(content_type=None)
