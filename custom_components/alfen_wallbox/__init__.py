@@ -59,16 +59,21 @@ async def async_setup_entry(hass: HomeAssistantType, entry: ConfigEntry):
 
 async def async_unload_entry(hass, config_entry):
     """Unload a config entry."""
-    await asyncio.wait(
-        [
-            hass.config_entries.async_forward_entry_unload(config_entry, component)
-            for component in PLATFORMS
-        ]
+    _LOGGER.debug("async_unload_entry: %s", config_entry)
+
+    unload_ok = all(
+        await asyncio.gather(
+            *[
+                hass.config_entries.async_forward_entry_unload(config_entry, component)
+                for component in PLATFORMS
+            ]
+        )
     )
     hass.data[DOMAIN].pop(config_entry.entry_id)
     if not hass.data[DOMAIN]:
         hass.data.pop(DOMAIN)
-    return True
+
+    return unload_ok
 
 async def alfen_setup(hass, host, name, username, password):
     """Create a Alfen instance only once."""
