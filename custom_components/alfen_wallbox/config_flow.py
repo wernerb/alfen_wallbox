@@ -70,8 +70,3 @@ class FlowHandler(config_entries.ConfigFlow):
         if not host:
             return await self.async_step_user()
         return await self._create_device(host, user_input[CONF_NAME], user_input[CONF_USERNAME], user_input[CONF_PASSWORD])
-
-    async def async_step_zeroconf(self, user_input):
-        """Initialize step from discovery."""
-        _LOGGER.info("Discovered device: %s", user_input)
-        return await self._create_entry(user_input[KEY_IP], None, user_input[CONF_USERNAME], user_input[CONF_PASSWORD])

@@ -5,6 +5,5 @@
     "config_flow": true,    
     "documentation": "https://github.com/egnerfl/alfen_wallbox",
     "dependencies": [],
-    "codeowners": ["egnerfl"],
-    "zeroconf": ["_alfen._tcp.local."]
+    "codeowners": ["egnerfl"]
   }
