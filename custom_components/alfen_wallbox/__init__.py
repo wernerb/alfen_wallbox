@@ -37,14 +37,18 @@ SCAN_INTERVAL = timedelta(seconds=60)
 
 _LOGGER = logging.getLogger(__name__)
 
+
 async def async_setup(hass: HomeAssistant, config: Dict) -> bool:
     """Set up the Alfen Wallbox component."""
     hass.data.setdefault(DOMAIN, {})
     return True
 
+
 async def async_setup_entry(hass: HomeAssistantType, entry: ConfigEntry):
     conf = entry.data
-    device = await alfen_setup(hass, conf[CONF_HOST], conf[CONF_NAME], conf[CONF_USERNAME], conf[CONF_PASSWORD])
+    device = await alfen_setup(
+        hass, conf[CONF_HOST], conf[CONF_NAME], conf[CONF_USERNAME], conf[CONF_PASSWORD]
+    )
     if not device:
         return False
     hass.data.setdefault(DOMAIN, {}).update({entry.entry_id: device})
@@ -56,6 +60,7 @@ async def async_setup_entry(hass: HomeAssistantType, entry: ConfigEntry):
     """device_registry = await dr.async_get_registry(hass)
     device_registry.async_get_or_create(**device.device_info)"""
     return True
+
 
 async def async_unload_entry(hass, config_entry):
     """Unload a config entry."""
@@ -75,9 +80,10 @@ async def async_unload_entry(hass, config_entry):
 
     return unload_ok
 
+
 async def alfen_setup(hass, host, name, username, password):
     """Create a Alfen instance only once."""
-    
+
     session = hass.helpers.aiohttp_client.async_get_clientsession()
     try:
         with timeout(TIMEOUT):

@@ -15,6 +15,7 @@ from .const import KEY_IP, TIMEOUT
 
 _LOGGER = logging.getLogger(__name__)
 
+
 @config_entries.HANDLERS.register("alfen_wallbox")
 class FlowHandler(config_entries.ConfigFlow):
     """Handle a config flow."""
@@ -29,14 +30,26 @@ class FlowHandler(config_entries.ConfigFlow):
             if entry.data[KEY_IP] == host:
                 return self.async_abort(reason="already_configured")
 
-        return self.async_create_entry(title=host, data={CONF_HOST: host, CONF_NAME: name, CONF_USERNAME: username, CONF_PASSWORD: password})
+        return self.async_create_entry(
+            title=host,
+            data={
+                CONF_HOST: host,
+                CONF_NAME: name,
+                CONF_USERNAME: username,
+                CONF_PASSWORD: password,
+            },
+        )
 
     async def _create_device(self, host, name, username, password):
         """Create device."""
 
         try:
             device = AlfenDevice(
-                host, name, self.hass.helpers.aiohttp_client.async_get_clientsession(), username, password
+                host,
+                name,
+                self.hass.helpers.aiohttp_client.async_get_clientsession(),
+                username,
+                password,
             )
             with timeout(TIMEOUT):
                 await device.init()
@@ -55,18 +68,31 @@ class FlowHandler(config_entries.ConfigFlow):
         """User initiated config flow."""
         if user_input is None:
             return self.async_show_form(
-                step_id="user", data_schema=vol.Schema({
-                    vol.Required(CONF_HOST): str,
-                    vol.Required(CONF_USERNAME, default="admin"): str,
-                    vol.Required(CONF_PASSWORD): str,
-                    vol.Optional(CONF_NAME): str
-                    })
+                step_id="user",
+                data_schema=vol.Schema(
+                    {
+                        vol.Required(CONF_HOST): str,
+                        vol.Required(CONF_USERNAME, default="admin"): str,
+                        vol.Required(CONF_PASSWORD): str,
+                        vol.Optional(CONF_NAME): str,
+                    }
+                ),
             )
-        return await self._create_device(user_input[CONF_HOST], user_input[CONF_NAME], user_input[CONF_USERNAME], user_input[CONF_PASSWORD])
+        return await self._create_device(
+            user_input[CONF_HOST],
+            user_input[CONF_NAME],
+            user_input[CONF_USERNAME],
+            user_input[CONF_PASSWORD],
+        )
 
     async def async_step_import(self, user_input):
         """Import a config entry."""
         host = user_input.get(CONF_HOST)
         if not host:
             return await self.async_step_user()
-        return await self._create_device(host, user_input[CONF_NAME], user_input[CONF_USERNAME], user_input[CONF_PASSWORD])
+        return await self._create_device(
+            host,
+            user_input[CONF_NAME],
+            user_input[CONF_USERNAME],
+            user_input[CONF_PASSWORD],
+        )
