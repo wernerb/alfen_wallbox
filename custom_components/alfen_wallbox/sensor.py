@@ -2,17 +2,16 @@ import logging
 
 import voluptuous as vol
 
-from homeassistant.const import CONF_ICON, CONF_NAME, TEMP_CELSIUS
+from homeassistant.const import TEMP_CELSIUS
 from homeassistant.helpers.entity import Entity
 from homeassistant.components.sensor import (
     DEVICE_CLASS_ENERGY,
     DEVICE_CLASS_POWER,
-    PLATFORM_SCHEMA,
     STATE_CLASS_TOTAL_INCREASING,
     STATE_CLASS_MEASUREMENT,
     SensorEntity,
 )
-from homeassistant.helpers import config_validation as cv, entity_platform, service
+from homeassistant.helpers import config_validation as cv, entity_platform
 
 from . import DOMAIN as ALFEN_DOMAIN
 
@@ -121,7 +120,7 @@ async def async_setup_entry(hass, entry, async_add_entities):
             AlfenSensor(device, "Wired DNS 2", "comm_wired_dns_2"),
             AlfenSensor(device, "Protocol Name", "comm_protocol_name"),
             AlfenSensor(device, "Protocol Version", "comm_protocol_version"),
-            AlfenSensor(device, "Solar Charging Mode", "lb_solar_charging_mode"),
+            #AlfenSensor(device, "Solar Charging Mode", "lb_solar_charging_mode"),
             AlfenSensor(
                 device,
                 "Solar Charging Green Share %",

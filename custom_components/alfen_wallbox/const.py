@@ -1,3 +1,4 @@
+
 DOMAIN = "alfen_wallbox"
 
 KEY_MAC = "mac"
