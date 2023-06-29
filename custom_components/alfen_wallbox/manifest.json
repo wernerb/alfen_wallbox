@@ -3,7 +3,7 @@
     "name": "Alfen Wallbox",
     "version": "0.0.1",
     "config_flow": true,    
-    "documentation": "https://github.com/egnerfl/alfen_wallbox",
+    "documentation": "https://github.com/leeyuentuen/alfen_wallbox",
     "dependencies": [],
-    "codeowners": ["egnerfl"]
+    "codeowners": ["leeyuentuen"]
   }
