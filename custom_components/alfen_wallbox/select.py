@@ -2,8 +2,7 @@ import logging
 from typing import Final, Any
 
 from dataclasses import dataclass
-from config.custom_components.alfen_wallbox.alfen import AlfenDevice
-from config.custom_components.alfen_wallbox.entity import AlfenEntity
+from .entity import AlfenEntity
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.helpers.entity_platform import AddEntitiesCallback

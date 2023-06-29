@@ -3,7 +3,7 @@ from typing import Final
 from dataclasses import dataclass
 
 import voluptuous as vol
-from config.custom_components.alfen_wallbox.entity import AlfenEntity
+from .entity import AlfenEntity
 from homeassistant import const
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import UnitOfElectricCurrent, UnitOfElectricPotential, UnitOfEnergy, UnitOfInformation, UnitOfPower, UnitOfSpeed, UnitOfTemperature
@@ -656,7 +656,6 @@ class AlfenSensor(AlfenEntity, SensorEntity):
         super().__init__(device)
         self._device = device
         self._attr_name = f"{device.name} {description.name}"
-        _LOGGER.info("Initiating State sensors %s", self._attr_name)
         self._attr_unique_id = f"{self._attr_unique_id}-{description.key}"
         self.entity_description = description
         if self.entity_description.key == "active_power_total":
