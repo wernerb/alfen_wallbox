@@ -3,26 +3,21 @@
 import asyncio
 from datetime import timedelta
 import logging
-from typing import Any, Dict
+from typing import Dict
 
 from aiohttp import ClientConnectionError
 from async_timeout import timeout
 
-from homeassistant.components.sensor import DOMAIN as SENSOR_DOMAIN
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import (
-    ATTR_NAME,
     CONF_HOST,
     CONF_NAME,
     CONF_USERNAME,
     CONF_PASSWORD,
+    Platform,
 )
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryNotReady
-from homeassistant.helpers import device_registry as dr
-from homeassistant.helpers.aiohttp_client import async_get_clientsession
-from homeassistant.helpers.entity import Entity
-from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 from homeassistant.helpers.typing import HomeAssistantType
 
 from .alfen import AlfenDevice
@@ -32,7 +27,7 @@ from .const import (
     TIMEOUT,
 )
 
-PLATFORMS = [SENSOR_DOMAIN]
+PLATFORMS = [Platform.SENSOR, Platform.SELECT]
 SCAN_INTERVAL = timedelta(seconds=60)
 
 _LOGGER = logging.getLogger(__name__)

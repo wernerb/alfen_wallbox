@@ -458,7 +458,8 @@ class AlfenStatus:
             elif prop["id"] == "2110_0":
                 self.gprs_signal_strength = prop["value"]
             elif prop["id"] == "3280_1":
-                self.lb_solar_charging_mode = self.solar_charging_mode(prop["value"])
+                self.lb_solar_charging_mode = self.solar_charging_mode(
+                    prop["value"])
             elif prop["id"] == "3280_2":
                 self.lb_solar_charging_green_share = prop["value"]
             elif prop["id"] == "3280_3":
