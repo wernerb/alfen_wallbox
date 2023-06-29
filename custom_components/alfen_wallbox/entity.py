@@ -1,9 +1,7 @@
 from datetime import timedelta
 import logging
 
-import ssl
-from config.custom_components.alfen_wallbox.alfen import HEADER_JSON, POST_HEADER_JSON, AlfenDevice
-from homeassistant.util import Throttle
+from .alfen import AlfenDevice
 from .const import DOMAIN as ALFEN_DOMAIN
 from homeassistant.helpers.entity import DeviceInfo, Entity
 
