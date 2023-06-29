@@ -46,6 +46,7 @@ class AlfenSensorDescriptionMixin:
 
     api_param: str
     unit: str
+    round_digits: int | None
 
 
 @dataclass
@@ -55,7 +56,13 @@ class AlfenSensorDescription(
     """Class to describe an Alfen sensor entity."""
 
 
-STATUS_DICT: Final[dict[str, int]] = {
+AUTH_MODE_DICT: Final[dict[int, str]] = {
+    0: "Plug and Charge",
+    2: "RFID"
+}
+
+
+STATUS_DICT: Final[dict[int, str]] = {
     0: "Unknown",
     1: "Off",
     2: "Booting",
@@ -107,6 +114,7 @@ ALFEN_SENSOR_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
         icon="mdi:ev-station",
         api_param="2501_2",
         unit=None,
+        round_digits=None,
     ),
     AlfenSensorDescription(
         key="uptime",
@@ -114,6 +122,7 @@ ALFEN_SENSOR_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
         icon="mdi:timer-outline",
         api_param="2060_0",
         unit=None,
+        round_digits=None,
     ),
     AlfenSensorDescription(
         key="bootups",
@@ -121,6 +130,7 @@ ALFEN_SENSOR_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
         icon="mdi:reload",
         api_param="2056_0",
         unit=None,
+        round_digits=None,
     ),
     AlfenSensorDescription(
         key="voltage_l1",
@@ -128,6 +138,7 @@ ALFEN_SENSOR_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
         icon="mdi:flash",
         api_param="2221_3",
         unit=UnitOfElectricPotential.VOLT,
+        round_digits=2,
     ),
     AlfenSensorDescription(
         key="voltage_l2",
@@ -135,6 +146,7 @@ ALFEN_SENSOR_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
         icon="mdi:flash",
         api_param="2221_4",
         unit=UnitOfElectricPotential.VOLT,
+        round_digits=2,
     ),
     AlfenSensorDescription(
         key="voltage_l3",
@@ -142,6 +154,7 @@ ALFEN_SENSOR_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
         icon="mdi:flash",
         api_param="2221_5",
         unit=UnitOfElectricPotential.VOLT,
+        round_digits=2,
     ),
     AlfenSensorDescription(
         key="current_l1",
@@ -149,6 +162,7 @@ ALFEN_SENSOR_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
         icon="mdi:current-ac",
         api_param="2221_A",
         unit=UnitOfElectricCurrent.AMPERE,
+        round_digits=2,
     ),
     AlfenSensorDescription(
         key="current_l2",
@@ -156,6 +170,7 @@ ALFEN_SENSOR_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
         icon="mdi:current-ac",
         api_param="2221_B",
         unit=UnitOfElectricCurrent.AMPERE,
+        round_digits=2,
     ),
     AlfenSensorDescription(
         key="current_l3",
@@ -163,6 +178,7 @@ ALFEN_SENSOR_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
         icon="mdi:current-ac",
         api_param="2221_C",
         unit=UnitOfElectricCurrent.AMPERE,
+        round_digits=2,
     ),
     AlfenSensorDescription(
         key="active_power_total",
@@ -170,6 +186,7 @@ ALFEN_SENSOR_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
         icon="mdi:circle-slice-3",
         api_param="2221_16",
         unit=UnitOfPower.WATT,
+        round_digits=None,
     ),
     AlfenSensorDescription(
         key="meter_reading",
@@ -177,6 +194,7 @@ ALFEN_SENSOR_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
         icon=None,
         api_param="2221_22",
         unit=UnitOfEnergy.KILO_WATT_HOUR,
+        round_digits=None,
     ),
     AlfenSensorDescription(
         key="temperature",
@@ -184,6 +202,7 @@ ALFEN_SENSOR_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
         icon="mdi:thermometer",
         api_param="2201_0",
         unit=UnitOfTemperature.CELSIUS,
+        round_digits=2,
     ),
     AlfenSensorDescription(
         key="current_limit",
@@ -191,6 +210,7 @@ ALFEN_SENSOR_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
         icon="mdi:current-ac",
         api_param="2129_0",
         unit=UnitOfElectricCurrent.AMPERE,
+        round_digits=2,
     ),
     AlfenSensorDescription(
         key="auth_mode",
@@ -198,6 +218,7 @@ ALFEN_SENSOR_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
         icon=None,
         api_param="2126_0",
         unit=None,
+        round_digits=None,
     ),
     AlfenSensorDescription(
         key="alb_safe_current",
@@ -205,6 +226,7 @@ ALFEN_SENSOR_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
         icon="mdi:current-ac",
         api_param="2068_0",
         unit=UnitOfElectricCurrent.AMPERE,
+        round_digits=2,
     ),
     AlfenSensorDescription(
         key="alb_phase_connection",
@@ -212,6 +234,7 @@ ALFEN_SENSOR_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
         icon=None,
         api_param="2069_0",
         unit=None,
+        round_digits=None,
     ),
     AlfenSensorDescription(
         key="max_station_current",
@@ -219,6 +242,7 @@ ALFEN_SENSOR_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
         icon="mdi:current-ac",
         api_param="2062_0",
         unit=UnitOfElectricCurrent.AMPERE,
+        round_digits=2,
     ),
     AlfenSensorDescription(
         key="load_balancing_mode",
@@ -226,6 +250,7 @@ ALFEN_SENSOR_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
         icon=None,
         api_param="2064_0",
         unit=None,
+        round_digits=None,
     ),
     AlfenSensorDescription(
         key="main_static_lb_max_current",
@@ -233,6 +258,7 @@ ALFEN_SENSOR_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
         icon="mdi:current-ac",
         api_param="212B_0",
         unit=UnitOfElectricCurrent.AMPERE,
+        round_digits=2,
     ),
     AlfenSensorDescription(
         key="main_active_lb_max_current",
@@ -240,6 +266,7 @@ ALFEN_SENSOR_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
         icon="mdi:current-ac",
         api_param="212D_0",
         unit=UnitOfElectricCurrent.AMPERE,
+        round_digits=2,
     ),
     AlfenSensorDescription(
         key="charging_box_identifier",
@@ -247,6 +274,7 @@ ALFEN_SENSOR_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
         icon=None,
         api_param="2053_0",
         unit=None,
+        round_digits=None,
     ),
     AlfenSensorDescription(
         key="boot_reason",
@@ -254,6 +282,7 @@ ALFEN_SENSOR_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
         icon=None,
         api_param="2057_0",
         unit=None,
+        round_digits=None,
     ),
     AlfenSensorDescription(
         key="max_smart_meter_current",
@@ -261,6 +290,7 @@ ALFEN_SENSOR_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
         icon="mdi:current-ac",
         api_param="2067_0",
         unit=UnitOfElectricCurrent.AMPERE,
+        round_digits=2,
     ),
     AlfenSensorDescription(
         key="p1_measurements_1",
@@ -268,6 +298,7 @@ ALFEN_SENSOR_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
         icon="mdi:current-ac",
         api_param="212F_1",
         unit=UnitOfElectricCurrent.AMPERE,
+        round_digits=2,
     ),
     AlfenSensorDescription(
         key="p1_measurements_2",
@@ -275,6 +306,7 @@ ALFEN_SENSOR_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
         icon="mdi:current-ac",
         api_param="212F_2",
         unit=UnitOfElectricCurrent.AMPERE,
+        round_digits=2,
     ),
     AlfenSensorDescription(
         key="p1_measurements_3",
@@ -282,6 +314,7 @@ ALFEN_SENSOR_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
         icon="mdi:current-ac",
         api_param="212F_3",
         unit=UnitOfElectricCurrent.AMPERE,
+        round_digits=2,
     ),
     AlfenSensorDescription(
         key="gprs_apn_name",
@@ -289,6 +322,7 @@ ALFEN_SENSOR_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
         icon="mdi:antenna",
         api_param="2100_0",
         unit=None,
+        round_digits=None,
     ),
     AlfenSensorDescription(
         key="gprs_apn_user",
@@ -296,6 +330,7 @@ ALFEN_SENSOR_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
         icon="mdi:antenna",
         api_param="2101_0",
         unit=None,
+        round_digits=None,
     ),
     AlfenSensorDescription(
         key="gprs_apn_password",
@@ -303,6 +338,7 @@ ALFEN_SENSOR_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
         icon="mdi:antenna",
         api_param="2102_0",
         unit=None,
+        round_digits=None,
     ),
     AlfenSensorDescription(
         key="gprs_sim_imsi",
@@ -310,6 +346,7 @@ ALFEN_SENSOR_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
         icon="mdi:antenna",
         api_param="2104_0",
         unit=None,
+        round_digits=None,
     ),
     AlfenSensorDescription(
         key="gprs_sim_iccid",
@@ -317,6 +354,7 @@ ALFEN_SENSOR_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
         icon="mdi:antenna",
         api_param="",
         unit=None,
+        round_digits=None,
     ),
     AlfenSensorDescription(
         key="gprs_provider",
@@ -324,6 +362,7 @@ ALFEN_SENSOR_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
         icon="mdi:antenna",
         api_param="",
         unit=None,
+        round_digits=None,
     ),
     AlfenSensorDescription(
         key="comm_bo_url_wired_server_domain_and_port",
@@ -331,6 +370,7 @@ ALFEN_SENSOR_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
         icon="mdi:cable-data",
         api_param="2071_1",
         unit=None,
+        round_digits=None,
     ),
     AlfenSensorDescription(
         key="comm_bo_url_wired_server_path",
@@ -338,6 +378,7 @@ ALFEN_SENSOR_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
         icon="mdi:cable-data",
         api_param="2071_2",
         unit=None,
+        round_digits=None,
     ),
     AlfenSensorDescription(
         key="comm_dhcp_address_1",
@@ -345,6 +386,7 @@ ALFEN_SENSOR_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
         icon="mdi:antenna",
         api_param="2072_1",
         unit=None,
+        round_digits=None,
     ),
     AlfenSensorDescription(
         key="comm_netmask_address_1",
@@ -352,6 +394,7 @@ ALFEN_SENSOR_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
         icon="mdi:antenna",
         api_param="2073_1",
         unit=None,
+        round_digits=None,
     ),
     AlfenSensorDescription(
         key="comm_gateway_address_1",
@@ -359,6 +402,7 @@ ALFEN_SENSOR_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
         icon="mdi:antenna",
         api_param="2074_1",
         unit=None,
+        round_digits=None,
     ),
     AlfenSensorDescription(
         key="comm_ip_address_1",
@@ -366,6 +410,7 @@ ALFEN_SENSOR_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
         icon="mdi:antenna",
         api_param="2075_1",
         unit=None,
+        round_digits=None,
     ),
     AlfenSensorDescription(
         key="comm_bo_short_name",
@@ -373,6 +418,7 @@ ALFEN_SENSOR_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
         icon=None,
         api_param="2076_0",
         unit=None,
+        round_digits=None,
     ),
     AlfenSensorDescription(
         key="comm_bo_url_gprs_server_domain_and_port",
@@ -380,6 +426,7 @@ ALFEN_SENSOR_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
         icon="mdi:antenna",
         api_param="2078_1",
         unit=None,
+        round_digits=None,
     ),
     AlfenSensorDescription(
         key="comm_bo_url_gprs_server_path",
@@ -387,6 +434,7 @@ ALFEN_SENSOR_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
         icon="mdi:antenna",
         api_param="2078_2",
         unit=None,
+        round_digits=None,
     ),
     AlfenSensorDescription(
         key="comm_gprs_dns_1",
@@ -394,6 +442,7 @@ ALFEN_SENSOR_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
         icon="mdi:antenna",
         api_param="2079_1",
         unit=None,
+        round_digits=None,
     ),
     AlfenSensorDescription(
         key="comm_gprs_dns_2",
@@ -401,6 +450,7 @@ ALFEN_SENSOR_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
         icon="mdi:antenna",
         api_param="2080_1",
         unit=None,
+        round_digits=None,
     ),
     AlfenSensorDescription(
         key="gprs_signal_strength",
@@ -408,6 +458,7 @@ ALFEN_SENSOR_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
         icon="mdi:antenna",
         api_param="2110_0",
         unit=const.SIGNAL_STRENGTH_DECIBELS,
+        round_digits=None,
     ),
     AlfenSensorDescription(
         key="comm_dhcp_address_2",
@@ -415,6 +466,7 @@ ALFEN_SENSOR_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
         icon="mdi:cable-data",
         api_param="207A_1",
         unit=None,
+        round_digits=None,
     ),
     AlfenSensorDescription(
         key="comm_netmask_address_2",
@@ -422,6 +474,7 @@ ALFEN_SENSOR_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
         icon="mdi:cable-data",
         api_param="207B_1",
         unit=None,
+        round_digits=None,
     ),
     AlfenSensorDescription(
         key="comm_gateway_address_2",
@@ -429,6 +482,7 @@ ALFEN_SENSOR_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
         icon="mdi:cable-data",
         api_param="207C_1",
         unit=None,
+        round_digits=None,
     ),
     AlfenSensorDescription(
         key="comm_ip_address_2",
@@ -436,6 +490,7 @@ ALFEN_SENSOR_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
         icon="mdi:cable-data",
         api_param="207D_1",
         unit=None,
+        round_digits=None,
     ),
     AlfenSensorDescription(
         key="comm_wired_dns_1",
@@ -443,6 +498,7 @@ ALFEN_SENSOR_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
         icon="mdi:cable-data",
         api_param="207E_1",
         unit=None,
+        round_digits=None,
     ),
     AlfenSensorDescription(
         key="comm_wired_dns_2",
@@ -450,6 +506,7 @@ ALFEN_SENSOR_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
         icon="mdi:cable-data",
         api_param="207F_1",
         unit=None,
+        round_digits=None,
     ),
     AlfenSensorDescription(
         key="comm_protocol_name",
@@ -457,6 +514,7 @@ ALFEN_SENSOR_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
         icon=None,
         api_param="2081_0",
         unit=None,
+        round_digits=None,
     ),
     AlfenSensorDescription(
         key="comm_protocol_version",
@@ -464,6 +522,7 @@ ALFEN_SENSOR_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
         icon=None,
         api_param="2082_0",
         unit=None,
+        round_digits=None,
     ),
     AlfenSensorDescription(
         key="lb_solar_charging_green_share",
@@ -471,6 +530,7 @@ ALFEN_SENSOR_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
         icon=None,
         api_param="3280_2",
         unit=const.PERCENTAGE,
+        round_digits=None,
     ),
     AlfenSensorDescription(
         key="lb_solar_charging_comfort_level",
@@ -478,6 +538,7 @@ ALFEN_SENSOR_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
         icon=None,
         api_param="3280_3",
         unit=UnitOfPower.WATT,
+        round_digits=None,
     ),
 )
 
@@ -502,7 +563,10 @@ async def async_setup_entry(
     ]
 
     async_add_entities(sensors)
-    async_add_entities([AlfenMainSensor(device)])
+
+    # get the first type in the typle
+
+    async_add_entities([AlfenMainSensor(device, ALFEN_SENSOR_TYPES[0])])
 
     platform = entity_platform.current_platform.get()
 
@@ -570,12 +634,13 @@ async def async_setup_entry(
 
 
 class AlfenMainSensor(AlfenEntity):
-    def __init__(self, device: AlfenDevice) -> None:
+    def __init__(self, device: AlfenDevice, description: AlfenSensorDescription) -> None:
         """Initialize the sensor."""
         super().__init__(device)
         self._device = device
         self._attr_name = f"{device.name}"
         self._sensor = "sensor"
+        self.entity_description = description
 
     @property
     def unique_id(self):
@@ -590,9 +655,12 @@ class AlfenMainSensor(AlfenEntity):
     @property
     def state(self):
         """Return the state of the sensor."""
-        if self._device.status is not None:
-            return self.status_as_str()
-        return None
+        for prop in self._device.properties:
+            if prop['id'] == self.entity_description.api_param:
+                if self.entity_description.round_digits is not None:
+                    return round(prop['value'], self.entity_description.round_digits)
+                return STATUS_DICT.get(prop['value'], 'Unknown')
+        return 'Unknown'
 
     async def async_reboot_wallbox(self):
         """Reboot the wallbox."""
@@ -638,10 +706,6 @@ class AlfenMainSensor(AlfenEntity):
     def device_info(self):
         """Return a device description for device registry."""
         return self._device.device_info
-
-    def status_as_str(self):
-        """Return the status as a string."""
-        return STATUS_DICT.get(self._device.status.status, "Unknown")
 
 
 class AlfenSensor(AlfenEntity, SensorEntity):
@@ -714,6 +778,14 @@ class AlfenSensor(AlfenEntity, SensorEntity):
         """Return the state of the sensor."""
         for prop in self._device.properties:
             if prop['id'] == self.entity_description.api_param:
+                if self.entity_description.round_digits is not None:
+                    return round(prop['value'], self.entity_description.round_digits)
+
+                # some exception of return value
+                # auth_mode
+                if self.entity_description.api_param == "2126_0":
+                    return AUTH_MODE_DICT.get(prop['value'], 'Unknown')
+
                 return prop['value']
 
     @property
