@@ -101,13 +101,13 @@ class AlfenDevice:
             url=self.__get_url("prop"),
             json={api_param: {"id": api_param, "value": value}},
         )
-        _LOGGER.info(f"Set {api_param} value {value} response {response}")
+        _LOGGER.debug(f"Set {api_param} value {value} response {response}")
 
     async def _do_update(self):
         await self.login()
 
         properties = []
-        for i in ["generic", "generic2", "meter1", "states", "temp"]:
+        for i in ("generic", "generic2", "meter1", "states", "temp"):
             nextRequest = True
             offset = 0
             while (nextRequest):
@@ -353,15 +353,6 @@ class AlfenDevice:
 
     def __get_url(self, action):
         return "https://{}/api/{}".format(self.host, action)
-
-
-#     def auth_mode_as_str(self, code):
-#         switcher = {0: "Plug and Charge", 2: "RFID"}
-#         return switcher.get(code, "Unknown")
-
-# #    def solar_charging_mode(self, code):
-# #        switcher = {0: "Disable", 1: "Comfort", 2: "Green"}
-# #        return switcher.get(code, "Unknown")
 
 
 class AlfenDeviceInfo:
