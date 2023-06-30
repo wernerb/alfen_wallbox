@@ -187,7 +187,7 @@ ALFEN_SENSOR_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
         icon="mdi:circle-slice-3",
         api_param="2221_16",
         unit=UnitOfPower.WATT,
-        round_digits=None,
+        round_digits=2,
     ),
     AlfenSensorDescription(
         key="meter_reading",
