@@ -7,6 +7,7 @@ from .entity import AlfenEntity
 from homeassistant import const
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import UnitOfElectricCurrent, UnitOfElectricPotential, UnitOfEnergy, UnitOfInformation, UnitOfPower, UnitOfSpeed, UnitOfTemperature
+import datetime
 
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.entity import Entity
@@ -778,13 +779,21 @@ class AlfenSensor(AlfenEntity, SensorEntity):
         """Return the state of the sensor."""
         for prop in self._device.properties:
             if prop['id'] == self.entity_description.api_param:
-                if self.entity_description.round_digits is not None:
-                    return round(prop['value'], self.entity_description.round_digits)
-
                 # some exception of return value
                 # auth_mode
                 if self.entity_description.api_param == "2126_0":
                     return AUTH_MODE_DICT.get(prop['value'], 'Unknown')
+
+                # meter_reading from w to kWh
+                if self.entity_description.api_param == "2221_22":
+                    return round((prop["value"] / 1000), 2)
+
+                # change milliseconds to HH:MM:SS
+                if self.entity_description.api_param == "2060_0":
+                    return str(datetime.timedelta(milliseconds=prop['value'])).split('.', maxsplit=1)[0]
+
+                if self.entity_description.round_digits is not None:
+                    return round(prop['value'], self.entity_description.round_digits)
 
                 return prop['value']
 
