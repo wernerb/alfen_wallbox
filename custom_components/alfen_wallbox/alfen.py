@@ -390,7 +390,7 @@ class AlfenStatus:
             elif prop["id"] == "212D_0":
                 self.main_active_lb_max_current = round(prop["value"], 2)
             elif prop["id"] == "2185_0":
-                self.enable_phase_switching = prop["value"]
+                self.enable_phase_switching = self.enable_phase_switching_as_str(prop["value"])
             elif prop["id"] == "2053_0":
                 self.charging_box_identifier = prop["value"]
             elif prop["id"] == "2057_0":
@@ -474,6 +474,9 @@ class AlfenStatus:
         switcher = {0: "Disable", 1: "Comfort", 2: "Green"}
         return switcher.get(code, "Unknown")
 
+    def enable_phase_switching_as_str(self, code):
+        switcher = {0: "Disabled", 1: "Enabled"}
+        return switcher.get(code, "Unknown")
 
 class AlfenDeviceInfo:
     def __init__(self, response):
