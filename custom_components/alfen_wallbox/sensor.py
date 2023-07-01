@@ -81,7 +81,7 @@ async def async_setup_entry(hass, entry, async_add_entities):
             AlfenSensor(device, "Enable Phase Switching", "enable_phase_switching"),
             AlfenSensor(device, "Charging Box Identifier", "charging_box_identifier"),
             AlfenSensor(device, "System Boot Reason", "boot_reason"),
-            AlfenSensor(device, "Max Smart Meter Current", "max_smart_meter_current"),
+            AlfenSensor(device, "Max Smart Meter Current", "max_smart_meter_current", "A"),
             AlfenSensor(device, "P1 Meter Phase 1 Current", "p1_measurements_1", "A"),
             AlfenSensor(device, "P1 Meter Phase 2 Current", "p1_measurements_2", "A"),
             AlfenSensor(device, "P1 Meter Phase 3 Current", "p1_measurements_3", "A"),
