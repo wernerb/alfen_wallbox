@@ -101,7 +101,7 @@ class AlfenDevice:
             url=self.__get_url("prop"),
             json={api_param: {"id": api_param, "value": value}},
         )
-        _LOGGER.debug(f"Set {api_param} value {value} response {response}")
+        _LOGGER.info(f"Set {api_param} value {value} response {response}")
 
     async def _do_update(self):
         await self.login()
@@ -129,6 +129,7 @@ class AlfenDevice:
                 offset += len(response_json["properties"])
 
         await self.logout()
+
         self.properties = properties
 
     async def async_get_info(self):

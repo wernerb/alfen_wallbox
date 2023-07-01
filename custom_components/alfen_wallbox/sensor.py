@@ -3,6 +3,8 @@ from typing import Final
 from dataclasses import dataclass
 
 import voluptuous as vol
+
+from homeassistant.components.sensor.const import SensorDeviceClass
 from .entity import AlfenEntity
 from homeassistant import const
 from homeassistant.config_entries import ConfigEntry
@@ -55,12 +57,6 @@ class AlfenSensorDescription(
     SensorEntityDescription,  AlfenSensorDescriptionMixin
 ):
     """Class to describe an Alfen sensor entity."""
-
-
-AUTH_MODE_DICT: Final[dict[int, str]] = {
-    0: "Plug and Charge",
-    2: "RFID"
-}
 
 
 STATUS_DICT: Final[dict[int, str]] = {
@@ -125,6 +121,24 @@ ALFEN_SENSOR_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
         unit=None,
         round_digits=None,
     ),
+    AlfenSensorDescription(
+        key="last_modify_datetime",
+        name="Last Modify Config datetime",
+        icon="mdi:timer-outline",
+        api_param="2187_0",
+        unit=None,
+        state_class=SensorDeviceClass.DATE,
+        round_digits=None,
+    ),
+    # too much logging data
+    # AlfenSensorDescription(
+    #     key="system_date_time",
+    #     name="System Datetime",
+    #     icon="mdi:timer-outline",
+    #     api_param="2059_0",
+    #     unit=None,
+    #     round_digits=None,
+    # ),
     AlfenSensorDescription(
         key="bootups",
         name="Bootups",
@@ -192,7 +206,7 @@ ALFEN_SENSOR_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
     AlfenSensorDescription(
         key="meter_reading",
         name="Meter Reading",
-        icon=None,
+        icon="mdi:counter",
         api_param="2221_22",
         unit=UnitOfEnergy.KILO_WATT_HOUR,
         round_digits=None,
@@ -213,45 +227,14 @@ ALFEN_SENSOR_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
         unit=UnitOfElectricCurrent.AMPERE,
         round_digits=2,
     ),
-    AlfenSensorDescription(
-        key="auth_mode",
-        name="Authorization Mode",
-        icon=None,
-        api_param="2126_0",
-        unit=None,
-        round_digits=None,
-    ),
-    AlfenSensorDescription(
-        key="alb_safe_current",
-        name="Active Load Balancing Safe Current",
-        icon="mdi:current-ac",
-        api_param="2068_0",
-        unit=UnitOfElectricCurrent.AMPERE,
-        round_digits=2,
-    ),
-    AlfenSensorDescription(
-        key="alb_phase_connection",
-        name="Active Load Balancing Phase Connection",
-        icon=None,
-        api_param="2069_0",
-        unit=None,
-        round_digits=None,
-    ),
+
     AlfenSensorDescription(
         key="max_station_current",
-        name="Maximum Smart Meter current",
+        name="Maximum Smart Meter Current",
         icon="mdi:current-ac",
         api_param="2062_0",
         unit=UnitOfElectricCurrent.AMPERE,
         round_digits=2,
-    ),
-    AlfenSensorDescription(
-        key="load_balancing_mode",
-        name="Load Balancing Mode",
-        icon=None,
-        api_param="2064_0",
-        unit=None,
-        round_digits=None,
     ),
     AlfenSensorDescription(
         key="main_static_lb_max_current",
@@ -272,7 +255,7 @@ ALFEN_SENSOR_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
     AlfenSensorDescription(
         key="charging_box_identifier",
         name="Charging Box Identifier",
-        icon=None,
+        icon="mdi:ev-station",
         api_param="2053_0",
         unit=None,
         round_digits=None,
@@ -280,7 +263,7 @@ ALFEN_SENSOR_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
     AlfenSensorDescription(
         key="boot_reason",
         name="System Boot Reason",
-        icon=None,
+        icon="mdi:reload",
         api_param="2057_0",
         unit=None,
         round_digits=None,
@@ -353,7 +336,7 @@ ALFEN_SENSOR_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
         key="gprs_sim_iccid",
         name="GPRS SIM Serial",
         icon="mdi:antenna",
-        api_param="",
+        api_param="2105_0",
         unit=None,
         round_digits=None,
     ),
@@ -361,7 +344,7 @@ ALFEN_SENSOR_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
         key="gprs_provider",
         name="GPRS Provider",
         icon="mdi:antenna",
-        api_param="",
+        api_param="2112_0",
         unit=None,
         round_digits=None,
     ),
@@ -416,7 +399,7 @@ ALFEN_SENSOR_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
     AlfenSensorDescription(
         key="comm_bo_short_name",
         name="Backoffice Short Name",
-        icon=None,
+        icon="mdi:antenna",
         api_param="2076_0",
         unit=None,
         round_digits=None,
@@ -512,7 +495,7 @@ ALFEN_SENSOR_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
     AlfenSensorDescription(
         key="comm_protocol_name",
         name="Protocol Name",
-        icon=None,
+        icon="mdi:information-outline",
         api_param="2081_0",
         unit=None,
         round_digits=None,
@@ -520,7 +503,7 @@ ALFEN_SENSOR_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
     AlfenSensorDescription(
         key="comm_protocol_version",
         name="Protocol Version",
-        icon=None,
+        icon="mdi:information-outline",
         api_param="2082_0",
         unit=None,
         round_digits=None,
@@ -528,7 +511,7 @@ ALFEN_SENSOR_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
     AlfenSensorDescription(
         key="lb_solar_charging_green_share",
         name="Solar Charging Green Share %",
-        icon=None,
+        icon="mdi:solar-power",
         api_param="3280_2",
         unit=const.PERCENTAGE,
         round_digits=None,
@@ -536,7 +519,7 @@ ALFEN_SENSOR_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
     AlfenSensorDescription(
         key="lb_solar_charging_comfort_level",
         name="Solar Charging Comfort Level w",
-        icon=None,
+        icon="mdi:solar-power",
         api_param="3280_3",
         unit=UnitOfPower.WATT,
         round_digits=None,
@@ -564,9 +547,6 @@ async def async_setup_entry(
     ]
 
     async_add_entities(sensors)
-
-    # get the first type in the typle
-
     async_add_entities([AlfenMainSensor(device, ALFEN_SENSOR_TYPES[0])])
 
     platform = entity_platform.current_platform.get()
@@ -742,7 +722,6 @@ class AlfenSensor(AlfenEntity, SensorEntity):
             if prop['id'] == self.entity_description.api_param:
                 return prop['value']
         return None
-#        return getattr(self._device.properties, self.entity_description.key)
 
     @callback
     def _async_update_attrs(self) -> None:
@@ -780,9 +759,6 @@ class AlfenSensor(AlfenEntity, SensorEntity):
         for prop in self._device.properties:
             if prop['id'] == self.entity_description.api_param:
                 # some exception of return value
-                # auth_mode
-                if self.entity_description.api_param == "2126_0":
-                    return AUTH_MODE_DICT.get(prop['value'], 'Unknown')
 
                 # meter_reading from w to kWh
                 if self.entity_description.api_param == "2221_22":
@@ -791,6 +767,10 @@ class AlfenSensor(AlfenEntity, SensorEntity):
                 # change milliseconds to HH:MM:SS
                 if self.entity_description.api_param == "2060_0":
                     return str(datetime.timedelta(milliseconds=prop['value'])).split('.', maxsplit=1)[0]
+
+                # change milliseconds to d/m/y HH:MM:SS
+                if self.entity_description.api_param == "2187_0" or self.entity_description.api_param == "2059_0":
+                    return datetime.datetime.fromtimestamp(prop['value'] / 1000).strftime("%d/%m/%Y %H:%M:%S")
 
                 if self.entity_description.round_digits is not None:
                     return round(prop['value'], self.entity_description.round_digits)

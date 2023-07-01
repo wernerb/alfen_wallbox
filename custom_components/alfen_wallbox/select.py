@@ -36,8 +36,43 @@ class AlfenSelectDescription(SelectEntityDescription, AlfenSelectDescriptionMixi
 CHARGING_MODE_DICT: Final[dict[str, int]] = {
     "Disable": 0, "Comfort": 1, "Green": 2}
 
-ON_OFF_DICT: Final[dict[str, int]] = {
-    "Off": 0, "On": 1}
+ON_OFF_DICT: Final[dict[str, int]] = {"Off": 0, "On": 1}
+
+PHASE_ROTATION_DICT: Final[dict[str, str]] = {
+    "L1": "L1",
+    "L2": "L2",
+    "L3": "L3",
+    "L1,L2,L3": "L1L2L3",
+    "L1,L3,L2": "L1L3L2",
+    "L2,L1,L3": "L2L1L3",
+    "L2,L3,L1": "L2L3L1",
+    "L3,L1,L2": "L3L1L2",
+    "L3,L2,L1": "L3L2L1",
+}
+
+SAFE_AMPS_DICT: Final[dict[str, int]] = {
+    "1 A": 1,
+    "2 A": 2,
+    "3 A": 3,
+    "4 A": 4,
+    "5 A": 5,
+    "6 A": 6,
+    "7 A": 7,
+    "8 A": 8,
+    "9 A": 9,
+    "10 A": 10,
+}
+
+AUTH_MODE_DICT: Final[dict[str, int]] = {
+    "Plug and Charge": 0,
+    "RFID": 2
+}
+
+LOAD_BALANCE_MODE_DICT: Final[dict[str, int]] = {
+    "Modbus TCP/IP": 0,
+    "DSMR4.x / SMR5.0 (P1)": 3
+}
+
 
 ALFEN_SELECT_TYPES: Final[tuple[AlfenSelectDescription, ...]] = (
     AlfenSelectDescription(
@@ -64,20 +99,51 @@ ALFEN_SELECT_TYPES: Final[tuple[AlfenSelectDescription, ...]] = (
         options_dict=ON_OFF_DICT,
         api_param="3280_4",
     ),
+    AlfenSelectDescription(
+        key="alb_phase_connection",
+        name="Active Load Balancing Phase Connection",
+        icon=None,
+        options=list(PHASE_ROTATION_DICT),
+        options_dict=PHASE_ROTATION_DICT,
+        api_param="2069_0",
+    ),
+    AlfenSelectDescription(
+        key="alb_safe_current",
+        name="Active Load Balancing Safe Current",
+        icon="mdi:current-ac",
+        options=list(SAFE_AMPS_DICT),
+        options_dict=SAFE_AMPS_DICT,
+        api_param="2068_0",
+    ),
+
+    AlfenSelectDescription(
+        key="auth_mode",
+        name="Authorization Mode",
+        icon="mdi:key",
+        options=list(AUTH_MODE_DICT),
+        options_dict=AUTH_MODE_DICT,
+        api_param="2126_0",
+    ),
+
+    AlfenSelectDescription(
+        key="load_balancing_mode",
+        name="Load Balancing Mode",
+        icon="mdi:scale-balance",
+        options=list(LOAD_BALANCE_MODE_DICT),
+        options_dict=LOAD_BALANCE_MODE_DICT,
+        api_param="2064_0",
+    ),
 )
 
 
 async def async_setup_entry(
-    hass: HomeAssistant,
-    entry: ConfigEntry,
-    async_add_entities: AddEntitiesCallback
+    hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback
 ) -> None:
     """Add Alfen Select from a config_entry"""
 
     device = hass.data[ALFEN_DOMAIN][entry.entry_id]
-    selects = [
-        AlfenSelect(device, description) for description in ALFEN_SELECT_TYPES
-    ]
+    selects = [AlfenSelect(device, description)
+               for description in ALFEN_SELECT_TYPES]
 
     async_add_entities(selects)
 
@@ -87,9 +153,9 @@ class AlfenSelect(AlfenEntity, SelectEntity):
 
     values_dict: dict[int, str]
 
-    def __init__(self,
-                 device: AlfenDevice,
-                 description: AlfenSelectDescription) -> None:
+    def __init__(
+        self, device: AlfenDevice, description: AlfenSelectDescription
+    ) -> None:
         """Initialize."""
         super().__init__(device)
         self._device = device
@@ -116,8 +182,8 @@ class AlfenSelect(AlfenEntity, SelectEntity):
     def _get_current_option(self) -> str | None:
         """Return the current option."""
         for prop in self._device.properties:
-            if prop['id'] == self.entity_description.api_param:
-                return prop['value']
+            if prop["id"] == self.entity_description.api_param:
+                return prop["value"]
         return None
 
     async def async_update(self):
