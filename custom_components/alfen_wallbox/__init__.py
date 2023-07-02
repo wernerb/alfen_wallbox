@@ -25,10 +25,13 @@ from .const import (
     TIMEOUT,
 )
 
-PLATFORMS = [Platform.SENSOR,
-             Platform.SELECT,
-             Platform.BINARY_SENSOR,
-             Platform.SWITCH]
+PLATFORMS = [
+    Platform.SENSOR,
+    Platform.SELECT,
+    Platform.BINARY_SENSOR,
+    Platform.SWITCH,
+    Platform.NUMBER,
+]
 SCAN_INTERVAL = timedelta(seconds=60)
 
 _LOGGER = logging.getLogger(__name__)

@@ -73,6 +73,16 @@ LOAD_BALANCE_MODE_DICT: Final[dict[str, int]] = {
     "DSMR4.x / SMR5.0 (P1)": 3
 }
 
+LOAD_BALANCE_DATA_SOURCE_DICT: Final[dict[str, int]] = {
+    "Meter": 0,
+    "Energy Management System": 3
+}
+
+LOAD_BALANCE_RECEIVED_MEASUREMENTS_DICT: Final[dict[str, int]] = {
+    "Exclude Charging Ev": 0,
+    "Include Charging Ev": 1
+}
+
 
 ALFEN_SELECT_TYPES: Final[tuple[AlfenSelectDescription, ...]] = (
     AlfenSelectDescription(
@@ -82,14 +92,6 @@ ALFEN_SELECT_TYPES: Final[tuple[AlfenSelectDescription, ...]] = (
         options=list(CHARGING_MODE_DICT),
         options_dict=CHARGING_MODE_DICT,
         api_param="3280_1",
-    ),
-    AlfenSelectDescription(
-        key="enable_phase_switching",
-        name="Enable Phase Switching",
-        icon="mdi:ev-station",
-        options=list(ON_OFF_DICT),
-        options_dict=ON_OFF_DICT,
-        api_param="2185_0",
     ),
     AlfenSelectDescription(
         key="lb_solar_charging_boost",
@@ -107,14 +109,14 @@ ALFEN_SELECT_TYPES: Final[tuple[AlfenSelectDescription, ...]] = (
         options_dict=PHASE_ROTATION_DICT,
         api_param="2069_0",
     ),
-    AlfenSelectDescription(
-        key="alb_safe_current",
-        name="Active Load Balancing Safe Current",
-        icon="mdi:current-ac",
-        options=list(SAFE_AMPS_DICT),
-        options_dict=SAFE_AMPS_DICT,
-        api_param="2068_0",
-    ),
+    # AlfenSelectDescription(
+    #     key="alb_safe_current",
+    #     name="Active Load Balancing Safe Current",
+    #     icon="mdi:current-ac",
+    #     options=list(SAFE_AMPS_DICT),
+    #     options_dict=SAFE_AMPS_DICT,
+    #     api_param="2068_0",
+    # ),
 
     AlfenSelectDescription(
         key="auth_mode",
@@ -133,6 +135,15 @@ ALFEN_SELECT_TYPES: Final[tuple[AlfenSelectDescription, ...]] = (
         options_dict=LOAD_BALANCE_MODE_DICT,
         api_param="2064_0",
     ),
+    AlfenSelectDescription(
+        key="lb_active_balancing_received_measurements",
+        name="Load Balancing Received Measurements",
+        icon="mdi:scale-balance",
+        options=list(LOAD_BALANCE_RECEIVED_MEASUREMENTS_DICT),
+        options_dict=LOAD_BALANCE_RECEIVED_MEASUREMENTS_DICT,
+        api_param="206F_0",
+    ),
+
 )
 
 

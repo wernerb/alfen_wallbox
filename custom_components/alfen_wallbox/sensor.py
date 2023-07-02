@@ -219,23 +219,7 @@ ALFEN_SENSOR_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
         unit=UnitOfTemperature.CELSIUS,
         round_digits=2,
     ),
-    AlfenSensorDescription(
-        key="current_limit",
-        name="Current Limit",
-        icon="mdi:current-ac",
-        api_param="2129_0",
-        unit=UnitOfElectricCurrent.AMPERE,
-        round_digits=2,
-    ),
 
-    AlfenSensorDescription(
-        key="max_station_current",
-        name="Maximum Smart Meter Current",
-        icon="mdi:current-ac",
-        api_param="2062_0",
-        unit=UnitOfElectricCurrent.AMPERE,
-        round_digits=2,
-    ),
     AlfenSensorDescription(
         key="main_static_lb_max_current",
         name="Main Static Load Balancing Max Current",
@@ -268,14 +252,7 @@ ALFEN_SENSOR_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
         unit=None,
         round_digits=None,
     ),
-    AlfenSensorDescription(
-        key="max_smart_meter_current",
-        name="Max Smart Meter Current",
-        icon="mdi:current-ac",
-        api_param="2067_0",
-        unit=UnitOfElectricCurrent.AMPERE,
-        round_digits=2,
-    ),
+
     AlfenSensorDescription(
         key="p1_measurements_1",
         name="P1 Meter Phase 1 Current",
@@ -364,14 +341,14 @@ ALFEN_SENSOR_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
         unit=None,
         round_digits=None,
     ),
-    AlfenSensorDescription(
-        key="comm_dhcp_address_1",
-        name="GPRS DHCP Address",
-        icon="mdi:antenna",
-        api_param="2072_1",
-        unit=None,
-        round_digits=None,
-    ),
+    # AlfenSensorDescription(
+    #     key="comm_dhcp_address_1",
+    #     name="GPRS DHCP Address",
+    #     icon="mdi:antenna",
+    #     api_param="2072_1",
+    #     unit=None,
+    #     round_digits=None,
+    # ),
     AlfenSensorDescription(
         key="comm_netmask_address_1",
         name="GPRS Netmask",
@@ -444,14 +421,14 @@ ALFEN_SENSOR_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
         unit=const.SIGNAL_STRENGTH_DECIBELS,
         round_digits=None,
     ),
-    AlfenSensorDescription(
-        key="comm_dhcp_address_2",
-        name="Wired DHCP",
-        icon="mdi:cable-data",
-        api_param="207A_1",
-        unit=None,
-        round_digits=None,
-    ),
+    # AlfenSensorDescription(
+    #     key="comm_dhcp_address_2",
+    #     name="Wired DHCP",
+    #     icon="mdi:cable-data",
+    #     api_param="207A_1",
+    #     unit=None,
+    #     round_digits=None,
+    # ),
     AlfenSensorDescription(
         key="comm_netmask_address_2",
         name="Wired Netmask",
@@ -506,22 +483,6 @@ ALFEN_SENSOR_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
         icon="mdi:information-outline",
         api_param="2082_0",
         unit=None,
-        round_digits=None,
-    ),
-    AlfenSensorDescription(
-        key="lb_solar_charging_green_share",
-        name="Solar Charging Green Share %",
-        icon="mdi:solar-power",
-        api_param="3280_2",
-        unit=const.PERCENTAGE,
-        round_digits=None,
-    ),
-    AlfenSensorDescription(
-        key="lb_solar_charging_comfort_level",
-        name="Solar Charging Comfort Level w",
-        icon="mdi:solar-power",
-        api_param="3280_3",
-        unit=UnitOfPower.WATT,
         round_digits=None,
     ),
 )
