@@ -35,7 +35,7 @@ class AlfenNumberDescription(NumberEntityDescription, AlfenNumberDescriptionMixi
 ALFEN_NUMBER_TYPES: Final[tuple[AlfenNumberDescription, ...]] = (
     AlfenNumberDescription(
         key="alb_safe_current",
-        name="ALB Safe A.",
+        name="ALB Safe Current",
         state=None,
         icon="mdi:current-ac",
         assumed_state=False,
@@ -63,7 +63,7 @@ ALFEN_NUMBER_TYPES: Final[tuple[AlfenNumberDescription, ...]] = (
     ),
     AlfenNumberDescription(
         key="max_station_current",
-        name="Max. Station A.",
+        name="Max. Station Current",
         state=None,
         icon="mdi:current-ac",
         assumed_state=False,
@@ -77,7 +77,7 @@ ALFEN_NUMBER_TYPES: Final[tuple[AlfenNumberDescription, ...]] = (
     ),
     AlfenNumberDescription(
         key="max_smart_meter_current",
-        name="Max. Meter A.",
+        name="Max. Meter Current",
         state=None,
         icon="mdi:current-ac",
         assumed_state=False,
@@ -85,7 +85,7 @@ ALFEN_NUMBER_TYPES: Final[tuple[AlfenNumberDescription, ...]] = (
         native_min_value=1,
         native_max_value=16,
         native_step=1,
-        mode=NumberMode.SLIDER,
+        mode=NumberMode.BOX,
         unit_of_measurement=UnitOfElectricCurrent.AMPERE,
         api_param="2067_0",
     ),
