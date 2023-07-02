@@ -4,21 +4,20 @@ from dataclasses import dataclass
 
 import voluptuous as vol
 
-from homeassistant.components.sensor.const import SensorDeviceClass
 from .entity import AlfenEntity
 from homeassistant import const
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import UnitOfElectricCurrent, UnitOfElectricPotential, UnitOfEnergy, UnitOfInformation, UnitOfPower, UnitOfSpeed, UnitOfTemperature
+from homeassistant.const import UnitOfElectricCurrent, UnitOfElectricPotential, UnitOfEnergy, UnitOfPower, UnitOfTemperature
 import datetime
 
 from homeassistant.core import HomeAssistant, callback
-from homeassistant.helpers.entity import Entity
 from homeassistant.components.sensor import (
     DEVICE_CLASS_ENERGY,
     DEVICE_CLASS_POWER,
     SensorEntity,
     SensorEntityDescription,
-    SensorStateClass
+    SensorStateClass,
+    SensorDeviceClass
 )
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 

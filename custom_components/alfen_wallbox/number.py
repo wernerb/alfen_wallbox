@@ -1,5 +1,4 @@
 from homeassistant.components.number import NumberDeviceClass, NumberEntity, NumberEntityDescription, NumberMode
-from homeassistant.components.number.const import DEVICE_CLASS_UNITS
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from . import DOMAIN as ALFEN_DOMAIN
