@@ -11,6 +11,7 @@ Add Solar charging data:
 <img width="336" alt="image" src="https://github.com/leeyuentuen/alfen_wallbox/assets/1487966/4884a7ce-d06b-4ebb-bfb3-e37002fa6629">
 
 Example of running in Services:
+Note; the name of the configured charging point is "wallbox" in these examples.
 
 Changing Green Share %
 ```
@@ -26,6 +27,21 @@ service: alfen_wallbox.set_comfort_power
 data:
   entity_id: sensor.wallbox
   value: 1450
+```
+
+Enable phase switching
+```
+service: alfen_wallbox.enable_phase_switching
+data:
+  entity_id: sensor.wallbox
+```
+
+
+Disable phase switching
+```
+service: alfen_wallbox.disable_phase_switching
+data:
+  entity_id: sensor.wallbox
 ```
 
 > After reverse engineering the API myself I found out that there is already a python libary wrapping the Alfen API.

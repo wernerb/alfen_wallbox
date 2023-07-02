@@ -354,7 +354,6 @@ class AlfenDevice:
     def __get_url(self, action):
         return "https://{}/api/{}".format(self.host, action)
 
-
 class AlfenDeviceInfo:
     def __init__(self, response) -> None:
         self.identity = response["Identity"]
