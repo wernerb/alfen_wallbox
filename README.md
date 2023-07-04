@@ -1,14 +1,16 @@
+
 # Alfen Wallbox - HomeAssistant Integration
 
 This is a custom component to allow control of Alfen Wallboxes in [HomeAssistant](https://home-assistant.io).
 
 The component is a fork of the [Garo Wallbox custom integration](https://github.com/sockless-coding/garo_wallbox).
 
-![image](https://github.com/leeyuentuen/alfen_wallbox/assets/1487966/a25af9bc-a6b3-496d-9c04-6812825cb375)
+![Screenshot 2023-07-02 at 18 09 47](https://github.com/leeyuentuen/alfen_wallbox/assets/1487966/322e9e05-117f-4adc-b159-7177533fde01)
 
-Add Solar charging data:
+![Screenshot 2023-07-02 at 18 09 58](https://github.com/leeyuentuen/alfen_wallbox/assets/1487966/310f0537-9bc4-49a0-9552-0c8414b97425)
 
-<img width="336" alt="image" src="https://github.com/leeyuentuen/alfen_wallbox/assets/1487966/4884a7ce-d06b-4ebb-bfb3-e37002fa6629">
+![Screenshot 2023-07-02 at 18 10 13](https://github.com/leeyuentuen/alfen_wallbox/assets/1487966/f5e2670d-4bd8-40d2-bbbe-f0628cff6273)
+
 
 Example of running in Services:
 Note; the name of the configured charging point is "wallbox" in these examples.

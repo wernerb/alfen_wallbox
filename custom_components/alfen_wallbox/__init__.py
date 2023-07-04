@@ -3,27 +3,20 @@
 import asyncio
 from datetime import timedelta
 import logging
-from typing import Any, Dict
 
 from aiohttp import ClientConnectionError
 from async_timeout import timeout
 
-from homeassistant.components.sensor import DOMAIN as SENSOR_DOMAIN
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import (
-    ATTR_NAME,
     CONF_HOST,
     CONF_NAME,
     CONF_USERNAME,
     CONF_PASSWORD,
+    Platform,
 )
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryNotReady
-from homeassistant.helpers import device_registry as dr
-from homeassistant.helpers.aiohttp_client import async_get_clientsession
-from homeassistant.helpers.entity import Entity
-from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
-from homeassistant.helpers.typing import HomeAssistantType
 
 from .alfen import AlfenDevice
 
@@ -32,48 +25,48 @@ from .const import (
     TIMEOUT,
 )
 
-PLATFORMS = [SENSOR_DOMAIN]
+PLATFORMS = [
+    Platform.SENSOR,
+    Platform.SELECT,
+    Platform.BINARY_SENSOR,
+    Platform.SWITCH,
+    Platform.NUMBER,
+]
 SCAN_INTERVAL = timedelta(seconds=60)
 
 _LOGGER = logging.getLogger(__name__)
 
 
-async def async_setup(hass: HomeAssistant, config: Dict) -> bool:
+async def async_setup(hass: HomeAssistant, config: dict) -> bool:
     """Set up the Alfen Wallbox component."""
     hass.data.setdefault(DOMAIN, {})
     return True
 
 
-async def async_setup_entry(hass: HomeAssistantType, entry: ConfigEntry):
+async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
     conf = entry.data
     device = await alfen_setup(
         hass, conf[CONF_HOST], conf[CONF_NAME], conf[CONF_USERNAME], conf[CONF_PASSWORD]
     )
     if not device:
         return False
-    hass.data.setdefault(DOMAIN, {}).update({entry.entry_id: device})
-    for component in PLATFORMS:
-        hass.async_create_task(
-            hass.config_entries.async_forward_entry_setup(entry, component)
-        )
 
-    """device_registry = await dr.async_get_registry(hass)
-    device_registry.async_get_or_create(**device.device_info)"""
+    hass.data.setdefault(DOMAIN, {})
+    hass.data[DOMAIN][entry.entry_id] = device
+
+    # hass.data.setdefault(DOMAIN, {}).update({entry.entry_id: device})
+
+    await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
+
     return True
 
 
-async def async_unload_entry(hass, config_entry):
+async def async_unload_entry(hass: HomeAssistant, config_entry: ConfigEntry):
     """Unload a config entry."""
     _LOGGER.debug("async_unload_entry: %s", config_entry)
 
-    unload_ok = all(
-        await asyncio.gather(
-            *[
-                hass.config_entries.async_forward_entry_unload(config_entry, component)
-                for component in PLATFORMS
-            ]
-        )
-    )
+    unload_ok = await hass.config_entries.async_unload_platforms(config_entry, PLATFORMS)
+
     hass.data[DOMAIN].pop(config_entry.entry_id)
     if not hass.data[DOMAIN]:
         hass.data.pop(DOMAIN)
@@ -81,7 +74,7 @@ async def async_unload_entry(hass, config_entry):
     return unload_ok
 
 
-async def alfen_setup(hass, host, name, username, password):
+async def alfen_setup(hass: HomeAssistant, host: str, name: str, username: str, password: str):
     """Create a Alfen instance only once."""
 
     session = hass.helpers.aiohttp_client.async_get_clientsession()
