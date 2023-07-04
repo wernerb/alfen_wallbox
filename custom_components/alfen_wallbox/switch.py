@@ -33,6 +33,11 @@ ALFEN_BINARY_SENSOR_TYPES: Final[tuple[AlfenSwitchDescription, ...]] = (
         name="Enable Phase Switching",
         api_param="2185_0",
     ),
+    AlfenSwitchDescription(
+        key="dp_light_auto_dim",
+        name="Display Light Auto Dim",
+        api_param="2061_1",
+    ),
 )
 
 

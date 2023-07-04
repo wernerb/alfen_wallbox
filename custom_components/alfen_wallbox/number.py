@@ -116,6 +116,20 @@ ALFEN_NUMBER_TYPES: Final[tuple[AlfenNumberDescription, ...]] = (
         unit_of_measurement=UnitOfPower.WATT,
         api_param="3280_3",
     ),
+    AlfenNumberDescription(
+        key="dp_light_intensity",
+        name="Display Light Intensity %",
+        state=None,
+        icon="mdi:lightbulb",
+        assumed_state=False,
+        device_class=NumberDeviceClass.POWER_FACTOR,
+        native_min_value=0,
+        native_max_value=100,
+        native_step=10,
+        mode=NumberMode.SLIDER,
+        unit_of_measurement=UnitOfPower.WATT,
+        api_param="2061_2",
+    ),
 )
 
 
