@@ -83,6 +83,18 @@ LOAD_BALANCE_RECEIVED_MEASUREMENTS_DICT: Final[dict[str, int]] = {
     "Include Charging Ev": 1
 }
 
+DISPLAY_LANGUAGE_DICT: Final[dict[str, str]] = {
+    "English": "en_GB",
+    "Dutch": "nl_NL",
+    "German": "de_DE",
+    "French": "fr_FR",
+    "Italian": "it_IT",
+    "Norwegian": "no_NO",
+    "Finnish": "fi_FI",
+    "Portuguese": "pt_PT",
+    "Spanish": "es_ES",
+    "Swedish": "sv_SE",
+}
 
 ALFEN_SELECT_TYPES: Final[tuple[AlfenSelectDescription, ...]] = (
     AlfenSelectDescription(
@@ -142,6 +154,14 @@ ALFEN_SELECT_TYPES: Final[tuple[AlfenSelectDescription, ...]] = (
         options=list(LOAD_BALANCE_RECEIVED_MEASUREMENTS_DICT),
         options_dict=LOAD_BALANCE_RECEIVED_MEASUREMENTS_DICT,
         api_param="206F_0",
+    ),
+    AlfenSelectDescription(
+        key="display_language",
+        name="Display Language",
+        icon="mdi:translate",
+        options=list(DISPLAY_LANGUAGE_DICT),
+        options_dict=DISPLAY_LANGUAGE_DICT,
+        api_param="205D_0",
     ),
 
 )

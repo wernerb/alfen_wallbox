@@ -7,7 +7,7 @@ import voluptuous as vol
 from .entity import AlfenEntity
 from homeassistant import const
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import UnitOfElectricCurrent, UnitOfElectricPotential, UnitOfEnergy, UnitOfPower, UnitOfTemperature
+from homeassistant.const import PERCENTAGE, UnitOfElectricCurrent, UnitOfElectricPotential, UnitOfEnergy, UnitOfFrequency, UnitOfPower, UnitOfTemperature
 import datetime
 
 from homeassistant.core import HomeAssistant, callback
@@ -484,6 +484,54 @@ ALFEN_SENSOR_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
         unit=None,
         round_digits=None,
     ),
+    AlfenSensorDescription(
+        key="object_id",
+        name="Charger Number",
+        icon="mdi:information-outline",
+        api_param="2051_0",
+        unit=None,
+        round_digits=None,
+    ),
+    AlfenSensorDescription(
+        key="net_quality_hertz",
+        name="Net Quality Hz",
+        icon="mdi:information-outline",
+        api_param="2221_12",
+        unit=UnitOfFrequency.HERTZ,
+        round_digits=2,
+    ),
+    AlfenSensorDescription(
+        key="comm_car_cp_voltage_high",
+        name="Car CP Voltage High",
+        icon="mdi:lightning-bolt",
+        api_param="2511_0",
+        unit=UnitOfElectricPotential.VOLT,
+        round_digits=2,
+    ),
+    AlfenSensorDescription(
+        key="comm_car_cp_voltage_low",
+        name="Car CP Voltage Low",
+        icon="mdi:lightning-bolt",
+        api_param="2511_1",
+        unit=UnitOfElectricPotential.VOLT,
+        round_digits=2,
+    ),
+    AlfenSensorDescription(
+        key="comm_car_pp_resistance",
+        name="Car PP resistance",
+        icon="mdi:resistor",
+        api_param="2511_2",
+        unit="Ω",
+        round_digits=1,
+    ),
+    AlfenSensorDescription(
+        key="comm_car_pwm_duty_cycle",
+        name="Car PWM Duty Cycle",
+        icon="mdi:percent",
+        api_param="2511_3",
+        unit=PERCENTAGE,
+        round_digits=1,
+    ),
 )
 
 
@@ -723,6 +771,10 @@ class AlfenSensor(AlfenEntity, SensorEntity):
                 # meter_reading from w to kWh
                 if self.entity_description.api_param == "2221_22":
                     return round((prop["value"] / 1000), 2)
+
+                # Car PWM Duty cycle %
+                if self.entity_description.api_param == "2511_3":
+                    return round((prop["value"] / 100), self.entity_description.round_digits)
 
                 # change milliseconds to HH:MM:SS
                 if self.entity_description.api_param == "2060_0":
