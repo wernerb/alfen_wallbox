@@ -34,12 +34,6 @@ ALFEN_BINARY_SENSOR_TYPES: Final[tuple[AlfenBinaryDescription, ...]] = (
         device_class=None,
         api_param="205B_0",
     ),
-    AlfenBinaryDescription(
-        key="lb_enable_max_imbalance_current",
-        name="LB Enable Max Imbalance Current",
-        device_class=None,
-        api_param="2174_1",
-    ),
 )
 
 

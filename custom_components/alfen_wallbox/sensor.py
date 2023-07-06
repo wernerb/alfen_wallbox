@@ -103,6 +103,11 @@ STATUS_DICT: Final[dict[int, str]] = {
     43: "Partial Solar Charging",
 }
 
+ALLOWED_PHASE_DICT: Final[dict[int, str]] = {
+    1: "1 Phase",
+    3: "3 Phases"
+}
+
 ALFEN_SENSOR_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
     AlfenSensorDescription(
         key="status",
@@ -532,6 +537,25 @@ ALFEN_SENSOR_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
         unit=PERCENTAGE,
         round_digits=1,
     ),
+    AlfenSensorDescription(
+        key="lb_max_allowed_phase_socket_1",
+        name="Load Balancing Max Allowed of Phases Socket 1",
+        icon="mdi:scale-balance",
+        unit=None,
+        api_param="312E_0",
+        round_digits=None,
+    ),
+    # 2 Socket devices
+    # AlfenSensorDescription(
+    #     key="lb_max_allowed_phase_socket_2",
+    #     name="Load Balancing Max Allowed of Phases Socket 2",
+    #     icon="mdi:scale-balance",
+    #     unit=None,
+    #     api_param="312F_0",
+    #     round_digits=None,
+    # ),
+
+
 )
 
 
@@ -646,9 +670,16 @@ class AlfenMainSensor(AlfenEntity):
         """Return the state of the sensor."""
         for prop in self._device.properties:
             if prop['id'] == self.entity_description.api_param:
+                # exception
+                # status
+                if (prop['id'] == "2501_2"):
+                    return STATUS_DICT.get(prop['value'], 'Unknown')
+
                 if self.entity_description.round_digits is not None:
                     return round(prop['value'], self.entity_description.round_digits)
-                return STATUS_DICT.get(prop['value'], 'Unknown')
+
+                return prop['value']
+
         return 'Unknown'
 
     async def async_reboot_wallbox(self):
@@ -783,6 +814,10 @@ class AlfenSensor(AlfenEntity, SensorEntity):
                 # change milliseconds to d/m/y HH:MM:SS
                 if self.entity_description.api_param == "2187_0" or self.entity_description.api_param == "2059_0":
                     return datetime.datetime.fromtimestamp(prop['value'] / 1000).strftime("%d/%m/%Y %H:%M:%S")
+
+                # Allowed phase 1 or Allowed Phase 2
+                if (self.entity_description.api_param == "312E_0") | (self.entity_description.api_param == "312F_0"):
+                    return ALLOWED_PHASE_DICT.get(prop['value'], 'Unknown')
 
                 if self.entity_description.round_digits is not None:
                     return round(prop['value'], self.entity_description.round_digits)
