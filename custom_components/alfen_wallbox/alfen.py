@@ -107,7 +107,7 @@ class AlfenDevice:
         await self.login()
 
         properties = []
-        for i in ("generic", "generic2", "meter1", "states", "temp"):
+        for i in ("generic", "generic2", "meter1", "states", "temp", "ocpp"):
             nextRequest = True
             offset = 0
             while (nextRequest):
