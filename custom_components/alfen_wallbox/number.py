@@ -130,6 +130,20 @@ ALFEN_NUMBER_TYPES: Final[tuple[AlfenNumberDescription, ...]] = (
         unit_of_measurement=UnitOfPower.WATT,
         api_param="2061_2",
     ),
+    AlfenNumberDescription(
+        key="lb_max_imbalance_current",
+        name="Max. Imbalance Current between phases",
+        state=None,
+        icon="mdi:current-ac",
+        assumed_state=False,
+        device_class=NumberDeviceClass.POWER_FACTOR,
+        native_min_value=0,
+        native_max_value=10,
+        native_step=1,
+        mode=NumberMode.SLIDER,
+        unit_of_measurement=UnitOfElectricCurrent.AMPERE,
+        api_param="2174_0",
+    ),
 )
 
 

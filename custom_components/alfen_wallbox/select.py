@@ -96,6 +96,24 @@ DISPLAY_LANGUAGE_DICT: Final[dict[str, str]] = {
     "Swedish": "sv_SE",
 }
 
+ALLOWED_PHASE_DICT: Final[dict[str, int]] = {
+    "1 Phase": 1,
+    "3 Phases": 3,
+}
+
+PRIORITIES_DICT: Final[dict[str, int]] = {
+    "Disable": 0,
+    "1": 1,
+    "2": 2,
+    "3": 3,
+    "4": 4
+}
+
+OPERATIVE_MODE_DICT: Final[dict[str, int]] = {
+    "Operative": 0,
+    "In-operative": 2,
+}
+
 ALFEN_SELECT_TYPES: Final[tuple[AlfenSelectDescription, ...]] = (
     AlfenSelectDescription(
         key="lb_solar_charging_mode",
@@ -163,6 +181,51 @@ ALFEN_SELECT_TYPES: Final[tuple[AlfenSelectDescription, ...]] = (
         options_dict=DISPLAY_LANGUAGE_DICT,
         api_param="205D_0",
     ),
+    AlfenSelectDescription(
+        key="lb_max_allowed_phase_socket_1",
+        name="Load Balancing Max Allowed of Phases Socket 1",
+        icon="mdi:scale-balance",
+        options=list(ALLOWED_PHASE_DICT),
+        options_dict=ALLOWED_PHASE_DICT,
+        api_param="312E_0",
+    ),
+    # 2 Socket devices
+    # AlfenSelectDescription(
+    #     key="lb_max_allowed_phase_socket_2",
+    #     name="Load Balancing Max Allowed of Phases Socket 2",
+    #     icon="mdi:balance-scale",
+    #     options=list(ALLOWED_PHASE_DICT),
+    #     options_dict=ALLOWED_PHASE_DICT,
+    #     api_param="312F_0",
+    # ),
+    AlfenSelectDescription(
+        key="bo_network_1_connection_priority",
+        name="Backoffice Network 1 Connection Priority (Ethernet)",
+        icon="mdi:ethernet-cable",
+        options=list(PRIORITIES_DICT),
+        options_dict=PRIORITIES_DICT,
+        api_param="20F0_E",
+    ),
+    AlfenSelectDescription(
+        key="bo_network_2_connection_priority",
+        name="Backoffice Network 2 Connection Priority (GPRS)",
+        icon="mdi:antenna",
+        options=list(PRIORITIES_DICT),
+        options_dict=PRIORITIES_DICT,
+        api_param="20F1_E",
+    ),
+    AlfenSelectDescription(
+        key="socket_1_operation_mode",
+        name="Socket 1 Operation Mode",
+        icon="mdi:power-socket-eu",
+        options=list(OPERATIVE_MODE_DICT),
+        options_dict=OPERATIVE_MODE_DICT,
+        api_param="205F_0",
+    ),
+
+
+
+
 
 )
 
