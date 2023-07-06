@@ -182,23 +182,6 @@ ALFEN_SELECT_TYPES: Final[tuple[AlfenSelectDescription, ...]] = (
         api_param="205D_0",
     ),
     AlfenSelectDescription(
-        key="lb_max_allowed_phase_socket_1",
-        name="Load Balancing Max Allowed of Phases Socket 1",
-        icon="mdi:scale-balance",
-        options=list(ALLOWED_PHASE_DICT),
-        options_dict=ALLOWED_PHASE_DICT,
-        api_param="312E_0",
-    ),
-    # 2 Socket devices
-    # AlfenSelectDescription(
-    #     key="lb_max_allowed_phase_socket_2",
-    #     name="Load Balancing Max Allowed of Phases Socket 2",
-    #     icon="mdi:balance-scale",
-    #     options=list(ALLOWED_PHASE_DICT),
-    #     options_dict=ALLOWED_PHASE_DICT,
-    #     api_param="312F_0",
-    # ),
-    AlfenSelectDescription(
         key="bo_network_1_connection_priority",
         name="Backoffice Network 1 Connection Priority (Ethernet)",
         icon="mdi:ethernet-cable",
