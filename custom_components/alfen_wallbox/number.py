@@ -127,7 +127,7 @@ ALFEN_NUMBER_TYPES: Final[tuple[AlfenNumberDescription, ...]] = (
         native_max_value=100,
         native_step=10,
         mode=NumberMode.SLIDER,
-        unit_of_measurement=UnitOfPower.WATT,
+        unit_of_measurement=PERCENTAGE,
         api_param="2061_2",
     ),
     AlfenNumberDescription(
