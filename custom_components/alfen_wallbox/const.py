@@ -4,6 +4,34 @@ DOMAIN = "alfen_wallbox"
 KEY_MAC = "mac"
 KEY_IP = "ip"
 
+ID = "id"
+VALUE = "value"
+PROPERTIES = "properties"
+CAT = "cat"
+OFFSET = "offset"
+TOTAL = "total"
+
+METHOD_POST = "POST"
+METHOD_GET = "GET"
+
+CMD = "cmd"
+PROP = "prop"
+INFO = "info"
+LOGIN = "login"
+LOGOUT = "logout"
+
+PARAM_USERNAME = "username"
+PARAM_PASSWORD = "password"
+PARAM_COMMAND = "command"
+
+CAT_GENERIC = "generic"
+CAT_GENERIC2 = "generic2"
+CAT_METER1 = "meter1"
+CAT_STATES = "states"
+CAT_TEMP = "temp"
+CAT_OCPP = "ocpp"
+
+
 TIMEOUT = 60
 
 SERVICE_REBOOT_WALLBOX = "reboot_wallbox"

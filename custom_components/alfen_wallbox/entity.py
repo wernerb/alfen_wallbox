@@ -30,9 +30,4 @@ class AlfenEntity(Entity):
 
     async def update_state(self, api_param, value):
         """Get the state of the entity."""
-
-        await self._device.login()
-
-        await self._device.update_value(api_param, value)
-
-        await self._device.logout()
+        await self._device.set_value(api_param, value)

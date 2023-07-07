@@ -2,6 +2,8 @@ import logging
 from typing import Final, Any
 
 from dataclasses import dataclass
+
+from config.custom_components.alfen_wallbox.const import ID, VALUE
 from .entity import AlfenEntity
 
 from homeassistant.config_entries import ConfigEntry
@@ -259,8 +261,8 @@ class AlfenSelect(AlfenEntity, SelectEntity):
     def _get_current_option(self) -> str | None:
         """Return the current option."""
         for prop in self._device.properties:
-            if prop["id"] == self.entity_description.api_param:
-                return prop["value"]
+            if prop[ID] == self.entity_description.api_param:
+                return prop[VALUE]
         return None
 
     async def async_update(self):
