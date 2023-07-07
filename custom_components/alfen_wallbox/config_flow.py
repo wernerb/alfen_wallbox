@@ -11,11 +11,12 @@ from homeassistant.const import CONF_HOST, CONF_NAME, CONF_USERNAME, CONF_PASSWO
 
 from .alfen import AlfenDevice
 
-from .const import KEY_IP, TIMEOUT
+from .const import DOMAIN, KEY_IP, TIMEOUT
 
 _LOGGER = logging.getLogger(__name__)
 
-@config_entries.HANDLERS.register("alfen_wallbox")
+
+@config_entries.HANDLERS.register(DOMAIN)
 class FlowHandler(config_entries.ConfigFlow):
     """Handle a config flow."""
 
@@ -60,7 +61,7 @@ class FlowHandler(config_entries.ConfigFlow):
                     vol.Required(CONF_USERNAME, default="admin"): str,
                     vol.Required(CONF_PASSWORD): str,
                     vol.Optional(CONF_NAME): str
-                    })
+                })
             )
         return await self._create_device(user_input[CONF_HOST], user_input[CONF_NAME], user_input[CONF_USERNAME], user_input[CONF_PASSWORD])
 

@@ -1,3 +1,4 @@
+from config.custom_components.alfen_wallbox.const import ID, VALUE
 from homeassistant.components.number import NumberDeviceClass, NumberEntity, NumberEntityDescription, NumberMode
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
@@ -53,7 +54,7 @@ ALFEN_NUMBER_TYPES: Final[tuple[AlfenNumberDescription, ...]] = (
         icon="mdi:current-ac",
         assumed_state=False,
         device_class=NumberDeviceClass.CURRENT,
-        native_min_value=1,
+        native_min_value=0,
         native_max_value=16,
         native_step=1,
         mode=NumberMode.BOX,
@@ -67,7 +68,7 @@ ALFEN_NUMBER_TYPES: Final[tuple[AlfenNumberDescription, ...]] = (
         icon="mdi:current-ac",
         assumed_state=False,
         device_class=NumberDeviceClass.CURRENT,
-        native_min_value=1,
+        native_min_value=0,
         native_max_value=16,
         native_step=1,
         mode=NumberMode.BOX,
@@ -81,7 +82,7 @@ ALFEN_NUMBER_TYPES: Final[tuple[AlfenNumberDescription, ...]] = (
         icon="mdi:current-ac",
         assumed_state=False,
         device_class=NumberDeviceClass.CURRENT,
-        native_min_value=1,
+        native_min_value=0,
         native_max_value=16,
         native_step=1,
         mode=NumberMode.BOX,
@@ -200,14 +201,21 @@ class AlfenNumber(AlfenEntity, NumberEntity):
     def native_value(self) -> float | None:
         """Return the entity value to represent the entity state."""
         for prop in self._device.properties:
-            if prop["id"] == self.entity_description.api_param:
-                return prop["value"]
+            if prop[ID] == self.entity_description.api_param:
+                return prop[VALUE]
         return None
 
     async def async_set_native_value(self, value: float) -> None:
         """Update the current value."""
         await self.update_state(self.entity_description.api_param, value)
         self.async_write_ha_state()
+
+    def _get_current_option(self) -> str | None:
+        """Return the current option."""
+        for prop in self._device.properties:
+            if prop[ID] == self.entity_description.api_param:
+                return prop[VALUE]
+        return None
 
     @callback
     def _async_update_attrs(self) -> None:
