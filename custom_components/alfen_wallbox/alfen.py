@@ -80,6 +80,7 @@ class AlfenDevice:
         )
 
         _LOGGER.debug(f"Login response {response}")
+        return response.status == 200
 
     async def logout(self):
         response = await self._session.request(
@@ -89,6 +90,7 @@ class AlfenDevice:
             url=self.__get_url(LOGOUT),
         )
         _LOGGER.debug(f"Logout response {response}")
+        return response.status == 200
 
     async def _update_value(self, api_param, value):
         response = await self._session.request(
@@ -98,7 +100,7 @@ class AlfenDevice:
             url=self.__get_url(PROP),
             json={api_param: {ID: api_param, VALUE: value}},
         )
-        _LOGGER.info(f"Set {api_param} value {value} response {response}")
+        _LOGGER.debug(f"Set {api_param} value {value} response {response}")
         return response.status == 200
 
     async def _get_value(self, api_param):
@@ -110,7 +112,7 @@ class AlfenDevice:
                 "{}?{}={}".format(PROP, ID, api_param)
             ),
         )
-        _LOGGER.info(f"Status Response {response}")
+        _LOGGER.debug(f"Status Response {response}")
         response_json = await response.json(content_type=None)
         if self.properties is None:
             self.properties = []
@@ -185,7 +187,12 @@ class AlfenDevice:
         await self.logout()
 
     async def set_value(self, api_param, value):
-        await self.login()
+
+        logged_in = await self.login()
+        # if not logged in, we can't set the value, show error
+        if not logged_in:
+            return self.async_abort(reason="Unable to authenticate to wallbox")
+
         success = await self._update_value(api_param, value)
         await self.logout()
         if success:

@@ -1,9 +1,6 @@
 
 DOMAIN = "alfen_wallbox"
 
-KEY_MAC = "mac"
-KEY_IP = "ip"
-
 ID = "id"
 VALUE = "value"
 PROPERTIES = "properties"

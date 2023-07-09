@@ -43,7 +43,7 @@ ALFEN_NUMBER_TYPES: Final[tuple[AlfenNumberDescription, ...]] = (
         native_min_value=1,
         native_max_value=16,
         native_step=1,
-        mode=NumberMode.BOX,
+        mode=NumberMode.SLIDER,
         unit_of_measurement=UnitOfElectricCurrent.AMPERE,
         api_param="2068_0",
     ),
@@ -57,7 +57,7 @@ ALFEN_NUMBER_TYPES: Final[tuple[AlfenNumberDescription, ...]] = (
         native_min_value=0,
         native_max_value=16,
         native_step=1,
-        mode=NumberMode.BOX,
+        mode=NumberMode.SLIDER,
         unit_of_measurement=UnitOfElectricCurrent.AMPERE,
         api_param="2129_0",
     ),
@@ -71,7 +71,7 @@ ALFEN_NUMBER_TYPES: Final[tuple[AlfenNumberDescription, ...]] = (
         native_min_value=0,
         native_max_value=16,
         native_step=1,
-        mode=NumberMode.BOX,
+        mode=NumberMode.SLIDER,
         unit_of_measurement=UnitOfElectricCurrent.AMPERE,
         api_param="2062_0",
     ),
@@ -85,7 +85,7 @@ ALFEN_NUMBER_TYPES: Final[tuple[AlfenNumberDescription, ...]] = (
         native_min_value=0,
         native_max_value=16,
         native_step=1,
-        mode=NumberMode.BOX,
+        mode=NumberMode.SLIDER,
         unit_of_measurement=UnitOfElectricCurrent.AMPERE,
         api_param="2067_0",
     ),
@@ -99,7 +99,7 @@ ALFEN_NUMBER_TYPES: Final[tuple[AlfenNumberDescription, ...]] = (
         native_min_value=0,
         native_max_value=100,
         native_step=1,
-        mode=NumberMode.BOX,
+        mode=NumberMode.SLIDER,
         unit_of_measurement=PERCENTAGE,
         api_param="3280_2",
     ),
@@ -113,7 +113,7 @@ ALFEN_NUMBER_TYPES: Final[tuple[AlfenNumberDescription, ...]] = (
         native_min_value=1400,
         native_max_value=3500,
         native_step=100,
-        mode=NumberMode.BOX,
+        mode=NumberMode.SLIDER,
         unit_of_measurement=UnitOfPower.WATT,
         api_param="3280_3",
     ),
@@ -193,12 +193,6 @@ class AlfenNumber(AlfenEntity, NumberEntity):
         if description.native_step is not None:
             self._attr_native_step = description.native_step
 
-    async def async_set_native_value(self, value: float) -> None:
-        """Update the current value."""
-        self._attr_native_value = value
-        self.async_write_ha_state()
-        self._async_update_attrs()
-
     @property
     def native_value(self) -> float | None:
         """Return the entity value to represent the entity state."""
@@ -210,6 +204,7 @@ class AlfenNumber(AlfenEntity, NumberEntity):
     async def async_set_native_value(self, value: float) -> None:
         """Update the current value."""
         await self.update_state(self.entity_description.api_param, int(value))
+        self._attr_native_value = self._get_current_option()
         self.async_write_ha_state()
 
     def _get_current_option(self) -> str | None:
@@ -219,7 +214,7 @@ class AlfenNumber(AlfenEntity, NumberEntity):
                 return prop[VALUE]
         return None
 
-    @callback
-    def _async_update_attrs(self) -> None:
-        """Update attrs from device."""
-        self._attr_native_value = self._get_current_option()
+    # @callback
+    # def _async_update_attrs(self) -> None:
+    #     """Update attrs from device."""
+    #     self._attr_native_value = self._get_current_option()
