@@ -1,4 +1,4 @@
-from config.custom_components.alfen_wallbox.const import ID, VALUE
+from .const import ID, VALUE
 from homeassistant.components.number import NumberDeviceClass, NumberEntity, NumberEntityDescription, NumberMode
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
@@ -213,8 +213,3 @@ class AlfenNumber(AlfenEntity, NumberEntity):
             if prop[ID] == self.entity_description.api_param:
                 return prop[VALUE]
         return None
-
-    # @callback
-    # def _async_update_attrs(self) -> None:
-    #     """Update attrs from device."""
-    #     self._attr_native_value = self._get_current_option()

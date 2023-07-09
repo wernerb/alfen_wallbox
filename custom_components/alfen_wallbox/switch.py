@@ -3,7 +3,7 @@ import logging
 from dataclasses import dataclass
 from typing import Any, Final
 
-from config.custom_components.alfen_wallbox.const import ID, VALUE
+from .const import ID, VALUE
 from .alfen import AlfenDevice
 from .entity import AlfenEntity
 

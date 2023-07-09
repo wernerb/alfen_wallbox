@@ -3,7 +3,7 @@ from typing import Final, Any
 
 from dataclasses import dataclass
 
-from config.custom_components.alfen_wallbox.const import ID, VALUE
+from .const import ID, VALUE
 from .entity import AlfenEntity
 
 from homeassistant.config_entries import ConfigEntry
