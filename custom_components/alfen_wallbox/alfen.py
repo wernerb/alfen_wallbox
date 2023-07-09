@@ -1,5 +1,5 @@
 import logging
-from aiohttp import ClientSession
+from aiohttp import ClientResponse, ClientSession
 
 import ssl
 from datetime import timedelta
@@ -48,11 +48,11 @@ class AlfenDevice:
         await self.async_update()
 
     @property
-    def status(self):
+    def status(self) -> str:
         return self._status
 
     @property
-    def device_info(self):
+    def device_info(self) -> dict:
         """Return a device description for device registry."""
         return {
             "identifiers": {(DOMAIN, self.name)},
@@ -69,20 +69,17 @@ class AlfenDevice:
     async def async_update(self):
         await self._do_update()
 
-    async def login(self):
-        response = await self._session.request(
-            ssl=self.ssl,
-            method=METHOD_POST,
-            headers=HEADER_JSON,
-            url=self.__get_url(LOGIN),
-            json={PARAM_USERNAME: self.username,
-                  PARAM_PASSWORD: self.password},
-        )
+    async def login(self) -> bool:
+        response = await self.request(
+            METHOD_POST,
+            HEADER_JSON,
+            LOGIN,
+            {PARAM_USERNAME: self.username, PARAM_PASSWORD: self.password})
 
         _LOGGER.debug(f"Login response {response}")
         return response.status == 200
 
-    async def logout(self):
+    async def logout(self) -> bool:
         response = await self._session.request(
             ssl=self.ssl,
             method=METHOD_POST,
@@ -92,14 +89,15 @@ class AlfenDevice:
         _LOGGER.debug(f"Logout response {response}")
         return response.status == 200
 
-    async def _update_value(self, api_param, value):
-        response = await self._session.request(
-            ssl=self.ssl,
-            method=METHOD_POST,
-            headers=POST_HEADER_JSON,
-            url=self.__get_url(PROP),
-            json={api_param: {ID: api_param, VALUE: value}},
+    async def _update_value(self, api_param, value) -> bool:
+
+        response = await self.request(
+            METHOD_POST,
+            POST_HEADER_JSON,
+            PROP,
+            {api_param: {ID: api_param, VALUE: value}}
         )
+
         _LOGGER.debug(f"Set {api_param} value {value} response {response}")
         return response.status == 200
 
@@ -186,12 +184,23 @@ class AlfenDevice:
         _LOGGER.debug(f"Reboot response {response}")
         await self.logout()
 
-    async def set_value(self, api_param, value):
+    async def request(self, method: str, headers: str, url_cmd: str, json=None) -> ClientResponse:
+        response = await self._session.request(
+            ssl=self.ssl,
+            method=method,
+            headers=headers,
+            url=self.__get_url(url_cmd),
+            json=json,
+        )
+        _LOGGER.debug(f"Request response {response}")
+        return response
+
+    async def set_value(self, api_param, value) -> bool:
 
         logged_in = await self.login()
         # if not logged in, we can't set the value, show error
         if not logged_in:
-            return self.async_abort(reason="Unable to authenticate to wallbox")
+            return None
 
         success = await self._update_value(api_param, value)
         await self.logout()
@@ -201,7 +210,8 @@ class AlfenDevice:
                 if prop[ID] == api_param:
                     _LOGGER.debug(f"Set {api_param} value {value}")
                     prop[VALUE] = value
-                    break
+                    return True
+        return False
 
     async def get_value(self, api_param):
         await self.login()
@@ -211,7 +221,7 @@ class AlfenDevice:
     async def set_current_limit(self, limit):
         _LOGGER.debug(f"Set current limit {limit}A")
         if limit > 32 | limit < 1:
-            return self.async_abort(reason="invalid_current_limit")
+            return None
         self.set_value("2129_0", limit)
 
     async def set_rfid_auth_mode(self, enabled):
@@ -226,9 +236,7 @@ class AlfenDevice:
     async def set_current_phase(self, phase):
         _LOGGER.debug(f"Set current phase {phase}")
         if phase not in ('L1', 'L2', 'L3'):
-            return self.async_abort(
-                reason="invalid phase mapping allowed value: L1, L2, L3"
-            )
+            return None
         self.set_value("2069_0", phase)
 
     async def set_phase_switching(self, enabled):
@@ -243,16 +251,16 @@ class AlfenDevice:
     async def set_green_share(self, value):
         _LOGGER.debug(f"Set green share value {value}%")
         if value < 0 | value > 100:
-            return self.async_abort(reason="invalid_value")
+            return None
         self.set_value("3280_2", value)
 
     async def set_comfort_power(self, value):
         _LOGGER.debug(f"Set Comfort Level {value}W")
         if value < 1400 | value > 5000:
-            return self.async_abort(reason="invalid_value")
+            return None
         self.set_value("3280_3", value)
 
-    def __get_url(self, action):
+    def __get_url(self, action) -> str:
         return "https://{}/api/{}".format(self.host, action)
 
 

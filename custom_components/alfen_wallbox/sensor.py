@@ -4,6 +4,9 @@ from dataclasses import dataclass
 
 import voluptuous as vol
 
+from homeassistant.helpers.entity import DeviceInfo
+from homeassistant.helpers.typing import StateType
+
 from .entity import AlfenEntity
 from homeassistant import const
 from homeassistant.config_entries import ConfigEntry
@@ -757,7 +760,7 @@ class AlfenSensor(AlfenEntity, SensorEntity):
             self._attr_state_class = SensorStateClass.TOTAL_INCREASING
         self._async_update_attrs()
 
-    def _get_current_value(self):
+    def _get_current_value(self) -> StateType | None:
         """Get the current value."""
         for prop in self._device.properties:
             if prop[ID] == self.entity_description.api_param:
@@ -770,32 +773,32 @@ class AlfenSensor(AlfenEntity, SensorEntity):
         self._attr_native_value = self._get_current_value()
 
     @property
-    def unique_id(self):
+    def unique_id(self) -> str:
         """Return a unique ID."""
         return f"{self._device.id}-{self.entity_description.key}"
 
     @property
-    def name(self):
+    def name(self) -> str:
         """Return the name of the sensor."""
         return self._attr_name
 
     @property
-    def icon(self):
+    def icon(self) -> str | None:
         """Return the icon of the sensor."""
         return self.entity_description.icon
 
     @property
-    def native_value(self):
+    def native_value(self) -> StateType:
         """Return the state of the sensor."""
         return round(self.state, 2)
 
     @property
-    def native_unit_of_measurement(self):
+    def native_unit_of_measurement(self) -> str | None:
         """Return the unit the value is expressed in."""
         return self.entity_description.unit
 
     @property
-    def state(self):
+    def state(self) -> StateType:
         """Return the state of the sensor."""
         for prop in self._device.properties:
             if prop[ID] == self.entity_description.api_param:
@@ -827,7 +830,7 @@ class AlfenSensor(AlfenEntity, SensorEntity):
                 return prop[VALUE]
 
     @property
-    def unit_of_measurement(self):
+    def unit_of_measurement(self) -> str:
         """Return the unit of measurement."""
         return self.entity_description.unit
 
@@ -836,6 +839,6 @@ class AlfenSensor(AlfenEntity, SensorEntity):
         await self._device.async_update()
 
     @property
-    def device_info(self):
+    def device_info(self) -> DeviceInfo:
         """Return a device description for device registry."""
         return self._device.device_info

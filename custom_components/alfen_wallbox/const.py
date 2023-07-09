@@ -28,6 +28,8 @@ CAT_STATES = "states"
 CAT_TEMP = "temp"
 CAT_OCPP = "ocpp"
 
+COMMAND_REBOOT = "reboot"
+
 
 TIMEOUT = 60
 

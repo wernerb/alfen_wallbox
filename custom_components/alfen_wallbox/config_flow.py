@@ -23,7 +23,7 @@ class FlowHandler(config_entries.ConfigFlow):
     VERSION = 1
     CONNECTION_CLASS = config_entries.CONN_CLASS_LOCAL_POLL
 
-    async def _create_entry(self, host, name, username, password):
+    async def _create_entry(self, host, name, username, password) -> None:
         """Register new entry."""
         # Check if ip already is registered
         for entry in self._async_current_entries():
