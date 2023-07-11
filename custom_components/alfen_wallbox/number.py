@@ -1,3 +1,4 @@
+from .const import ID, VALUE
 from homeassistant.components.number import NumberDeviceClass, NumberEntity, NumberEntityDescription, NumberMode
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
@@ -42,7 +43,7 @@ ALFEN_NUMBER_TYPES: Final[tuple[AlfenNumberDescription, ...]] = (
         native_min_value=1,
         native_max_value=16,
         native_step=1,
-        mode=NumberMode.BOX,
+        mode=NumberMode.SLIDER,
         unit_of_measurement=UnitOfElectricCurrent.AMPERE,
         api_param="2068_0",
     ),
@@ -53,10 +54,10 @@ ALFEN_NUMBER_TYPES: Final[tuple[AlfenNumberDescription, ...]] = (
         icon="mdi:current-ac",
         assumed_state=False,
         device_class=NumberDeviceClass.CURRENT,
-        native_min_value=1,
+        native_min_value=0,
         native_max_value=16,
         native_step=1,
-        mode=NumberMode.BOX,
+        mode=NumberMode.SLIDER,
         unit_of_measurement=UnitOfElectricCurrent.AMPERE,
         api_param="2129_0",
     ),
@@ -67,10 +68,10 @@ ALFEN_NUMBER_TYPES: Final[tuple[AlfenNumberDescription, ...]] = (
         icon="mdi:current-ac",
         assumed_state=False,
         device_class=NumberDeviceClass.CURRENT,
-        native_min_value=1,
+        native_min_value=0,
         native_max_value=16,
         native_step=1,
-        mode=NumberMode.BOX,
+        mode=NumberMode.SLIDER,
         unit_of_measurement=UnitOfElectricCurrent.AMPERE,
         api_param="2062_0",
     ),
@@ -81,10 +82,10 @@ ALFEN_NUMBER_TYPES: Final[tuple[AlfenNumberDescription, ...]] = (
         icon="mdi:current-ac",
         assumed_state=False,
         device_class=NumberDeviceClass.CURRENT,
-        native_min_value=1,
+        native_min_value=0,
         native_max_value=16,
         native_step=1,
-        mode=NumberMode.BOX,
+        mode=NumberMode.SLIDER,
         unit_of_measurement=UnitOfElectricCurrent.AMPERE,
         api_param="2067_0",
     ),
@@ -98,7 +99,7 @@ ALFEN_NUMBER_TYPES: Final[tuple[AlfenNumberDescription, ...]] = (
         native_min_value=0,
         native_max_value=100,
         native_step=1,
-        mode=NumberMode.BOX,
+        mode=NumberMode.SLIDER,
         unit_of_measurement=PERCENTAGE,
         api_param="3280_2",
     ),
@@ -112,7 +113,7 @@ ALFEN_NUMBER_TYPES: Final[tuple[AlfenNumberDescription, ...]] = (
         native_min_value=1400,
         native_max_value=3500,
         native_step=100,
-        mode=NumberMode.BOX,
+        mode=NumberMode.SLIDER,
         unit_of_measurement=UnitOfPower.WATT,
         api_param="3280_3",
     ),
@@ -184,32 +185,31 @@ class AlfenNumber(AlfenEntity, NumberEntity):
         self.entity_description = description
 
         if description.native_min_value is not None:
+            self._attr_min_value = description.native_min_value
             self._attr_native_min_value = description.native_min_value
         if description.native_max_value is not None:
+            self._attr_max_value = description.native_max_value
             self._attr_native_max_value = description.native_max_value
         if description.native_step is not None:
             self._attr_native_step = description.native_step
-
-    async def async_set_native_value(self, value: float) -> None:
-        """Update the current value."""
-        self._attr_native_value = value
-        self.async_write_ha_state()
-        self._async_update_attrs()
 
     @property
     def native_value(self) -> float | None:
         """Return the entity value to represent the entity state."""
         for prop in self._device.properties:
-            if prop["id"] == self.entity_description.api_param:
-                return prop["value"]
+            if prop[ID] == self.entity_description.api_param:
+                return prop[VALUE]
         return None
 
     async def async_set_native_value(self, value: float) -> None:
         """Update the current value."""
-        await self.update_state(self.entity_description.api_param, value)
+        await self.update_state(self.entity_description.api_param, int(value))
+        self._attr_native_value = self._get_current_option()
         self.async_write_ha_state()
 
-    @callback
-    def _async_update_attrs(self) -> None:
-        """Update attrs from device."""
-        self._attr_native_value = self._get_current_option()
+    def _get_current_option(self) -> str | None:
+        """Return the current option."""
+        for prop in self._device.properties:
+            if prop[ID] == self.entity_description.api_param:
+                return prop[VALUE]
+        return None

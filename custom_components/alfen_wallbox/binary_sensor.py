@@ -2,6 +2,8 @@ import logging
 
 from dataclasses import dataclass
 from typing import Final
+
+from .const import ID, VALUE
 from .alfen import AlfenDevice
 from .entity import AlfenEntity
 
@@ -69,14 +71,14 @@ class AlfenBinarySensor(AlfenEntity, BinarySensorEntity):
     @property
     def available(self) -> bool:
         for prop in self._device.properties:
-            if prop["id"] == self.entity_description.api_param:
+            if prop[ID] == self.entity_description.api_param:
                 return True
         return False
 
     @property
     def is_on(self) -> bool:
         for prop in self._device.properties:
-            if prop["id"] == self.entity_description.api_param:
-                return prop["value"] == 1
+            if prop[ID] == self.entity_description.api_param:
+                return prop[VALUE] == 1
 
         return False

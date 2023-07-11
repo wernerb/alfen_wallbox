@@ -2,6 +2,8 @@ import logging
 
 from dataclasses import dataclass
 from typing import Any, Final
+
+from .const import ID, VALUE
 from .alfen import AlfenDevice
 from .entity import AlfenEntity
 
@@ -57,8 +59,6 @@ async def async_setup_entry(
 class AlfenSwitchSensor(AlfenEntity, SwitchEntity):
     """Define an Alfen binary sensor."""
 
-    # entity_description: AlfenSwitchDescriptionMixin
-
     def __init__(self,
                  device: AlfenDevice,
                  description: AlfenSwitchDescription
@@ -73,15 +73,15 @@ class AlfenSwitchSensor(AlfenEntity, SwitchEntity):
     @property
     def available(self) -> bool:
         for prop in self._device.properties:
-            if prop["id"] == self.entity_description.api_param:
+            if prop[ID] == self.entity_description.api_param:
                 return True
         return False
 
     @property
     def is_on(self) -> bool:
         for prop in self._device.properties:
-            if prop["id"] == self.entity_description.api_param:
-                return prop["value"] == 1
+            if prop[ID] == self.entity_description.api_param:
+                return prop[VALUE] == 1
 
         return False
 

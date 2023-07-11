@@ -4,6 +4,9 @@ from dataclasses import dataclass
 
 import voluptuous as vol
 
+from homeassistant.helpers.entity import DeviceInfo
+from homeassistant.helpers.typing import StateType
+
 from .entity import AlfenEntity
 from homeassistant import const
 from homeassistant.config_entries import ConfigEntry
@@ -28,6 +31,7 @@ from . import DOMAIN as ALFEN_DOMAIN
 
 from .alfen import AlfenDevice
 from .const import (
+    ID,
     SERVICE_REBOOT_WALLBOX,
     SERVICE_SET_CURRENT_LIMIT,
     SERVICE_ENABLE_RFID_AUTHORIZATION_MODE,
@@ -37,6 +41,7 @@ from .const import (
     SERVICE_DISABLE_PHASE_SWITCHING,
     SERVICE_SET_GREEN_SHARE,
     SERVICE_SET_COMFORT_POWER,
+    VALUE,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -632,7 +637,7 @@ async def async_setup_entry(
     platform.async_register_entity_service(
         SERVICE_SET_GREEN_SHARE,
         {
-            vol.Required("value"): cv.positive_int,
+            vol.Required(VALUE): cv.positive_int,
         },
         "async_set_green_share",
     )
@@ -640,7 +645,7 @@ async def async_setup_entry(
     platform.async_register_entity_service(
         SERVICE_SET_COMFORT_POWER,
         {
-            vol.Required("value"): cv.positive_int,
+            vol.Required(VALUE): cv.positive_int,
         },
         "async_set_comfort_power",
     )
@@ -669,16 +674,16 @@ class AlfenMainSensor(AlfenEntity):
     def state(self):
         """Return the state of the sensor."""
         for prop in self._device.properties:
-            if prop['id'] == self.entity_description.api_param:
+            if prop[ID] == self.entity_description.api_param:
                 # exception
                 # status
-                if (prop['id'] == "2501_2"):
-                    return STATUS_DICT.get(prop['value'], 'Unknown')
+                if (prop[ID] == "2501_2"):
+                    return STATUS_DICT.get(prop[VALUE], 'Unknown')
 
                 if self.entity_description.round_digits is not None:
-                    return round(prop['value'], self.entity_description.round_digits)
+                    return round(prop[VALUE], self.entity_description.round_digits)
 
-                return prop['value']
+                return prop[VALUE]
 
         return 'Unknown'
 
@@ -755,11 +760,11 @@ class AlfenSensor(AlfenEntity, SensorEntity):
             self._attr_state_class = SensorStateClass.TOTAL_INCREASING
         self._async_update_attrs()
 
-    def _get_current_value(self):
+    def _get_current_value(self) -> StateType | None:
         """Get the current value."""
         for prop in self._device.properties:
-            if prop['id'] == self.entity_description.api_param:
-                return prop['value']
+            if prop[ID] == self.entity_description.api_param:
+                return prop[VALUE]
         return None
 
     @callback
@@ -768,64 +773,64 @@ class AlfenSensor(AlfenEntity, SensorEntity):
         self._attr_native_value = self._get_current_value()
 
     @property
-    def unique_id(self):
+    def unique_id(self) -> str:
         """Return a unique ID."""
         return f"{self._device.id}-{self.entity_description.key}"
 
     @property
-    def name(self):
+    def name(self) -> str:
         """Return the name of the sensor."""
         return self._attr_name
 
     @property
-    def icon(self):
+    def icon(self) -> str | None:
         """Return the icon of the sensor."""
         return self.entity_description.icon
 
     @property
-    def native_value(self):
+    def native_value(self) -> StateType:
         """Return the state of the sensor."""
         return round(self.state, 2)
 
     @property
-    def native_unit_of_measurement(self):
+    def native_unit_of_measurement(self) -> str | None:
         """Return the unit the value is expressed in."""
         return self.entity_description.unit
 
     @property
-    def state(self):
+    def state(self) -> StateType:
         """Return the state of the sensor."""
         for prop in self._device.properties:
-            if prop['id'] == self.entity_description.api_param:
+            if prop[ID] == self.entity_description.api_param:
                 # some exception of return value
 
                 # meter_reading from w to kWh
                 if self.entity_description.api_param == "2221_22":
-                    return round((prop["value"] / 1000), 2)
+                    return round((prop[VALUE] / 1000), 2)
 
                 # Car PWM Duty cycle %
                 if self.entity_description.api_param == "2511_3":
-                    return round((prop["value"] / 100), self.entity_description.round_digits)
+                    return round((prop[VALUE] / 100), self.entity_description.round_digits)
 
                 # change milliseconds to HH:MM:SS
                 if self.entity_description.api_param == "2060_0":
-                    return str(datetime.timedelta(milliseconds=prop['value'])).split('.', maxsplit=1)[0]
+                    return str(datetime.timedelta(milliseconds=prop[VALUE])).split('.', maxsplit=1)[0]
 
                 # change milliseconds to d/m/y HH:MM:SS
                 if self.entity_description.api_param == "2187_0" or self.entity_description.api_param == "2059_0":
-                    return datetime.datetime.fromtimestamp(prop['value'] / 1000).strftime("%d/%m/%Y %H:%M:%S")
+                    return datetime.datetime.fromtimestamp(prop[VALUE] / 1000).strftime("%d/%m/%Y %H:%M:%S")
 
                 # Allowed phase 1 or Allowed Phase 2
                 if (self.entity_description.api_param == "312E_0") | (self.entity_description.api_param == "312F_0"):
-                    return ALLOWED_PHASE_DICT.get(prop['value'], 'Unknown')
+                    return ALLOWED_PHASE_DICT.get(prop[VALUE], 'Unknown')
 
                 if self.entity_description.round_digits is not None:
-                    return round(prop['value'], self.entity_description.round_digits)
+                    return round(prop[VALUE], self.entity_description.round_digits)
 
-                return prop['value']
+                return prop[VALUE]
 
     @property
-    def unit_of_measurement(self):
+    def unit_of_measurement(self) -> str:
         """Return the unit of measurement."""
         return self.entity_description.unit
 
@@ -834,6 +839,6 @@ class AlfenSensor(AlfenEntity, SensorEntity):
         await self._device.async_update()
 
     @property
-    def device_info(self):
+    def device_info(self) -> DeviceInfo:
         """Return a device description for device registry."""
         return self._device.device_info

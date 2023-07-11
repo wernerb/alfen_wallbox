@@ -1,15 +1,11 @@
 import logging
-from aiohttp import ClientSession
+from aiohttp import ClientResponse, ClientSession
 
-import requests
-import time
 import ssl
-from enum import Enum
 from datetime import timedelta
-import datetime
 
 from homeassistant.util import Throttle
-from .const import DOMAIN, ALFEN_PRODUCT_MAP
+from .const import CAT, CAT_GENERIC, CAT_GENERIC2, CAT_METER1, CAT_OCPP, CAT_STATES, CAT_TEMP, CMD, DOMAIN, ALFEN_PRODUCT_MAP, ID, METHOD_GET, METHOD_POST, OFFSET, INFO, LOGIN, LOGOUT, PARAM_COMMAND, PARAM_PASSWORD, PARAM_USERNAME, PROP, PROPERTIES, TOTAL, VALUE
 
 HEADER_JSON = {"content-type": "alfen/json; charset=utf-8"}
 POST_HEADER_JSON = {"content-type": "application/json"}
@@ -52,11 +48,11 @@ class AlfenDevice:
         await self.async_update()
 
     @property
-    def status(self):
+    def status(self) -> str:
         return self._status
 
     @property
-    def device_info(self):
+    def device_info(self) -> dict:
         """Return a device description for device registry."""
         return {
             "identifiers": {(DOMAIN, self.name)},
@@ -73,60 +69,80 @@ class AlfenDevice:
     async def async_update(self):
         await self._do_update()
 
-    async def login(self):
-        response = await self._session.request(
-            ssl=self.ssl,
-            method="POST",
-            headers=HEADER_JSON,
-            url=self.__get_url("login"),
-            json={"username": self.username, "password": self.password},
-        )
+    async def login(self) -> bool:
+        response = await self.request(
+            METHOD_POST,
+            HEADER_JSON,
+            LOGIN,
+            {PARAM_USERNAME: self.username, PARAM_PASSWORD: self.password})
 
         _LOGGER.debug(f"Login response {response}")
+        return response.status == 200
 
-    async def logout(self):
+    async def logout(self) -> bool:
         response = await self._session.request(
             ssl=self.ssl,
-            method="POST",
+            method=METHOD_POST,
             headers=HEADER_JSON,
-            url=self.__get_url("logout"),
+            url=self.__get_url(LOGOUT),
         )
         _LOGGER.debug(f"Logout response {response}")
+        return response.status == 200
 
-    async def update_value(self, api_param, value):
+    async def _update_value(self, api_param, value) -> bool:
+
+        response = await self.request(
+            METHOD_POST,
+            POST_HEADER_JSON,
+            PROP,
+            {api_param: {ID: api_param, VALUE: value}}
+        )
+
+        _LOGGER.debug(f"Set {api_param} value {value} response {response}")
+        return response.status == 200
+
+    async def _get_value(self, api_param):
         response = await self._session.request(
             ssl=self.ssl,
-            method="POST",
-            headers=POST_HEADER_JSON,
-            url=self.__get_url("prop"),
-            json={api_param: {"id": api_param, "value": value}},
+            method=METHOD_GET,
+            headers=HEADER_JSON,
+            url=self.__get_url(
+                "{}?{}={}".format(PROP, ID, api_param)
+            ),
         )
-        _LOGGER.info(f"Set {api_param} value {value} response {response}")
+        _LOGGER.debug(f"Status Response {response}")
+        response_json = await response.json(content_type=None)
+        if self.properties is None:
+            self.properties = []
+        for resp in response_json[PROPERTIES]:
+            for prop in self.properties:
+                if prop[ID] == resp[ID]:
+                    prop[VALUE] = resp[VALUE]
+                    break
 
     async def _do_update(self):
         await self.login()
 
         properties = []
-        for i in ("generic", "generic2", "meter1", "states", "temp", "ocpp"):
+        for cat in (CAT_GENERIC, CAT_GENERIC2, CAT_METER1, CAT_STATES, CAT_TEMP, CAT_OCPP):
             nextRequest = True
             offset = 0
             while (nextRequest):
                 response = await self._session.request(
                     ssl=self.ssl,
-                    method="GET",
+                    method=METHOD_GET,
                     headers=HEADER_JSON,
-                    url=self.__get_url(
-                        "prop?cat={}&offset={}".format(i, offset)
-                    ),
+                    url=self.__get_url("{}?{}={}&{}={}".format(
+                        PROP, CAT, cat, OFFSET, offset)),
                 )
                 _LOGGER.debug(f"Status Response {response}")
 
                 response_json = await response.json(content_type=None)
                 if response_json is not None:
-                    properties += response_json["properties"]
-                nextRequest = response_json["total"] > (
-                    offset + len(response_json["properties"]))
-                offset += len(response_json["properties"])
+                    properties += response_json[PROPERTIES]
+                nextRequest = response_json[TOTAL] > (
+                    offset + len(response_json[PROPERTIES]))
+                offset += len(response_json[PROPERTIES])
 
         await self.logout()
 
@@ -134,7 +150,7 @@ class AlfenDevice:
 
     async def async_get_info(self):
         response = await self._session.request(
-            ssl=self.ssl, method="GET", url=self.__get_url("info")
+            ssl=self.ssl, method=METHOD_GET, url=self.__get_url(INFO)
         )
         _LOGGER.debug(f"Response {response}")
 
@@ -156,55 +172,57 @@ class AlfenDevice:
             self.info = AlfenDeviceInfo(response_json)
 
     async def reboot_wallbox(self):
-        await self._session.request(
-            ssl=self.ssl,
-            method="POST",
-            headers=HEADER_JSON,
-            url=self.__get_url("login"),
-            json={"username": self.username, "password": self.password},
-        )
+        await self.login()
+
         response = await self._session.request(
             ssl=self.ssl,
-            method="POST",
+            method=METHOD_POST,
             headers=POST_HEADER_JSON,
-            url=self.__get_url("cmd"),
-            json={"command": "reboot"},
+            url=self.__get_url(CMD),
+            json={PARAM_COMMAND: "reboot"},
         )
         _LOGGER.debug(f"Reboot response {response}")
-        await self._session.request(
+        await self.logout()
+
+    async def request(self, method: str, headers: str, url_cmd: str, json=None) -> ClientResponse:
+        response = await self._session.request(
             ssl=self.ssl,
-            method="POST",
-            headers=HEADER_JSON,
-            url=self.__get_url("logout"),
+            method=method,
+            headers=headers,
+            url=self.__get_url(url_cmd),
+            json=json,
         )
+        _LOGGER.debug(f"Request response {response}")
+        return response
+
+    async def set_value(self, api_param, value) -> bool:
+
+        logged_in = await self.login()
+        # if not logged in, we can't set the value, show error
+        if not logged_in:
+            return None
+
+        success = await self._update_value(api_param, value)
+        await self.logout()
+        if success:
+            # we expect that the value is updated so we are just update the value in the properties
+            for prop in self.properties:
+                if prop[ID] == api_param:
+                    _LOGGER.debug(f"Set {api_param} value {value}")
+                    prop[VALUE] = value
+                    return True
+        return False
+
+    async def get_value(self, api_param):
+        await self.login()
+        await self._get_value(api_param)
+        await self.logout()
 
     async def set_current_limit(self, limit):
         _LOGGER.debug(f"Set current limit {limit}A")
         if limit > 32 | limit < 1:
-            return self.async_abort(reason="invalid_current_limit")
-
-        await self._session.request(
-            ssl=self.ssl,
-            method="POST",
-            headers=HEADER_JSON,
-            url=self.__get_url("login"),
-            json={"username": self.username, "password": self.password},
-        )
-        response = await self._session.request(
-            ssl=self.ssl,
-            method="POST",
-            headers=POST_HEADER_JSON,
-            url=self.__get_url("prop"),
-            json={"2129_0": {"id": "2129_0", "value": limit}},
-        )
-        _LOGGER.debug(f"Set current limit response {response}")
-        await self._session.request(
-            ssl=self.ssl,
-            method="POST",
-            headers=HEADER_JSON,
-            url=self.__get_url("logout"),
-        )
-        await self._do_update()
+            return None
+        self.set_value("2129_0", limit)
 
     async def set_rfid_auth_mode(self, enabled):
         _LOGGER.debug(f"Set RFID Auth Mode {enabled}")
@@ -213,57 +231,13 @@ class AlfenDevice:
         if enabled:
             value = 2
 
-        await self._session.request(
-            ssl=self.ssl,
-            method="POST",
-            headers=HEADER_JSON,
-            url=self.__get_url("login"),
-            json={"username": self.username, "password": self.password},
-        )
-        response = await self._session.request(
-            ssl=self.ssl,
-            method="POST",
-            headers=POST_HEADER_JSON,
-            url=self.__get_url("prop"),
-            json={"2126_0": {"id": "2126_0", "value": value}},
-        )
-        _LOGGER.debug(f"Set RFID Auth Mode {response}")
-        await self._session.request(
-            ssl=self.ssl,
-            method="POST",
-            headers=HEADER_JSON,
-            url=self.__get_url("logout"),
-        )
-        await self._do_update()
+        self.set_value("2126_0", value)
 
     async def set_current_phase(self, phase):
         _LOGGER.debug(f"Set current phase {phase}")
-        if phase != "L1" and phase != "L2" and phase != "L3":
-            return self.async_abort(
-                reason="invalid phase mapping allowed value: L1, L2, L3"
-            )
-        await self._session.request(
-            ssl=self.ssl,
-            method="POST",
-            headers=HEADER_JSON,
-            url=self.__get_url("login"),
-            json={"username": self.username, "password": self.password},
-        )
-        response = await self._session.request(
-            ssl=self.ssl,
-            method="POST",
-            headers=POST_HEADER_JSON,
-            url=self.__get_url("prop"),
-            json={"2069_0": {"id": "2069_0", "value": phase}},
-        )
-        _LOGGER.debug(f"Set current phase response {response}")
-        await self._session.request(
-            ssl=self.ssl,
-            method="POST",
-            headers=HEADER_JSON,
-            url=self.__get_url("logout"),
-        )
-        await self._do_update()
+        if phase not in ('L1', 'L2', 'L3'):
+            return None
+        self.set_value("2069_0", phase)
 
     async def set_phase_switching(self, enabled):
         _LOGGER.debug(f"Set Phase Switching {enabled}")
@@ -272,86 +246,21 @@ class AlfenDevice:
         if enabled:
             value = 1
 
-        await self._session.request(
-            ssl=self.ssl,
-            method="POST",
-            headers=HEADER_JSON,
-            url=self.__get_url("login"),
-            json={"username": self.username, "password": self.password},
-        )
-        response = await self._session.request(
-            ssl=self.ssl,
-            method="POST",
-            headers=POST_HEADER_JSON,
-            url=self.__get_url("prop"),
-            json={"2185_0": {"id": "2185_0", "value": value}},
-        )
-        _LOGGER.debug(f"Set Phase Switching {response}")
-        await self._session.request(
-            ssl=self.ssl,
-            method="POST",
-            headers=HEADER_JSON,
-            url=self.__get_url("logout"),
-        )
-        await self._do_update()
+        self.set_value("2185_0", value)
 
     async def set_green_share(self, value):
         _LOGGER.debug(f"Set green share value {value}%")
         if value < 0 | value > 100:
-            return self.async_abort(reason="invalid_value")
-
-        await self._session.request(
-            ssl=self.ssl,
-            method="POST",
-            headers=HEADER_JSON,
-            url=self.__get_url("login"),
-            json={"username": self.username, "password": self.password},
-        )
-        response = await self._session.request(
-            ssl=self.ssl,
-            method="POST",
-            headers=POST_HEADER_JSON,
-            url=self.__get_url("prop"),
-            json={"3280_2": {"id": "3280_2", "value": value}},
-        )
-        _LOGGER.debug(f"Set green share value response {response}")
-        await self._session.request(
-            ssl=self.ssl,
-            method="POST",
-            headers=HEADER_JSON,
-            url=self.__get_url("logout"),
-        )
-        await self._do_update()
+            return None
+        self.set_value("3280_2", value)
 
     async def set_comfort_power(self, value):
         _LOGGER.debug(f"Set Comfort Level {value}W")
         if value < 1400 | value > 5000:
-            return self.async_abort(reason="invalid_value")
+            return None
+        self.set_value("3280_3", value)
 
-        await self._session.request(
-            ssl=self.ssl,
-            method="POST",
-            headers=HEADER_JSON,
-            url=self.__get_url("login"),
-            json={"username": self.username, "password": self.password},
-        )
-        response = await self._session.request(
-            ssl=self.ssl,
-            method="POST",
-            headers=POST_HEADER_JSON,
-            url=self.__get_url("prop"),
-            json={"3280_3": {"id": "3280_3", "value": value}},
-        )
-        _LOGGER.debug(f"Set green share value response {response}")
-        await self._session.request(
-            ssl=self.ssl,
-            method="POST",
-            headers=HEADER_JSON,
-            url=self.__get_url("logout"),
-        )
-        await self._do_update()
-
-    def __get_url(self, action):
+    def __get_url(self, action) -> str:
         return "https://{}/api/{}".format(self.host, action)
 
 

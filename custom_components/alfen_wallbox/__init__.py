@@ -17,6 +17,7 @@ from homeassistant.const import (
 )
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryNotReady
+from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
 from .alfen import AlfenDevice
 
@@ -31,6 +32,7 @@ PLATFORMS = [
     Platform.BINARY_SENSOR,
     Platform.SWITCH,
     Platform.NUMBER,
+    Platform.BUTTON
 ]
 SCAN_INTERVAL = timedelta(seconds=60)
 
@@ -43,7 +45,7 @@ async def async_setup(hass: HomeAssistant, config: dict) -> bool:
     return True
 
 
-async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
+async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     conf = entry.data
     device = await alfen_setup(
         hass, conf[CONF_HOST], conf[CONF_NAME], conf[CONF_USERNAME], conf[CONF_PASSWORD]
@@ -61,7 +63,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
     return True
 
 
-async def async_unload_entry(hass: HomeAssistant, config_entry: ConfigEntry):
+async def async_unload_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> bool:
     """Unload a config entry."""
     _LOGGER.debug("async_unload_entry: %s", config_entry)
 
@@ -74,10 +76,10 @@ async def async_unload_entry(hass: HomeAssistant, config_entry: ConfigEntry):
     return unload_ok
 
 
-async def alfen_setup(hass: HomeAssistant, host: str, name: str, username: str, password: str):
+async def alfen_setup(hass: HomeAssistant, host: str, name: str, username: str, password: str) -> AlfenDevice | None:
     """Create a Alfen instance only once."""
 
-    session = hass.helpers.aiohttp_client.async_get_clientsession()
+    session = async_get_clientsession(hass, verify_ssl=False)
     try:
         with timeout(TIMEOUT):
             device = AlfenDevice(host, name, session, username, password)
