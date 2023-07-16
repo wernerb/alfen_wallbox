@@ -77,7 +77,7 @@ STATUS_DICT: Final[dict[int, str]] = {
     10: "Vehicle connected",
     11: "Charging Active Normal",
     12: "Charging Active Simplified",
-    13: "Charging Suyspended Over Current",
+    13: "Charging Suspended Over Current",
     14: "Charging Suspended HF Switching",
     15: "Charging Suspended EV Disconnected",
     16: "Finish Wait Vehicle",
@@ -231,7 +231,7 @@ ALFEN_SENSOR_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
 
     AlfenSensorDescription(
         key="main_static_lb_max_current",
-        name="Main Static Load Balancing Max Current",
+        name="Main Static LB Max Current",
         icon="mdi:current-ac",
         api_param="212B_0",
         unit=UnitOfElectricCurrent.AMPERE,
@@ -239,7 +239,7 @@ ALFEN_SENSOR_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
     ),
     AlfenSensorDescription(
         key="main_active_lb_max_current",
-        name="Main Active Load Balancing Max Current",
+        name="Main Active LB Max Current",
         icon="mdi:current-ac",
         api_param="212D_0",
         unit=UnitOfElectricCurrent.AMPERE,
@@ -544,10 +544,26 @@ ALFEN_SENSOR_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
     ),
     AlfenSensorDescription(
         key="lb_max_allowed_phase_socket_1",
-        name="Load Balancing Max Allowed of Phases Socket 1",
+        name="LB Max Allowed of Phases Socket 1",
         icon="mdi:scale-balance",
         unit=None,
         api_param="312E_0",
+        round_digits=None,
+    ),
+    AlfenSensorDescription(
+        key="ui_state_1",
+        name="Display State Socket 1",
+        icon="mdi:information-outline",
+        unit=None,
+        api_param="3190_1",
+        round_digits=None,
+    ),
+    AlfenSensorDescription(
+        key="ui_error_number",
+        name="Display Error Number Socket 1",
+        icon="mdi:information-outline",
+        unit=None,
+        api_param="3190_2",
         round_digits=None,
     ),
     # 2 Socket devices
@@ -803,6 +819,13 @@ class AlfenSensor(AlfenEntity, SensorEntity):
         for prop in self._device.properties:
             if prop[ID] == self.entity_description.api_param:
                 # some exception of return value
+
+                # Display state status
+                if self.entity_description.api_param == "3190_1":
+                    if prop[VALUE] == 28:
+                        return "See error Number"
+                    else:
+                        return STATUS_DICT.get(prop[VALUE], 'Unknown')
 
                 # meter_reading from w to kWh
                 if self.entity_description.api_param == "2221_22":
