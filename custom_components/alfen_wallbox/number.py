@@ -3,9 +3,9 @@ from homeassistant.components.number import NumberDeviceClass, NumberEntity, Num
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from . import DOMAIN as ALFEN_DOMAIN
-from homeassistant.core import HomeAssistant, callback
+from homeassistant.core import HomeAssistant
 import logging
-from typing import Final, Any
+from typing import Final
 from dataclasses import dataclass
 from .entity import AlfenEntity
 from .alfen import AlfenDevice
@@ -25,6 +25,7 @@ class AlfenNumberDescriptionMixin:
     assumed_state: bool
     state: float
     api_param: str
+    custom_mode: str
 
 
 @dataclass
@@ -43,7 +44,7 @@ ALFEN_NUMBER_TYPES: Final[tuple[AlfenNumberDescription, ...]] = (
         native_min_value=1,
         native_max_value=32,
         native_step=1,
-        mode=NumberMode.SLIDER,
+        custom_mode=None,
         unit_of_measurement=UnitOfElectricCurrent.AMPERE,
         api_param="2068_0",
     ),
@@ -57,7 +58,7 @@ ALFEN_NUMBER_TYPES: Final[tuple[AlfenNumberDescription, ...]] = (
         native_min_value=0,
         native_max_value=32,
         native_step=1,
-        mode=NumberMode.SLIDER,
+        custom_mode=None,
         unit_of_measurement=UnitOfElectricCurrent.AMPERE,
         api_param="2129_0",
     ),
@@ -71,7 +72,7 @@ ALFEN_NUMBER_TYPES: Final[tuple[AlfenNumberDescription, ...]] = (
         native_min_value=0,
         native_max_value=32,
         native_step=1,
-        mode=NumberMode.SLIDER,
+        custom_mode=None,
         unit_of_measurement=UnitOfElectricCurrent.AMPERE,
         api_param="2062_0",
     ),
@@ -85,7 +86,7 @@ ALFEN_NUMBER_TYPES: Final[tuple[AlfenNumberDescription, ...]] = (
         native_min_value=0,
         native_max_value=32,
         native_step=1,
-        mode=NumberMode.SLIDER,
+        custom_mode=None,
         unit_of_measurement=UnitOfElectricCurrent.AMPERE,
         api_param="2067_0",
     ),
@@ -99,7 +100,7 @@ ALFEN_NUMBER_TYPES: Final[tuple[AlfenNumberDescription, ...]] = (
         native_min_value=0,
         native_max_value=100,
         native_step=1,
-        mode=NumberMode.SLIDER,
+        custom_mode=None,
         unit_of_measurement=PERCENTAGE,
         api_param="3280_2",
     ),
@@ -113,7 +114,7 @@ ALFEN_NUMBER_TYPES: Final[tuple[AlfenNumberDescription, ...]] = (
         native_min_value=1400,
         native_max_value=3500,
         native_step=100,
-        mode=NumberMode.SLIDER,
+        custom_mode=None,
         unit_of_measurement=UnitOfPower.WATT,
         api_param="3280_3",
     ),
@@ -127,7 +128,7 @@ ALFEN_NUMBER_TYPES: Final[tuple[AlfenNumberDescription, ...]] = (
         native_min_value=0,
         native_max_value=100,
         native_step=10,
-        mode=NumberMode.SLIDER,
+        custom_mode=None,
         unit_of_measurement=PERCENTAGE,
         api_param="2061_2",
     ),
@@ -141,7 +142,7 @@ ALFEN_NUMBER_TYPES: Final[tuple[AlfenNumberDescription, ...]] = (
         native_min_value=0,
         native_max_value=10,
         native_step=1,
-        mode=NumberMode.SLIDER,
+        custom_mode=None,
         unit_of_measurement=UnitOfElectricCurrent.AMPERE,
         api_param="2174_0",
     ),
@@ -179,7 +180,10 @@ class AlfenNumber(AlfenEntity, NumberEntity):
         self._attr_assumed_state = description.assumed_state
         self._attr_device_class = description.device_class
         self._attr_icon = description.icon
-        self._attr_mode = description.mode
+        if description.custom_mode is None:  # issue with pre Home Assistant Core 2023.6 versions
+            self._attr_mode = NumberMode.SLIDER
+        else:
+            self._attr_mode = description.custom_mode
         self._attr_native_unit_of_measurement = description.unit_of_measurement
         self._attr_native_value = description.state
         self.entity_description = description
