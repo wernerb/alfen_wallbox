@@ -96,6 +96,8 @@ DISPLAY_LANGUAGE_DICT: Final[dict[str, str]] = {
     "Portuguese": "pt_PT",
     "Spanish": "es_ES",
     "Swedish": "sv_SE",
+    "Polish": "pl_PL",
+    "Danish": "da_DK",
 }
 
 ALLOWED_PHASE_DICT: Final[dict[str, int]] = {
