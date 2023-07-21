@@ -145,7 +145,7 @@ class AlfenDevice:
                 offset += len(response_json[PROPERTIES])
 
         await self.logout()
-
+        _LOGGER.debug(f"Properties {properties}")
         self.properties = properties
 
     async def async_get_info(self):
