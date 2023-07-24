@@ -242,7 +242,7 @@ class AlfenSelect(AlfenEntity, SelectEntity):
         self._device = device
         self._attr_name = f"{device.name} {description.name}"
 
-        self._attr_unique_id = f"{self._attr_unique_id}_{description.key}"
+        self._attr_unique_id = f"{self._device.id}_{description.key}"
         self._attr_options = description.options
         self.entity_description = description
         self.values_dict = {v: k for k, v in description.options_dict.items()}
