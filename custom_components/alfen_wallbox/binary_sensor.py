@@ -65,7 +65,7 @@ class AlfenBinarySensor(AlfenEntity, BinarySensorEntity):
         super().__init__(device)
         self._device = device
         self._attr_name = f"{device.name} {description.name}"
-        self._attr_unique_id = f"{self._attr_unique_id}_{description.key}"
+        self._attr_unique_id = f"{self._device.id}_{description.key}"
         self.entity_description = description
 
     @property
