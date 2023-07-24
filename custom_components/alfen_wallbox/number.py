@@ -176,7 +176,7 @@ class AlfenNumber(AlfenEntity, NumberEntity):
         super().__init__(device)
         self._device = device
         self._attr_name = f"{description.name}"
-        self._attr_unique_id = f"{description.key}"
+        self._attr_unique_id = f"{self._device.id}_{description.key}"
         self._attr_assumed_state = description.assumed_state
         self._attr_device_class = description.device_class
         self._attr_icon = description.icon
