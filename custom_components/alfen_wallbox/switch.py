@@ -40,6 +40,11 @@ ALFEN_BINARY_SENSOR_TYPES: Final[tuple[AlfenSwitchDescription, ...]] = (
         name="Display Light Auto Dim",
         api_param="2061_1",
     ),
+    AlfenSwitchDescription(
+        key="lb_solar_charging_boost",
+        name="Solar Charging Boost",
+        api_param="3280_4",
+    ),
 )
 
 

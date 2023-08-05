@@ -38,8 +38,6 @@ class AlfenSelectDescription(SelectEntityDescription, AlfenSelectDescriptionMixi
 CHARGING_MODE_DICT: Final[dict[str, int]] = {
     "Disable": 0, "Comfort": 1, "Green": 2}
 
-ON_OFF_DICT: Final[dict[str, int]] = {"Off": 0, "On": 1}
-
 PHASE_ROTATION_DICT: Final[dict[str, str]] = {
     "L1": "L1",
     "L2": "L2",
@@ -118,6 +116,17 @@ OPERATIVE_MODE_DICT: Final[dict[str, int]] = {
     "In-operative": 2,
 }
 
+GPRS_NETWORK_MODE_DICT: Final[dict[str, int]] = {
+    "Automatic": 0,
+    "Manual": 1
+}
+
+GPRS_TECHNOLOGY_DICT: Final[dict[str, int]] = {
+    "2G": 0,
+    "4G": 2,
+}
+
+
 ALFEN_SELECT_TYPES: Final[tuple[AlfenSelectDescription, ...]] = (
     AlfenSelectDescription(
         key="lb_solar_charging_mode",
@@ -127,14 +136,7 @@ ALFEN_SELECT_TYPES: Final[tuple[AlfenSelectDescription, ...]] = (
         options_dict=CHARGING_MODE_DICT,
         api_param="3280_1",
     ),
-    AlfenSelectDescription(
-        key="lb_solar_charging_boost",
-        name="Solar Charging Boost",
-        icon="mdi:ev-station",
-        options=list(ON_OFF_DICT),
-        options_dict=ON_OFF_DICT,
-        api_param="3280_4",
-    ),
+
     AlfenSelectDescription(
         key="alb_phase_connection",
         name="Active Load Balancing Phase Connection",
@@ -209,10 +211,22 @@ ALFEN_SELECT_TYPES: Final[tuple[AlfenSelectDescription, ...]] = (
         options_dict=OPERATIVE_MODE_DICT,
         api_param="205F_0",
     ),
-
-
-
-
+    AlfenSelectDescription(
+        key="gprs_network_mode",
+        name="GPRS Network Mode",
+        icon="mdi:antenna",
+        options=list(GPRS_NETWORK_MODE_DICT),
+        options_dict=GPRS_NETWORK_MODE_DICT,
+        api_param="2113_0",
+    ),
+    AlfenSelectDescription(
+        key="gprs_technology",
+        name="GPRS Technology",
+        icon="mdi:antenna",
+        options=list(GPRS_TECHNOLOGY_DICT),
+        options_dict=GPRS_TECHNOLOGY_DICT,
+        api_param="2114_0",
+    ),
 
 )
 
