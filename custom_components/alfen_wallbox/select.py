@@ -3,7 +3,9 @@ from typing import Final, Any
 
 from dataclasses import dataclass
 
-from .const import ID, VALUE
+from homeassistant.helpers import entity_platform
+
+from .const import ID, SERVICE_DISABLE_RFID_AUTHORIZATION_MODE, SERVICE_ENABLE_RFID_AUTHORIZATION_MODE, SERVICE_SET_CURRENT_PHASE, VALUE
 from .entity import AlfenEntity
 
 from homeassistant.config_entries import ConfigEntry
@@ -18,6 +20,9 @@ from homeassistant.components.select import (
 
 from homeassistant.core import HomeAssistant, callback
 from . import DOMAIN as ALFEN_DOMAIN
+
+import voluptuous as vol
+
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -242,6 +247,27 @@ async def async_setup_entry(
 
     async_add_entities(selects)
 
+    platform = entity_platform.current_platform.get()
+
+    platform.async_register_entity_service(
+        SERVICE_SET_CURRENT_PHASE,
+        {
+            vol.Required("phase"): str,
+        },
+        "async_set_current_phase",
+    )
+
+    platform.async_register_entity_service(
+        SERVICE_ENABLE_RFID_AUTHORIZATION_MODE,
+        {},
+        "async_enable_rfid_auth_mode",
+    )
+
+    platform.async_register_entity_service(
+        SERVICE_DISABLE_RFID_AUTHORIZATION_MODE,
+        {},
+        "async_disable_rfid_auth_mode",
+    )
 
 class AlfenSelect(AlfenEntity, SelectEntity):
     """Define Alfen select."""
@@ -289,3 +315,20 @@ class AlfenSelect(AlfenEntity, SelectEntity):
     def _async_update_attrs(self) -> None:
         """Update select attributes."""
         self._attr_current_option = self._get_current_option()
+
+    async def async_set_current_phase(self, phase):
+        """Set the current phase."""
+        await self._device.set_current_phase(phase)
+        await self.async_select_option(phase)
+
+    async def async_enable_rfid_auth_mode(self):
+        """Enable RFID authorization mode."""
+        await self._device.set_rfid_auth_mode(True)
+        await self.update_state(self.entity_description.api_param, 2)
+        self.async_write_ha_state()
+
+    async def async_disable_rfid_auth_mode(self):
+        """Disable RFID authorization mode."""
+        await self._device.set_rfid_auth_mode(False)
+        await self.update_state(self.entity_description.api_param, 0)
+        self.async_write_ha_state()
