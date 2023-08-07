@@ -33,14 +33,6 @@ from .alfen import AlfenDevice
 from .const import (
     ID,
     SERVICE_REBOOT_WALLBOX,
-    SERVICE_SET_CURRENT_LIMIT,
-    SERVICE_ENABLE_RFID_AUTHORIZATION_MODE,
-    SERVICE_DISABLE_RFID_AUTHORIZATION_MODE,
-    SERVICE_SET_CURRENT_PHASE,
-    SERVICE_ENABLE_PHASE_SWITCHING,
-    SERVICE_DISABLE_PHASE_SWITCHING,
-    SERVICE_SET_GREEN_SHARE,
-    SERVICE_SET_COMFORT_POWER,
     VALUE,
 )
 
@@ -610,62 +602,6 @@ async def async_setup_entry(
         "async_reboot_wallbox",
     )
 
-    platform.async_register_entity_service(
-        SERVICE_SET_CURRENT_LIMIT,
-        {
-            vol.Required("limit"): cv.positive_int,
-        },
-        "async_set_current_limit",
-    )
-
-    platform.async_register_entity_service(
-        SERVICE_SET_CURRENT_PHASE,
-        {
-            vol.Required("phase"): str,
-        },
-        "async_set_current_phase",
-    )
-
-    platform.async_register_entity_service(
-        SERVICE_ENABLE_RFID_AUTHORIZATION_MODE,
-        {},
-        "async_enable_rfid_auth_mode",
-    )
-
-    platform.async_register_entity_service(
-        SERVICE_DISABLE_RFID_AUTHORIZATION_MODE,
-        {},
-        "async_disable_rfid_auth_mode",
-    )
-
-    platform.async_register_entity_service(
-        SERVICE_ENABLE_PHASE_SWITCHING,
-        {},
-        "async_enable_phase_switching",
-    )
-
-    platform.async_register_entity_service(
-        SERVICE_DISABLE_PHASE_SWITCHING,
-        {},
-        "async_disable_phase_switching",
-    )
-
-    platform.async_register_entity_service(
-        SERVICE_SET_GREEN_SHARE,
-        {
-            vol.Required(VALUE): cv.positive_int,
-        },
-        "async_set_green_share",
-    )
-
-    platform.async_register_entity_service(
-        SERVICE_SET_COMFORT_POWER,
-        {
-            vol.Required(VALUE): cv.positive_int,
-        },
-        "async_set_comfort_power",
-    )
-
 
 class AlfenMainSensor(AlfenEntity):
     def __init__(self, device: AlfenDevice, description: AlfenSensorDescription) -> None:
@@ -707,41 +643,11 @@ class AlfenMainSensor(AlfenEntity):
         """Reboot the wallbox."""
         await self._device.reboot_wallbox()
 
-    async def async_set_current_limit(self, limit):
-        """Set the current limit."""
-        await self._device.set_current_limit(limit)
-
-    async def async_enable_rfid_auth_mode(self):
-        """Enable RFID authorization mode."""
-        await self._device.set_rfid_auth_mode(True)
-
-    async def async_disable_rfid_auth_mode(self):
-        """Disable RFID authorization mode."""
-        await self._device.set_rfid_auth_mode(False)
-
     async def async_update(self):
         """Update the sensor."""
         await self._device.async_update()
 
-    async def async_set_current_phase(self, phase):
-        """Set the current phase."""
-        await self._device.set_current_phase(phase)
 
-    async def async_enable_phase_switching(self):
-        """Enable phase switching."""
-        await self._device.set_phase_switching(True)
-
-    async def async_disable_phase_switching(self):
-        """Disable phase switching."""
-        await self._device.set_phase_switching(False)
-
-    async def async_set_green_share(self, value):
-        """Set the green share."""
-        await self._device.set_green_share(value)
-
-    async def async_set_comfort_power(self, value):
-        """Set the comfort power."""
-        await self._device.set_comfort_power(value)
 
     @property
     def device_info(self):

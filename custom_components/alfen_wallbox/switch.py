@@ -3,7 +3,9 @@ import logging
 from dataclasses import dataclass
 from typing import Any, Final
 
-from .const import ID, VALUE
+from homeassistant.helpers import entity_platform
+
+from .const import ID, SERVICE_DISABLE_PHASE_SWITCHING, SERVICE_ENABLE_PHASE_SWITCHING, VALUE
 from .alfen import AlfenDevice
 from .entity import AlfenEntity
 
@@ -55,6 +57,20 @@ async def async_setup_entry(
 
     async_add_entities(switches)
 
+    platform = entity_platform.current_platform.get()
+
+    platform.async_register_entity_service(
+        SERVICE_ENABLE_PHASE_SWITCHING,
+        {},
+        "async_enable_phase_switching",
+    )
+
+    platform.async_register_entity_service(
+        SERVICE_DISABLE_PHASE_SWITCHING,
+        {},
+        "async_disable_phase_switching",
+    )
+
 
 class AlfenSwitchSensor(AlfenEntity, SwitchEntity):
     """Define an Alfen binary sensor."""
@@ -95,3 +111,13 @@ class AlfenSwitchSensor(AlfenEntity, SwitchEntity):
         """Turn the entity off."""
         await self.update_state(self.entity_description.api_param, 0)
         await self._device.async_update()
+
+    async def async_enable_phase_switching(self):
+        """Enable phase switching."""
+        await self._device.set_phase_switching(True)
+        await self.async_turn_on()
+
+    async def async_disable_phase_switching(self):
+        """Disable phase switching."""
+        await self._device.set_phase_switching(False)
+        await self.async_turn_off()

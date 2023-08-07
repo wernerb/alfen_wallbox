@@ -1,4 +1,5 @@
-from .const import ID, VALUE
+from homeassistant.helpers import entity_platform
+from .const import ID, SERVICE_SET_COMFORT_POWER, SERVICE_SET_CURRENT_LIMIT, SERVICE_SET_GREEN_SHARE, VALUE
 from homeassistant.components.number import NumberDeviceClass, NumberEntity, NumberEntityDescription, NumberMode
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
@@ -14,6 +15,10 @@ from homeassistant.const import (
     UnitOfElectricCurrent,
     UnitOfPower,
 )
+
+import voluptuous as vol
+
+from homeassistant.helpers import config_validation as cv
 
 
 _LOGGER = logging.getLogger(__name__)
@@ -159,6 +164,32 @@ async def async_setup_entry(
 
     async_add_entities(numbers)
 
+    platform = entity_platform.current_platform.get()
+
+    platform.async_register_entity_service(
+        SERVICE_SET_CURRENT_LIMIT,
+        {
+            vol.Required("limit"): cv.positive_int,
+        },
+        "async_set_current_limit",
+    )
+
+    platform.async_register_entity_service(
+        SERVICE_SET_GREEN_SHARE,
+        {
+            vol.Required(VALUE): cv.positive_int,
+        },
+        "async_set_green_share",
+    )
+
+    platform.async_register_entity_service(
+        SERVICE_SET_COMFORT_POWER,
+        {
+            vol.Required(VALUE): cv.positive_int,
+        },
+        "async_set_comfort_power",
+    )
+
 
 class AlfenNumber(AlfenEntity, NumberEntity):
     """Define an Alfen select entity."""
@@ -172,7 +203,7 @@ class AlfenNumber(AlfenEntity, NumberEntity):
         device: AlfenDevice,
         description: AlfenNumberDescription,
     ) -> None:
-        """Initialize the Demo Number entity."""
+        """Initialize the Alfen Number entity."""
         super().__init__(device)
         self._device = device
         self._attr_name = f"{description.name}"
@@ -217,3 +248,19 @@ class AlfenNumber(AlfenEntity, NumberEntity):
             if prop[ID] == self.entity_description.api_param:
                 return prop[VALUE]
         return None
+
+    async def async_set_current_limit(self, limit):
+        """Set the current limit."""
+        await self._device.set_current_limit(limit)
+        await self.async_set_native_value(limit)
+
+    async def async_set_green_share(self, value):
+        """Set the green share."""
+        await self._device.set_green_share(value)
+        await self.async_set_native_value(value)
+
+
+    async def async_set_comfort_power(self, value):
+        """Set the comfort power."""
+        await self._device.set_comfort_power(value)
+        await self.async_set_native_value(value)
