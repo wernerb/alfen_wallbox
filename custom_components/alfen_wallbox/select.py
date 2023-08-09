@@ -89,18 +89,22 @@ LOAD_BALANCE_RECEIVED_MEASUREMENTS_DICT: Final[dict[str, int]] = {
 }
 
 DISPLAY_LANGUAGE_DICT: Final[dict[str, str]] = {
-    "English": "en_GB",
+    "Czech": "cz_CZ",
+    "Danish": "da_DK",
     "Dutch": "nl_NL",
-    "German": "de_DE",
+    "English": "en_GB",
+    "Finnish": "fi_FI",
     "French": "fr_FR",
+    "German": "de_DE",
+    "Hungarian": "hu_HU",
+    "Icelandic": "is_IS",
     "Italian": "it_IT",
     "Norwegian": "no_NO",
-    "Finnish": "fi_FI",
+    "Polish": "pl_PL",
     "Portuguese": "pt_PT",
+    "Romanian": "ro_RO",
     "Spanish": "es_ES",
     "Swedish": "sv_SE",
-    "Polish": "pl_PL",
-    "Danish": "da_DK",
 }
 
 ALLOWED_PHASE_DICT: Final[dict[str, int]] = {
