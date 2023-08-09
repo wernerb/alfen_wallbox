@@ -3,7 +3,9 @@ from typing import Final, Any
 
 from dataclasses import dataclass
 
-from .const import ID, VALUE
+from homeassistant.helpers import entity_platform
+
+from .const import ID, SERVICE_DISABLE_RFID_AUTHORIZATION_MODE, SERVICE_ENABLE_RFID_AUTHORIZATION_MODE, SERVICE_SET_CURRENT_PHASE, VALUE
 from .entity import AlfenEntity
 
 from homeassistant.config_entries import ConfigEntry
@@ -18,6 +20,9 @@ from homeassistant.components.select import (
 
 from homeassistant.core import HomeAssistant, callback
 from . import DOMAIN as ALFEN_DOMAIN
+
+import voluptuous as vol
+
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -37,8 +42,6 @@ class AlfenSelectDescription(SelectEntityDescription, AlfenSelectDescriptionMixi
 
 CHARGING_MODE_DICT: Final[dict[str, int]] = {
     "Disable": 0, "Comfort": 1, "Green": 2}
-
-ON_OFF_DICT: Final[dict[str, int]] = {"Off": 0, "On": 1}
 
 PHASE_ROTATION_DICT: Final[dict[str, str]] = {
     "L1": "L1",
@@ -86,18 +89,22 @@ LOAD_BALANCE_RECEIVED_MEASUREMENTS_DICT: Final[dict[str, int]] = {
 }
 
 DISPLAY_LANGUAGE_DICT: Final[dict[str, str]] = {
-    "English": "en_GB",
+    "Czech": "cz_CZ",
+    "Danish": "da_DK",
     "Dutch": "nl_NL",
-    "German": "de_DE",
+    "English": "en_GB",
+    "Finnish": "fi_FI",
     "French": "fr_FR",
+    "German": "de_DE",
+    "Hungarian": "hu_HU",
+    "Icelandic": "is_IS",
     "Italian": "it_IT",
     "Norwegian": "no_NO",
-    "Finnish": "fi_FI",
+    "Polish": "pl_PL",
     "Portuguese": "pt_PT",
+    "Romanian": "ro_RO",
     "Spanish": "es_ES",
     "Swedish": "sv_SE",
-    "Polish": "pl_PL",
-    "Danish": "da_DK",
 }
 
 ALLOWED_PHASE_DICT: Final[dict[str, int]] = {
@@ -118,6 +125,17 @@ OPERATIVE_MODE_DICT: Final[dict[str, int]] = {
     "In-operative": 2,
 }
 
+GPRS_NETWORK_MODE_DICT: Final[dict[str, int]] = {
+    "Automatic": 0,
+    "Manual": 1
+}
+
+GPRS_TECHNOLOGY_DICT: Final[dict[str, int]] = {
+    "2G": 0,
+    "4G": 2,
+}
+
+
 ALFEN_SELECT_TYPES: Final[tuple[AlfenSelectDescription, ...]] = (
     AlfenSelectDescription(
         key="lb_solar_charging_mode",
@@ -127,14 +145,7 @@ ALFEN_SELECT_TYPES: Final[tuple[AlfenSelectDescription, ...]] = (
         options_dict=CHARGING_MODE_DICT,
         api_param="3280_1",
     ),
-    AlfenSelectDescription(
-        key="lb_solar_charging_boost",
-        name="Solar Charging Boost",
-        icon="mdi:ev-station",
-        options=list(ON_OFF_DICT),
-        options_dict=ON_OFF_DICT,
-        api_param="3280_4",
-    ),
+
     AlfenSelectDescription(
         key="alb_phase_connection",
         name="Active Load Balancing Phase Connection",
@@ -209,10 +220,22 @@ ALFEN_SELECT_TYPES: Final[tuple[AlfenSelectDescription, ...]] = (
         options_dict=OPERATIVE_MODE_DICT,
         api_param="205F_0",
     ),
-
-
-
-
+    AlfenSelectDescription(
+        key="gprs_network_mode",
+        name="GPRS Network Mode",
+        icon="mdi:antenna",
+        options=list(GPRS_NETWORK_MODE_DICT),
+        options_dict=GPRS_NETWORK_MODE_DICT,
+        api_param="2113_0",
+    ),
+    AlfenSelectDescription(
+        key="gprs_technology",
+        name="GPRS Technology",
+        icon="mdi:antenna",
+        options=list(GPRS_TECHNOLOGY_DICT),
+        options_dict=GPRS_TECHNOLOGY_DICT,
+        api_param="2114_0",
+    ),
 
 )
 
@@ -228,6 +251,27 @@ async def async_setup_entry(
 
     async_add_entities(selects)
 
+    platform = entity_platform.current_platform.get()
+
+    platform.async_register_entity_service(
+        SERVICE_SET_CURRENT_PHASE,
+        {
+            vol.Required("phase"): str,
+        },
+        "async_set_current_phase",
+    )
+
+    platform.async_register_entity_service(
+        SERVICE_ENABLE_RFID_AUTHORIZATION_MODE,
+        {},
+        "async_enable_rfid_auth_mode",
+    )
+
+    platform.async_register_entity_service(
+        SERVICE_DISABLE_RFID_AUTHORIZATION_MODE,
+        {},
+        "async_disable_rfid_auth_mode",
+    )
 
 class AlfenSelect(AlfenEntity, SelectEntity):
     """Define Alfen select."""
@@ -275,3 +319,20 @@ class AlfenSelect(AlfenEntity, SelectEntity):
     def _async_update_attrs(self) -> None:
         """Update select attributes."""
         self._attr_current_option = self._get_current_option()
+
+    async def async_set_current_phase(self, phase):
+        """Set the current phase."""
+        await self._device.set_current_phase(phase)
+        await self.async_select_option(phase)
+
+    async def async_enable_rfid_auth_mode(self):
+        """Enable RFID authorization mode."""
+        await self._device.set_rfid_auth_mode(True)
+        await self.update_state(self.entity_description.api_param, 2)
+        self.async_write_ha_state()
+
+    async def async_disable_rfid_auth_mode(self):
+        """Disable RFID authorization mode."""
+        await self._device.set_rfid_auth_mode(False)
+        await self.update_state(self.entity_description.api_param, 0)
+        self.async_write_ha_state()
