@@ -14,6 +14,7 @@ from homeassistant.const import (
     PERCENTAGE,
     UnitOfElectricCurrent,
     UnitOfPower,
+    UnitOfTime,
 )
 
 import voluptuous as vol
@@ -165,6 +166,35 @@ ALFEN_NUMBER_TYPES: Final[tuple[AlfenNumberDescription, ...]] = (
         unit_of_measurement=UnitOfElectricCurrent.AMPERE,
         api_param="21B9_0",
     ),
+    AlfenNumberDescription(
+        key="auth_re_authorize_after_power_outage",
+        name="Auth. Re-authorize after Power Outage (s)",
+        state=None,
+        icon="mdi:timer-sand",
+        assumed_state=False,
+        device_class=None,
+        native_min_value=0,
+        native_max_value=30,
+        native_step=1,
+        custom_mode=None,
+        unit_of_measurement=UnitOfTime.SECONDS,
+        api_param="2169_0",
+    ),
+    AlfenNumberDescription(
+        key="auth_connection_timeout",
+        name="Auth. Connection Timeout (s)",
+        state=None,
+        icon="mdi:timer-sand",
+        assumed_state=False,
+        device_class=None,
+        native_min_value=0,
+        native_max_value=30,
+        native_step=1,
+        custom_mode=None,
+        unit_of_measurement=UnitOfTime.SECONDS,
+        api_param="2169_0",
+    ),
+
 )
 
 
