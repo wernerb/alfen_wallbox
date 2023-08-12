@@ -55,19 +55,6 @@ PHASE_ROTATION_DICT: Final[dict[str, str]] = {
     "L3,L2,L1": "L3L2L1",
 }
 
-SAFE_AMPS_DICT: Final[dict[str, int]] = {
-    "1 A": 1,
-    "2 A": 2,
-    "3 A": 3,
-    "4 A": 4,
-    "5 A": 5,
-    "6 A": 6,
-    "7 A": 7,
-    "8 A": 8,
-    "9 A": 9,
-    "10 A": 10,
-}
-
 AUTH_MODE_DICT: Final[dict[str, int]] = {
     "Plug and Charge": 0,
     "RFID": 2
@@ -159,25 +146,16 @@ ALFEN_SELECT_TYPES: Final[tuple[AlfenSelectDescription, ...]] = (
     ),
 
     AlfenSelectDescription(
-        key="alb_phase_connection",
-        name="Active Load Balancing Phase Connection",
+        key="lb_phase_connection",
+        name="Load Balancing Phase Connection",
         icon=None,
         options=list(PHASE_ROTATION_DICT),
         options_dict=PHASE_ROTATION_DICT,
         api_param="2069_0",
     ),
-    # AlfenSelectDescription(
-    #     key="alb_safe_current",
-    #     name="Active Load Balancing Safe Current",
-    #     icon="mdi:current-ac",
-    #     options=list(SAFE_AMPS_DICT),
-    #     options_dict=SAFE_AMPS_DICT,
-    #     api_param="2068_0",
-    # ),
-
     AlfenSelectDescription(
         key="auth_mode",
-        name="Authorization Mode",
+        name="Auth. Mode",
         icon="mdi:key",
         options=list(AUTH_MODE_DICT),
         options_dict=AUTH_MODE_DICT,
@@ -273,12 +251,12 @@ ALFEN_SELECT_TYPES: Final[tuple[AlfenSelectDescription, ...]] = (
         api_param="2189_0",
     ),
     AlfenSelectDescription(
-        key="ps_installation_direct external suspend signal",
+        key="ps_installation_direct_external_suspend_signal",
         name="Installation Direct External Suspend Signal",
         icon="mdi:scale-balance",
         options=list(DIRECT_EXTERNAL_SUSPEND_SIGNAL),
         options_dict=DIRECT_EXTERNAL_SUSPEND_SIGNAL,
-        api_param="2189_0",
+        api_param="216C_0",
     ),
 
 )

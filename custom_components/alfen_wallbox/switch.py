@@ -47,6 +47,26 @@ ALFEN_BINARY_SENSOR_TYPES: Final[tuple[AlfenSwitchDescription, ...]] = (
         name="Solar Charging Boost",
         api_param="3280_4",
     ),
+    AlfenSwitchDescription(
+        key="auth_white_list",
+        name="Auth. Whitelist",
+        api_param="213B_0",
+    ),
+    AlfenSwitchDescription(
+        key="auth_local_list",
+        name="Auth. Whitelist",
+        api_param="213D_0",
+    ),
+    AlfenSwitchDescription(
+        key="auth_restart_after_power_outage",
+        name="Auth. Restart after Power Outage",
+        api_param="215E_0",
+    ),
+    AlfenSwitchDescription(
+        key="auth_remote_transaction_request",
+        name="Auth. Remote Transaction requests",
+        api_param="209B_0",
+    ),
 )
 
 

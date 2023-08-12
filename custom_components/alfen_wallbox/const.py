@@ -29,6 +29,7 @@ CAT_STATES = "states"
 CAT_TEMP = "temp"
 CAT_OCPP = "ocpp"
 CAT_MBUS_TCP = "MbusTCP"
+CAT_COMM = "comm"
 
 COMMAND_REBOOT = "reboot"
 
