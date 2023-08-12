@@ -33,8 +33,8 @@ class AlfenSwitchDescription(SwitchEntityDescription, AlfenSwitchDescriptionMixi
 
 ALFEN_BINARY_SENSOR_TYPES: Final[tuple[AlfenSwitchDescription, ...]] = (
     AlfenSwitchDescription(
-        key="enable_phase_switching",
-        name="Enable Phase Switching",
+        key="lb_enable_phase_switching",
+        name="Load Balancing Enable Phase Switching",
         api_param="2185_0",
     ),
     AlfenSwitchDescription(

@@ -100,6 +100,37 @@ STATUS_DICT: Final[dict[int, str]] = {
     43: "Partial Solar Charging",
 }
 
+DISPLAY_ERROR_DICT: Final[dict[int, str]] = {
+    0: "No Error",
+    1: "Not able to charge. Please call for support.",
+    101: "One moment please. Your charging session will resume shortly.",
+    102: "Not able to charge. Please call for support",
+    104: "Not able to charge. Please call for support.",
+    105: "Not able to charge. Please call for support.",
+    106: "Not able to charge. Please call for support.",
+    108: "Not displayed",
+    109: "Not displayed",
+    201: "Error in installation. Please check installation or call for support.",
+    202: "Input voltage too low, not able to charge. Please call your installer.",
+    206: "Temporary set to unavailable. Contact CPO or try again later.",
+    208: "Not displayed",
+    209: "Not displayed",
+    210: "Not displayed",
+    211: "Not able to lock cable. Please call for support.",
+    212: "Error in installation. Please check installation or call for support.",
+    213: "Not displayed",
+    301: "One moment please your charging session will resume shortly.",
+    302: "One moment please your charging session will resume shortly.",
+    303: "One moment please your charging session will resume shortly.",
+    304: "Charging not started yet to continue please reconnect cable.",
+    401: "Inside temperature high. Charging will resume shortly.",
+    402: "Inside temperature low. Charging will resume shortly.",
+    404: "Not able to lock cable. Please reconnect cable.",
+    405: "Cable not supported. Please try connecting your cable again.",
+    406: "No communication with vehicle. Please check your charging cable.",
+    407: "Not displayed"
+}
+
 ALLOWED_PHASE_DICT: Final[dict[int, str]] = {
     1: "1 Phase",
     3: "3 Phases"
@@ -535,8 +566,8 @@ ALFEN_SENSOR_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
         round_digits=1,
     ),
     AlfenSensorDescription(
-        key="lb_max_allowed_phase_socket_1",
-        name="LB Max Allowed of Phases Socket 1",
+        key="ps_connector_1_max_allowed_phase",
+        name="Connector 1 Max Allowed of Phases",
         icon="mdi:scale-balance",
         unit=None,
         api_param="312E_0",
@@ -560,15 +591,13 @@ ALFEN_SENSOR_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
     ),
     # 2 Socket devices
     # AlfenSensorDescription(
-    #     key="lb_max_allowed_phase_socket_2",
-    #     name="Load Balancing Max Allowed of Phases Socket 2",
+    #     key="ps_connector_2_max_allowed_phase",
+    #     name="Connector 2 Max Allowed of Phases",
     #     icon="mdi:scale-balance",
     #     unit=None,
     #     api_param="312F_0",
     #     round_digits=None,
     # ),
-
-
 )
 
 
@@ -755,6 +784,9 @@ class AlfenSensor(AlfenEntity, SensorEntity):
 
                 if self.entity_description.round_digits is not None:
                     return round(prop[VALUE], self.entity_description.round_digits)
+
+                if self.entity_description.api_param == "3190_2":
+                    return str(prop[VALUE]) + ': ' + DISPLAY_ERROR_DICT.get(prop[VALUE],  'Unknown')
 
                 return prop[VALUE]
 

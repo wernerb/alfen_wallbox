@@ -80,6 +80,7 @@ LOAD_BALANCE_MODE_DICT: Final[dict[str, int]] = {
 
 LOAD_BALANCE_DATA_SOURCE_DICT: Final[dict[str, int]] = {
     "Meter": 0,
+    "Meter + EMS Monitoring": 1,
     "Energy Management System": 3
 }
 
@@ -135,6 +136,17 @@ GPRS_TECHNOLOGY_DICT: Final[dict[str, int]] = {
     "4G": 2,
 }
 
+DSMR_SMR_INTERFACE_DICT: Final[dict[str, int]] = {
+    "Serial" : 0,
+    "Telnet" : 1,
+    "HomeWizard Wi-Fi P1": 2,
+}
+
+DIRECT_EXTERNAL_SUSPEND_SIGNAL: Final[dict[str, int]] = {
+    "Not allowed": 0,
+    "Allowed, suspend when closed": 1,
+    "Allowed, suspend when open": 2
+}
 
 ALFEN_SELECT_TYPES: Final[tuple[AlfenSelectDescription, ...]] = (
     AlfenSelectDescription(
@@ -235,6 +247,38 @@ ALFEN_SELECT_TYPES: Final[tuple[AlfenSelectDescription, ...]] = (
         options=list(GPRS_TECHNOLOGY_DICT),
         options_dict=GPRS_TECHNOLOGY_DICT,
         api_param="2114_0",
+    ),
+     AlfenSelectDescription(
+        key="lb_dsmr_smr_interface",
+        name="Load Balancing DSMR/SMR Interface",
+        icon="mdi:scale-balance",
+        options=list(DSMR_SMR_INTERFACE_DICT),
+        options_dict=DSMR_SMR_INTERFACE_DICT,
+        api_param="2191_1",
+    ),
+    AlfenSelectDescription(
+        key="lb_data_source",
+        name="Load Balancing Data Source",
+        icon="mdi:scale-balance",
+        options=list(LOAD_BALANCE_DATA_SOURCE_DICT),
+        options_dict=LOAD_BALANCE_DATA_SOURCE_DICT,
+        api_param="2530_1",
+    ),
+    AlfenSelectDescription(
+        key="ps_installation_max_allowed_phase",
+        name="Installation Max. Allowed Phases",
+        icon="mdi:scale-balance",
+        options=list(ALLOWED_PHASE_DICT),
+        options_dict=ALLOWED_PHASE_DICT,
+        api_param="2189_0",
+    ),
+    AlfenSelectDescription(
+        key="ps_installation_direct external suspend signal",
+        name="Installation Direct External Suspend Signal",
+        icon="mdi:scale-balance",
+        options=list(DIRECT_EXTERNAL_SUSPEND_SIGNAL),
+        options_dict=DIRECT_EXTERNAL_SUSPEND_SIGNAL,
+        api_param="2189_0",
     ),
 
 )
