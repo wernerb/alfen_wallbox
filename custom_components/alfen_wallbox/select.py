@@ -55,19 +55,6 @@ PHASE_ROTATION_DICT: Final[dict[str, str]] = {
     "L3,L2,L1": "L3L2L1",
 }
 
-SAFE_AMPS_DICT: Final[dict[str, int]] = {
-    "1 A": 1,
-    "2 A": 2,
-    "3 A": 3,
-    "4 A": 4,
-    "5 A": 5,
-    "6 A": 6,
-    "7 A": 7,
-    "8 A": 8,
-    "9 A": 9,
-    "10 A": 10,
-}
-
 AUTH_MODE_DICT: Final[dict[str, int]] = {
     "Plug and Charge": 0,
     "RFID": 2
@@ -80,6 +67,7 @@ LOAD_BALANCE_MODE_DICT: Final[dict[str, int]] = {
 
 LOAD_BALANCE_DATA_SOURCE_DICT: Final[dict[str, int]] = {
     "Meter": 0,
+    "Meter + EMS Monitoring": 1,
     "Energy Management System": 3
 }
 
@@ -135,6 +123,17 @@ GPRS_TECHNOLOGY_DICT: Final[dict[str, int]] = {
     "4G": 2,
 }
 
+DSMR_SMR_INTERFACE_DICT: Final[dict[str, int]] = {
+    "Serial" : 0,
+    "Telnet" : 1,
+    "HomeWizard Wi-Fi P1": 2,
+}
+
+DIRECT_EXTERNAL_SUSPEND_SIGNAL: Final[dict[str, int]] = {
+    "Not allowed": 0,
+    "Allowed, suspend when closed": 1,
+    "Allowed, suspend when open": 2
+}
 
 ALFEN_SELECT_TYPES: Final[tuple[AlfenSelectDescription, ...]] = (
     AlfenSelectDescription(
@@ -147,25 +146,16 @@ ALFEN_SELECT_TYPES: Final[tuple[AlfenSelectDescription, ...]] = (
     ),
 
     AlfenSelectDescription(
-        key="alb_phase_connection",
-        name="Active Load Balancing Phase Connection",
+        key="lb_phase_connection",
+        name="Load Balancing Phase Connection",
         icon=None,
         options=list(PHASE_ROTATION_DICT),
         options_dict=PHASE_ROTATION_DICT,
         api_param="2069_0",
     ),
-    # AlfenSelectDescription(
-    #     key="alb_safe_current",
-    #     name="Active Load Balancing Safe Current",
-    #     icon="mdi:current-ac",
-    #     options=list(SAFE_AMPS_DICT),
-    #     options_dict=SAFE_AMPS_DICT,
-    #     api_param="2068_0",
-    # ),
-
     AlfenSelectDescription(
         key="auth_mode",
-        name="Authorization Mode",
+        name="Auth. Mode",
         icon="mdi:key",
         options=list(AUTH_MODE_DICT),
         options_dict=AUTH_MODE_DICT,
@@ -235,6 +225,38 @@ ALFEN_SELECT_TYPES: Final[tuple[AlfenSelectDescription, ...]] = (
         options=list(GPRS_TECHNOLOGY_DICT),
         options_dict=GPRS_TECHNOLOGY_DICT,
         api_param="2114_0",
+    ),
+     AlfenSelectDescription(
+        key="lb_dsmr_smr_interface",
+        name="Load Balancing DSMR/SMR Interface",
+        icon="mdi:scale-balance",
+        options=list(DSMR_SMR_INTERFACE_DICT),
+        options_dict=DSMR_SMR_INTERFACE_DICT,
+        api_param="2191_1",
+    ),
+    AlfenSelectDescription(
+        key="lb_data_source",
+        name="Load Balancing Data Source",
+        icon="mdi:scale-balance",
+        options=list(LOAD_BALANCE_DATA_SOURCE_DICT),
+        options_dict=LOAD_BALANCE_DATA_SOURCE_DICT,
+        api_param="2530_1",
+    ),
+    AlfenSelectDescription(
+        key="ps_installation_max_allowed_phase",
+        name="Installation Max. Allowed Phases",
+        icon="mdi:scale-balance",
+        options=list(ALLOWED_PHASE_DICT),
+        options_dict=ALLOWED_PHASE_DICT,
+        api_param="2189_0",
+    ),
+    AlfenSelectDescription(
+        key="ps_installation_direct_external_suspend_signal",
+        name="Installation Direct External Suspend Signal",
+        icon="mdi:scale-balance",
+        options=list(DIRECT_EXTERNAL_SUSPEND_SIGNAL),
+        options_dict=DIRECT_EXTERNAL_SUSPEND_SIGNAL,
+        api_param="216C_0",
     ),
 
 )

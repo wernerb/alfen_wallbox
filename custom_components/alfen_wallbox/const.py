@@ -24,9 +24,12 @@ PARAM_COMMAND = "command"
 CAT_GENERIC = "generic"
 CAT_GENERIC2 = "generic2"
 CAT_METER1 = "meter1"
+CAT_METER4= "meter4"
 CAT_STATES = "states"
 CAT_TEMP = "temp"
 CAT_OCPP = "ocpp"
+CAT_MBUS_TCP = "MbusTCP"
+CAT_COMM = "comm"
 
 COMMAND_REBOOT = "reboot"
 

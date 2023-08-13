@@ -33,8 +33,8 @@ class AlfenSwitchDescription(SwitchEntityDescription, AlfenSwitchDescriptionMixi
 
 ALFEN_BINARY_SENSOR_TYPES: Final[tuple[AlfenSwitchDescription, ...]] = (
     AlfenSwitchDescription(
-        key="enable_phase_switching",
-        name="Enable Phase Switching",
+        key="lb_enable_phase_switching",
+        name="Load Balancing Enable Phase Switching",
         api_param="2185_0",
     ),
     AlfenSwitchDescription(
@@ -46,6 +46,26 @@ ALFEN_BINARY_SENSOR_TYPES: Final[tuple[AlfenSwitchDescription, ...]] = (
         key="lb_solar_charging_boost",
         name="Solar Charging Boost",
         api_param="3280_4",
+    ),
+    AlfenSwitchDescription(
+        key="auth_white_list",
+        name="Auth. Whitelist",
+        api_param="213B_0",
+    ),
+    AlfenSwitchDescription(
+        key="auth_local_list",
+        name="Auth. Whitelist",
+        api_param="213D_0",
+    ),
+    AlfenSwitchDescription(
+        key="auth_restart_after_power_outage",
+        name="Auth. Restart after Power Outage",
+        api_param="215E_0",
+    ),
+    AlfenSwitchDescription(
+        key="auth_remote_transaction_request",
+        name="Auth. Remote Transaction requests",
+        api_param="209B_0",
     ),
 )
 

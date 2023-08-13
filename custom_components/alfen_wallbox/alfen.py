@@ -5,7 +5,7 @@ import ssl
 from datetime import timedelta
 
 from homeassistant.util import Throttle
-from .const import CAT, CAT_GENERIC, CAT_GENERIC2, CAT_METER1, CAT_OCPP, CAT_STATES, CAT_TEMP, CMD, DOMAIN, ALFEN_PRODUCT_MAP, ID, METHOD_GET, METHOD_POST, OFFSET, INFO, LOGIN, LOGOUT, PARAM_COMMAND, PARAM_PASSWORD, PARAM_USERNAME, PROP, PROPERTIES, TOTAL, VALUE
+from .const import CAT, CAT_GENERIC, CAT_GENERIC2, CAT_METER1, CAT_METER4, CAT_OCPP, CAT_STATES, CAT_TEMP,CAT_MBUS_TCP,CAT_COMM, CMD, DOMAIN, ALFEN_PRODUCT_MAP, ID, METHOD_GET, METHOD_POST, OFFSET, INFO, LOGIN, LOGOUT, PARAM_COMMAND, PARAM_PASSWORD, PARAM_USERNAME, PROP, PROPERTIES, TOTAL, VALUE
 
 HEADER_JSON = {"content-type": "alfen/json; charset=utf-8"}
 POST_HEADER_JSON = {"content-type": "application/json"}
@@ -124,7 +124,7 @@ class AlfenDevice:
         await self.login()
 
         properties = []
-        for cat in (CAT_GENERIC, CAT_GENERIC2, CAT_METER1, CAT_STATES, CAT_TEMP, CAT_OCPP):
+        for cat in (CAT_GENERIC, CAT_GENERIC2, CAT_METER1, CAT_STATES, CAT_TEMP, CAT_OCPP, CAT_METER4, CAT_MBUS_TCP, CAT_COMM):
             nextRequest = True
             offset = 0
             while (nextRequest):

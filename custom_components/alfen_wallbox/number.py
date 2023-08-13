@@ -14,6 +14,7 @@ from homeassistant.const import (
     PERCENTAGE,
     UnitOfElectricCurrent,
     UnitOfPower,
+    UnitOfTime,
 )
 
 import voluptuous as vol
@@ -41,7 +42,7 @@ class AlfenNumberDescription(NumberEntityDescription, AlfenNumberDescriptionMixi
 ALFEN_NUMBER_TYPES: Final[tuple[AlfenNumberDescription, ...]] = (
     AlfenNumberDescription(
         key="alb_safe_current",
-        name="ALB Safe Current",
+        name="Load Balancing Safe Current",
         state=None,
         icon="mdi:current-ac",
         assumed_state=False,
@@ -54,8 +55,8 @@ ALFEN_NUMBER_TYPES: Final[tuple[AlfenNumberDescription, ...]] = (
         api_param="2068_0",
     ),
     AlfenNumberDescription(
-        key="current_limit",
-        name="Current Limit",
+        key="ps_connector_max_limit",
+        name="Power Connector Max Current",
         state=None,
         icon="mdi:current-ac",
         assumed_state=False,
@@ -82,8 +83,8 @@ ALFEN_NUMBER_TYPES: Final[tuple[AlfenNumberDescription, ...]] = (
         api_param="2062_0",
     ),
     AlfenNumberDescription(
-        key="max_smart_meter_current",
-        name="Max. Meter Current",
+        key="lb_max_smart_meter_current",
+        name="Load Balancing Max. Meter Current",
         state=None,
         icon="mdi:current-ac",
         assumed_state=False,
@@ -138,8 +139,8 @@ ALFEN_NUMBER_TYPES: Final[tuple[AlfenNumberDescription, ...]] = (
         api_param="2061_2",
     ),
     AlfenNumberDescription(
-        key="lb_max_imbalance_current",
-        name="Max. Imbalance Current between phases",
+        key="ps_installation_max_imbalance_current",
+        name="Installation Max. Imbalance Current between phases",
         state=None,
         icon="mdi:current-ac",
         assumed_state=False,
@@ -151,6 +152,49 @@ ALFEN_NUMBER_TYPES: Final[tuple[AlfenNumberDescription, ...]] = (
         unit_of_measurement=UnitOfElectricCurrent.AMPERE,
         api_param="2174_0",
     ),
+    AlfenNumberDescription(
+        key="lb_Charging_profiles_random_delay",
+        name="Load Balancing Charging profiles random delay",
+        state=None,
+        icon="mdi:timer-sand",
+        assumed_state=False,
+        device_class=NumberDeviceClass.POWER_FACTOR,
+        native_min_value=0,
+        native_max_value=30,
+        native_step=1,
+        custom_mode=None,
+        unit_of_measurement=UnitOfElectricCurrent.AMPERE,
+        api_param="21B9_0",
+    ),
+    AlfenNumberDescription(
+        key="auth_re_authorize_after_power_outage",
+        name="Auth. Re-authorize after Power Outage (s)",
+        state=None,
+        icon="mdi:timer-sand",
+        assumed_state=False,
+        device_class=None,
+        native_min_value=0,
+        native_max_value=30,
+        native_step=1,
+        custom_mode=None,
+        unit_of_measurement=UnitOfTime.SECONDS,
+        api_param="2169_0",
+    ),
+    AlfenNumberDescription(
+        key="auth_connection_timeout",
+        name="Auth. Connection Timeout (s)",
+        state=None,
+        icon="mdi:timer-sand",
+        assumed_state=False,
+        device_class=None,
+        native_min_value=0,
+        native_max_value=30,
+        native_step=1,
+        custom_mode=None,
+        unit_of_measurement=UnitOfTime.SECONDS,
+        api_param="2169_0",
+    ),
+
 )
 
 
