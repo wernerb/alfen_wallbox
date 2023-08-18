@@ -131,6 +131,22 @@ DISPLAY_ERROR_DICT: Final[dict[int, str]] = {
     407: "Not displayed"
 }
 
+MODE_3_STAT_DICT: Final[dict[int, str]] = {
+    160: "STATE_A",
+    161: "STATE_A1",
+    162: "STATE_A1",
+    177: "STATE_B1",
+    178: "STATE_B2",
+    193: "STATE_C1",
+    194: "STATE_C2",
+    209: "STATE_D1",
+    210: "STATE_D2",
+    14: "STATE_E",
+    240: "STATE_F"
+
+
+}
+
 ALLOWED_PHASE_DICT: Final[dict[int, str]] = {
     1: "1 Phase",
     3: "3 Phases"
@@ -589,6 +605,14 @@ ALFEN_SENSOR_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
         api_param="3190_2",
         round_digits=None,
     ),
+    AlfenSensorDescription(
+        key="mode_3_state",
+        name="Mode3 State",
+        icon="mdi:information-outline",
+        unit=None,
+        api_param="2501_4",
+        round_digits=None,
+    ),
     # 2 Socket devices
     # AlfenSensorDescription(
     #     key="ps_connector_2_max_allowed_phase",
@@ -784,6 +808,11 @@ class AlfenSensor(AlfenEntity, SensorEntity):
 
                 if self.entity_description.round_digits is not None:
                     return round(prop[VALUE], self.entity_description.round_digits)
+
+                # mode3_state
+                if (self.entity_description.api_param == "2501_4"):
+                    return MODE_3_STAT_DICT.get(prop[VALUE], 'Unknown')
+
 
                 if self.entity_description.api_param == "3190_2":
                     return str(prop[VALUE]) + ': ' + DISPLAY_ERROR_DICT.get(prop[VALUE],  'Unknown')
