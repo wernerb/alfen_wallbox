@@ -1,31 +1,59 @@
+import json
 import logging
-from aiohttp import ClientResponse, ClientSession
+import requests
 
-import ssl
+from urllib3 import disable_warnings
 from datetime import timedelta
+from homeassistant import core
 
 from homeassistant.util import Throttle
-from .const import CAT, CAT_GENERIC, CAT_GENERIC2, CAT_METER1, CAT_METER4, CAT_OCPP, CAT_STATES, CAT_TEMP,CAT_MBUS_TCP,CAT_COMM, CMD, DOMAIN, ALFEN_PRODUCT_MAP, ID, METHOD_GET, METHOD_POST, OFFSET, INFO, LOGIN, LOGOUT, PARAM_COMMAND, PARAM_PASSWORD, PARAM_USERNAME, PROP, PROPERTIES, TOTAL, VALUE
+from .const import (
+    CAT,
+    CAT_GENERIC,
+    CAT_GENERIC2,
+    CAT_METER1,
+    CAT_METER4,
+    CAT_OCPP,
+    CAT_STATES,
+    CAT_TEMP,
+    CAT_MBUS_TCP,
+    CAT_COMM,
+    CAT_DISPLAY,
+    CMD,
+    DOMAIN,
+    ALFEN_PRODUCT_MAP,
+    ID,
+    OFFSET,
+    INFO,
+    LOGIN,
+    LOGOUT,
+    PARAM_COMMAND,
+    PARAM_PASSWORD,
+    PARAM_USERNAME,
+    PROP,
+    PROPERTIES,
+    TOTAL,
+    VALUE
+)
 
-HEADER_JSON = {"content-type": "alfen/json; charset=utf-8"}
 POST_HEADER_JSON = {"content-type": "application/json"}
 
 _LOGGER = logging.getLogger(__name__)
 
-MIN_TIME_BETWEEN_UPDATES = timedelta(seconds=30)
-
+MIN_TIME_BETWEEN_UPDATES = timedelta(seconds=5)
+hass = core.HomeAssistant()
 
 class AlfenDevice:
     def __init__(self,
                  host: str,
                  name: str,
-                 session: ClientSession,
                  username: str,
                  password: str) -> None:
+
         self.host = host
         self.name = name
         self._status = None
-        self._session = session
+        self._session = requests.Session()
         self.username = username
         self.info = None
         self.id = None
@@ -33,19 +61,42 @@ class AlfenDevice:
             self.username = "admin"
         self.password = password
         self.properties = []
-        # Default ciphers needed as of python 3.10
-        context = ssl.create_default_context()
-        context.set_ciphers("DEFAULT")
-        context.check_hostname = False
-        context.verify_mode = ssl.CERT_NONE
-        self.ssl = context
+        self._session.verify = False
+        disable_warnings()
+
+
+
 
     async def init(self):
-        await self.async_get_info()
+        await hass.async_add_executor_job(self.get_info)
+        #await self.async_get_info()
         self.id = "alfen_{}".format(self.name)
         if self.name is None:
             self.name = f"{self.info.identity} ({self.host})"
         await self.async_update()
+
+
+    def get_info(self):
+        response = self._session.get(
+            url=self.__get_url(INFO)
+        )
+        _LOGGER.debug(f"Response {response}")
+
+        if response.status_code != 200:
+            _LOGGER.debug("Info API not available, use generic info")
+
+            generic_info = {
+                "Identity": self.host,
+                "FWVersion": "?",
+                "Model": "Generic Alfen Wallbox",
+                "ObjectId": "?",
+                "Type": "?",
+            }
+            self.info = AlfenDeviceInfo(generic_info)
+        else:
+            response.raise_for_status()
+            resp = response.text
+            self.info = AlfenDeviceInfo(json.loads(resp))
 
     @property
     def status(self) -> str:
@@ -67,51 +118,53 @@ class AlfenDevice:
 
     @Throttle(MIN_TIME_BETWEEN_UPDATES)
     async def async_update(self):
-        await self._do_update()
+        await hass.async_add_executor_job(self.login)
+        await hass.async_add_executor_job(self._get_all_properties_value)
+        await hass.async_add_executor_job(self.logout)
 
-    async def login(self) -> bool:
-        response = await self.request(
-            METHOD_POST,
-            HEADER_JSON,
-            LOGIN,
-            {PARAM_USERNAME: self.username, PARAM_PASSWORD: self.password})
+    def login(self):
+        del self._session.cookies["session"]
 
+        response = self._session.post(
+            headers=POST_HEADER_JSON,
+            url=self.__get_url(LOGIN),
+            json={PARAM_USERNAME: self.username, PARAM_PASSWORD: self.password, "displayname": "ha"})
         _LOGGER.debug(f"Login response {response}")
-        return response.status == 200
+        response.raise_for_status()
 
-    async def logout(self) -> bool:
-        response = await self._session.request(
-            ssl=self.ssl,
-            method=METHOD_POST,
-            headers=HEADER_JSON,
+
+    def logout(self) -> bool:
+        del self._session.cookies["session"]
+
+        response = self._session.post(
+            headers=POST_HEADER_JSON,
             url=self.__get_url(LOGOUT),
         )
         _LOGGER.debug(f"Logout response {response}")
-        return response.status == 200
+        return response.status_code == 200
 
-    async def _update_value(self, api_param, value) -> bool:
+    def _update_value(self, api_param, value):
 
-        response = await self.request(
-            METHOD_POST,
-            POST_HEADER_JSON,
-            PROP,
-            {api_param: {ID: api_param, VALUE: value}}
+        response = self._session.post(
+            headers = POST_HEADER_JSON,
+            url = self.__get_url(PROP),
+            json={api_param: {ID: api_param, VALUE: value}}
         )
 
         _LOGGER.debug(f"Set {api_param} value {value} response {response}")
-        return response.status == 200
+        response.raise_for_status()
 
-    async def _get_value(self, api_param):
-        response = await self._session.request(
-            ssl=self.ssl,
-            method=METHOD_GET,
-            headers=HEADER_JSON,
+    def _get_value(self, api_param):
+        response = self._session.get(
             url=self.__get_url(
                 "{}?{}={}".format(PROP, ID, api_param)
             ),
         )
         _LOGGER.debug(f"Status Response {response}")
-        response_json = await response.json(content_type=None)
+        response.raise_for_status()
+        resp = response.text
+        response_json = json.loads(resp)
+
         if self.properties is None:
             self.properties = []
         for resp in response_json[PROPERTIES]:
@@ -120,110 +173,69 @@ class AlfenDevice:
                     prop[VALUE] = resp[VALUE]
                     break
 
-    async def _do_update(self):
-        await self.login()
-
+    def _get_all_properties_value(self):
         properties = []
-        for cat in (CAT_GENERIC, CAT_GENERIC2, CAT_METER1, CAT_STATES, CAT_TEMP, CAT_OCPP, CAT_METER4, CAT_MBUS_TCP, CAT_COMM):
+        for cat in (CAT_GENERIC, CAT_GENERIC2, CAT_METER1, CAT_STATES, CAT_TEMP, CAT_OCPP, CAT_METER4, CAT_MBUS_TCP, CAT_COMM, CAT_DISPLAY):
             nextRequest = True
             offset = 0
             while (nextRequest):
-                response = await self._session.request(
-                    ssl=self.ssl,
-                    method=METHOD_GET,
-                    headers=HEADER_JSON,
+                response = self._session.get(
                     url=self.__get_url("{}?{}={}&{}={}".format(
                         PROP, CAT, cat, OFFSET, offset)),
                 )
                 _LOGGER.debug(f"Status Response {response}")
 
-                response_json = await response.json(content_type=None)
+                response.raise_for_status()
+                resp = response.text
+                response_json = json.loads(resp)
+
+                #response_json = await response.json(content_type=None)
                 if response_json is not None:
                     properties += response_json[PROPERTIES]
                 nextRequest = response_json[TOTAL] > (
                     offset + len(response_json[PROPERTIES]))
                 offset += len(response_json[PROPERTIES])
-
-        await self.logout()
         _LOGGER.debug(f"Properties {properties}")
         self.properties = properties
 
-    async def async_get_info(self):
-        response = await self._session.request(
-            ssl=self.ssl, method=METHOD_GET, url=self.__get_url(INFO)
-        )
-        _LOGGER.debug(f"Response {response}")
-
-        if response.status != 200:
-            _LOGGER.debug("Info API not available, use generic info")
-
-            generic_info = {
-                "Identity": self.host,
-                "FWVersion": "?",
-                "Model": "Generic Alfen Wallbox",
-                "ObjectId": "?",
-                "Type": "?",
-            }
-            self.info = AlfenDeviceInfo(generic_info)
-        else:
-            response_json = await response.json(content_type=None)
-            _LOGGER.debug(response_json)
-
-            self.info = AlfenDeviceInfo(response_json)
-
     async def reboot_wallbox(self):
-        await self.login()
+        await hass.async_add_executor_job(self.login)
 
-        response = await self._session.request(
-            ssl=self.ssl,
-            method=METHOD_POST,
+        response = await self._session.post(
+            #ssl=self.ssl,
             headers=POST_HEADER_JSON,
             url=self.__get_url(CMD),
             json={PARAM_COMMAND: "reboot"},
         )
         _LOGGER.debug(f"Reboot response {response}")
-        await self.logout()
+        await hass.async_add_executor_job(self.logout)
 
-    async def request(self, method: str, headers: str, url_cmd: str, json=None) -> ClientResponse:
-        response = await self._session.request(
-            ssl=self.ssl,
-            method=method,
-            headers=headers,
-            url=self.__get_url(url_cmd),
-            json=json,
-        )
-        _LOGGER.debug(f"Request response {response}")
-        return response
 
-    async def set_value(self, api_param, value) -> bool:
+    async def set_value(self, api_param, value):
 
-        logged_in = await self.login()
-        # if not logged in, we can't set the value, show error
-        if not logged_in:
-            return None
+        await hass.async_add_executor_job(self.login)
+        await hass.async_add_executor_job(self._update_value, api_param, value)
+        await hass.async_add_executor_job(self.logout)
 
-        success = await self._update_value(api_param, value)
-        await self.logout()
-        if success:
-            # we expect that the value is updated so we are just update the value in the properties
-            for prop in self.properties:
-                if prop[ID] == api_param:
-                    _LOGGER.debug(f"Set {api_param} value {value}")
-                    prop[VALUE] = value
-                    break
 
-        return False
+        # we expect that the value is updated so we are just update the value in the properties
+        for prop in self.properties:
+            if prop[ID] == api_param:
+                _LOGGER.debug(f"Set {api_param} value {value}")
+                prop[VALUE] = value
+                break
+
 
     async def get_value(self, api_param):
-        await self.login()
-        await self._get_value(api_param)
-        await self.logout()
+        await hass.async_add_executor_job(self.login)
+        await hass.async_add_executor_job(self._get_value, api_param)
+        await hass.async_add_executor_job(self.logout)
 
     async def set_current_limit(self, limit):
         _LOGGER.debug(f"Set current limit {limit}A")
         if limit > 32 | limit < 1:
             return None
-        await self.set_value("2129_0", limit)
+        await hass.async_add_executor_job(self.set_value, "2129_0", limit)
 
     async def set_rfid_auth_mode(self, enabled):
         _LOGGER.debug(f"Set RFID Auth Mode {enabled}")
@@ -238,7 +250,8 @@ class AlfenDevice:
         _LOGGER.debug(f"Set current phase {phase}")
         if phase not in ('L1', 'L2', 'L3'):
             return None
-        await self.set_value("2069_0", phase)
+        await hass.async_add_executor_job(self.set_value, "2069_0", phase)
+
 
     async def set_phase_switching(self, enabled):
         _LOGGER.debug(f"Set Phase Switching {enabled}")
@@ -247,13 +260,13 @@ class AlfenDevice:
         if enabled:
             value = 1
 
-        await self.set_value("2185_0", value)
+        await hass.async_add_executor_job(self.set_value, "2185_0", value)
 
     async def set_green_share(self, value):
         _LOGGER.debug(f"Set green share value {value}%")
         if value < 0 | value > 100:
             return None
-        await self.set_value("3280_2", value)
+        await hass.async_add_executor_job(self.set_value, "3280_2", value)
 
     async def set_comfort_power(self, value):
         _LOGGER.debug(f"Set Comfort Level {value}W")

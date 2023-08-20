@@ -119,8 +119,9 @@ GPRS_NETWORK_MODE_DICT: Final[dict[str, int]] = {
 }
 
 GPRS_TECHNOLOGY_DICT: Final[dict[str, int]] = {
-    "2G": 0,
-    "4G": 2,
+    "2G (GPRS)": 0,
+    "3G (UMTS)": 1,
+    "4G (LTE)": 2,
 }
 
 DSMR_SMR_INTERFACE_DICT: Final[dict[str, int]] = {
