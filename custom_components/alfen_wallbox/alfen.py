@@ -23,6 +23,8 @@ from .const import (
     DOMAIN,
     ALFEN_PRODUCT_MAP,
     ID,
+    METHOD_GET,
+    METHOD_POST,
     OFFSET,
     INFO,
     LOGIN,
@@ -40,7 +42,7 @@ POST_HEADER_JSON = {"content-type": "application/json"}
 
 _LOGGER = logging.getLogger(__name__)
 
-MIN_TIME_BETWEEN_UPDATES = timedelta(seconds=5)
+MIN_TIME_BETWEEN_UPDATES = timedelta(seconds=30)
 hass = core.HomeAssistant()
 
 class AlfenDevice:
@@ -63,8 +65,6 @@ class AlfenDevice:
         self.properties = []
         self._session.verify = False
         disable_warnings()
-
-
 
 
     async def init(self):
@@ -202,13 +202,33 @@ class AlfenDevice:
         await hass.async_add_executor_job(self.login)
 
         response = await self._session.post(
-            #ssl=self.ssl,
             headers=POST_HEADER_JSON,
             url=self.__get_url(CMD),
             json={PARAM_COMMAND: "reboot"},
         )
         _LOGGER.debug(f"Reboot response {response}")
         await hass.async_add_executor_job(self.logout)
+
+    async def request(self, method: str, headers: str, url_cmd: str, json_data=None):
+
+        if method == METHOD_POST:
+            response = self._session.post(
+                headers=POST_HEADER_JSON,
+                url=self.__get_url(CMD),
+                json={PARAM_COMMAND: "reboot"},
+            )
+        elif method == METHOD_GET:
+            response = self._session.get(
+                url=self.__get_url(url_cmd),
+                json=json_data,
+            )
+
+        _LOGGER.debug(f"Request response {response}")
+        response.raise_for_status()
+        resp = response.text
+        response_json = json.loads(resp)
+
+        return response_json
 
 
     async def set_value(self, api_param, value):
@@ -272,7 +292,8 @@ class AlfenDevice:
         _LOGGER.debug(f"Set Comfort Level {value}W")
         if value < 1400 | value > 5000:
             return None
-        await self.set_value("3280_3", value)
+        await hass.async_add_executor_job(self.set_value, "3280_3", value)
+
 
     def __get_url(self, action) -> str:
         return "https://{}/api/{}".format(self.host, action)

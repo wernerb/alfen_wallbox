@@ -8,6 +8,9 @@ CAT = "cat"
 OFFSET = "offset"
 TOTAL = "total"
 
+METHOD_POST = "POST"
+METHOD_GET = "GET"
+
 CMD = "cmd"
 PROP = "prop"
 INFO = "info"
