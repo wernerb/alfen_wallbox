@@ -77,10 +77,9 @@ async def async_unload_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> 
 async def alfen_setup(hass: HomeAssistant, host: str, name: str, username: str, password: str) -> AlfenDevice | None:
     """Create a Alfen instance only once."""
 
-    session = async_get_clientsession(hass, verify_ssl=False)
     try:
         with timeout(TIMEOUT):
-            device = AlfenDevice(host, name, session, username, password)
+            device = AlfenDevice(host, name, username, password)
             await device.init()
     except asyncio.TimeoutError:
         _LOGGER.debug("Connection to %s timed out", host)
@@ -88,8 +87,9 @@ async def alfen_setup(hass: HomeAssistant, host: str, name: str, username: str, 
     except ClientConnectionError:
         _LOGGER.debug("ClientConnectionError to %s", host)
         raise ConfigEntryNotReady
-    except Exception:  # pylint: disable=broad-except
+    except Exception as e:  # pylint: disable=broad-except
         _LOGGER.error("Unexpected error creating device %s", host)
+        _LOGGER.error(str(e))
         return None
 
     return device

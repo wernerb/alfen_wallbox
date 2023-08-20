@@ -67,6 +67,11 @@ ALFEN_BINARY_SENSOR_TYPES: Final[tuple[AlfenSwitchDescription, ...]] = (
         name="Auth. Remote Transaction requests",
         api_param="209B_0",
     ),
+    AlfenSwitchDescription(
+        key="proxy_enabled",
+        name="Proxy Enabled",
+        api_param="2117_0",
+    ),
 )
 
 

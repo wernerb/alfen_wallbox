@@ -17,7 +17,6 @@ from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from . import DOMAIN as ALFEN_DOMAIN
-from . import DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -36,7 +35,29 @@ ALFEN_TEXT_TYPES: Final[tuple[AlfenTextDescription,...]] = (
             key="auth_plug_and_charge_id",
             name="Auth. Plug & Charge ID",
             icon="mdi:key",
+            mode = TextMode.TEXT,
             api_param="2063_0"
+      ),
+      AlfenTextDescription(
+            key="proxy_address_port",
+            name="Proxy Address And Port",
+            icon="mdi:earth",
+            mode = TextMode.TEXT,
+            api_param="2115_0"
+      ),
+      AlfenTextDescription(
+            key="proxy_username",
+            name="Proxy Username",
+            icon="mdi:account",
+            mode = TextMode.TEXT,
+            api_param="2116_0"
+      ),
+      AlfenTextDescription(
+            key="proxy_password",
+            name="Proxy Password",
+            icon="mdi:key",
+            mode = TextMode.PASSWORD,
+            api_param="2116_1"
       ),
 )
 
@@ -60,7 +81,7 @@ class AlfenText(AlfenEntity, TextEntity):
         super().__init__(device)
         self._device = device
         self._attr_name = f"{device.name} {description.name}"
-
+        self._attr_mode = description.mode
         self._attr_unique_id = f"{self._device.id}_{description.key}"
         self.entity_description = description
         self._async_update_attrs()

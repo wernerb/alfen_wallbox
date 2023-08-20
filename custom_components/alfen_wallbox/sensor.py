@@ -59,27 +59,27 @@ STATUS_DICT: Final[dict[int, str]] = {
     0: "Unknown",
     1: "Off",
     2: "Booting",
-    3: "Booting Check Mains",
+    3: "Check Mains",
     4: "Available",
-    5: "Prep. Authorising",
-    6: "Prep. Authorised",
-    7: "Prep. Cable connected",
-    8: "Prep EV Connected",
-    9: "Charging Preparing",
-    10: "Vehicle connected",
-    11: "Charging Active Normal",
-    12: "Charging Active Simplified",
-    13: "Charging Suspended Over Current",
-    14: "Charging Suspended HF Switching",
-    15: "Charging Suspended EV Disconnected",
+    5: "Authorizing",
+    6: "Authorized",
+    7: "Cable connected",
+    8: "EV Connected",
+    9: "Preparing Charging",
+    10: "Wait Vehicle Charging",
+    11: "Charging Normal",
+    12: "Charging Simplified",
+    13: "Suspended Over-Current",
+    14: "Suspended HF Switching",
+    15: "Suspended EV Disconnected",
     16: "Finish Wait Vehicle",
-    17: "Finished Wait Disconnect",
+    17: "Finish Wait Disconnect",
     18: "Error Protective Earth",
-    19: "Error Powerline Fault",
+    19: "Error Power Failure",
     20: "Error Contactor Fault",
     21: "Error Charging",
     22: "Error Power Failure",
-    23: "Error Temperature",
+    23: "Error Error Temperature",
     24: "Error Illegal CP Value",
     25: "Error Illegal PP Value",
     26: "Error Too Many Restarts",
@@ -88,13 +88,14 @@ STATUS_DICT: Final[dict[int, str]] = {
     29: "Error Message Not Authorised",
     30: "Error Message Cable Not Supported",
     31: "Error Message S2 Not Opened",
-    32: "Error Message Time Out",
+    32: "Error Message Time-Out",
     33: "Reserved",
-    34: "Inoperative",
+    34: "In Operative",
     35: "Load Balancing Limited",
     36: "Load Balancing Forced Off",
     38: "Not Charging",
     39: "Solar Charging Wait",
+    40: "Charging Non Charging",
     41: "Solar Charging",
     42: "Charge Point Ready, Waiting For Power",
     43: "Partial Solar Charging",
@@ -103,8 +104,15 @@ STATUS_DICT: Final[dict[int, str]] = {
 DISPLAY_ERROR_DICT: Final[dict[int, str]] = {
     0: "No Error",
     1: "Not able to charge. Please call for support.",
-    101: "One moment please. Your charging session will resume shortly.",
-    102: "Not able to charge. Please call for support",
+    2: "Charging not started yet, to continue please reconnect cable",
+    3: "Too many retries. Please check your charging cable",
+    4: "One moment please... Your charging session will resume shortly.",
+    5: "One moment please... Your charging session will resume shortly.",
+    6: "One moment please... Your charging session will resume shortly.",
+    7: "S2 not open. Please reconnect cable.",
+    101: "Error in installation. Please check installation",
+    102: "Not able to charge. Please call for support.",
+    103: "Input voltage too low, not able to charge.",
     104: "Not able to charge. Please call for support.",
     105: "Not able to charge. Please call for support.",
     106: "Not able to charge. Please call for support.",
@@ -112,6 +120,8 @@ DISPLAY_ERROR_DICT: Final[dict[int, str]] = {
     109: "Not displayed",
     201: "Error in installation. Please check installation or call for support.",
     202: "Input voltage too low, not able to charge. Please call your installer.",
+    203: "Inside temperature high. Charging will resume shortly.",
+    204: "Temporary set to unavailable.",
     206: "Temporary set to unavailable. Contact CPO or try again later.",
     208: "Not displayed",
     209: "Not displayed",
@@ -143,13 +153,156 @@ MODE_3_STAT_DICT: Final[dict[int, str]] = {
     210: "STATE_D2",
     14: "STATE_E",
     240: "STATE_F"
-
-
 }
 
 ALLOWED_PHASE_DICT: Final[dict[int, str]] = {
     1: "1 Phase",
     3: "3 Phases"
+}
+
+POWER_STATES_DICT: Final[dict[int, str]] = {
+    0: "Unknown",
+    1: "Inactive",
+    2: "Connected ISO15118",
+    3: "Wait for EV Connect",
+    4: "EV Connected",
+    5: "Active",
+    6: "Wait for S2 Close",
+    7: "Wait for S2 Open",
+    8: "Suspended",
+    9: "Ventilating",
+    10: "Wakeup State E",
+    11: "Wakeup State B1",
+    12: "Error",
+    13: "Error EV Detect",
+    14: "Wait for EV Disconnect",
+    15: "Prepared",
+    16: "Connected ISO15118 Error",
+    17: "Count",
+}
+
+MAIN_STATE_DICT: Final[dict[int, str]] = {
+    -1: "Illegal",
+    0: "Unknown",
+    1: "Booting",
+    2: "Available",
+    3: "Cable Connected",
+    4: "Cable Connected Timeout",
+    5: "EV Connected",
+    6: "Button Activated",
+    7: "NFC Available",
+    8: "NFC Authorised",
+    9: "Wait for EV Connect",
+    10: "Charging Test Relays",
+    11: "Charging Power Off",
+    12: "Charging Power Off Low Max Current",
+    13: "Charging Power Starting",
+    14: "Charging Power On",
+    15: "Charging Power On Simplified",
+    16: "Charging Wait for EV Reconnect",
+    17: "Charging Terminating",
+    18: "Charging Wakeup",
+    19: "Wait for Disconnect",
+    20: "Wait for Release Authorisation",
+    21: "Charging Recover from Outage",
+    22: "Error",
+    23: "Error Message",
+    24: "Error Message Cable not Supported",
+    25: "Error Illegal Mode 3",
+    26: "Error Too Many Restarts",
+    27: "Error Charging",
+    28: "Error Charging Overcurrent",
+    29: "Error Charging HF Contactor Switching",
+    30: "Error S2 Not Opened",
+    31: "Error Protective Earth",
+    32: "Error Relays",
+    33: "Error Low Supply Voltage",
+    34: "Error Internal Voltage",
+    35: "Error Powermeter",
+    36: "Error Temperature",
+    37: "Suspended",
+    38: "Inoperative",
+    39: "Reserved",
+    40: "Error Charging RCD Signaled",
+    41: "Charging Power Off Ventilating",
+    42: "Charging Power Off Suspended",
+    43: "Charging Pwoer OFf Phase Change",
+    44: "Wait for Start Metervalue",
+    45: "Wait for Stop Metervalue",
+    46: "Error Socket Motor",
+    47: "Cable Conencted Type E",
+    48: "Cable Connected Time out Type E",
+    49: "Charging Type E",
+    50: "Wait for Disconnect Type E",
+    51: "Charging Suspended Type E",
+    52: "Charging Low Max Current Type E",
+    53: "Invalid Card",
+    54: "EV Connected Unauthorized",
+    55: "Wait for Disconnect PP"
+
+}
+
+MAIN_STATE__TMP_DICT: Final[dict[int, str]] = {
+    0: "Unknown",
+    1: "Available",
+    2: "Authorising",
+    4: "EV Connected",
+    5: "Active",
+    8: "Rejected",
+    15: "Booting",
+    16: "Cable Connected",
+    17: "Count",
+    19: "Cable Connected Authorising",
+    20: "Cable Connected Authorised",
+    24: "Cable Connected Rejected",
+    48: "EV Connected",
+    50: "EV Connected Authorising",
+    52: "EV Connected Authorised",
+    56: "EV Connected Rejected",
+    65: "Cable Locked",
+    66: "Cable Started",
+    67: "Charging",
+    68: "Charging Finishing",
+    69: "Charging Finished",
+    70: "Cable Unlock",
+    71: "Suspended EV",
+    72: "Suspended EVSE",
+    79: "Wait for Cable Disconnect",
+    128: "Timeout Waiting for Cable",
+    129: "Timeout Waiting for EV Connect",
+    130: "Timeout Waiting for Authorisation",
+    131: "Timeout Waiting for S2",
+    132: "Timeout Waiting for Cable Removal",
+    159: "Offline",
+    160: "Inoperative",
+    161: "Reserved",
+    192: "Error Mask",
+    193: "Error Relay",
+    194: "Error Temperature",
+    195: "Error Overcurrent",
+    196: "Error Socket Motor",
+    197: "Error Illegal Mode 3",
+    198: "Error Energy Meter",
+    199: "Error Phase",
+    200: "Error Internal RCD",
+    201: "Error HF Switching",
+    202: "Error Low Supply Voltage"
+}
+
+OCPP_BOOT_NOTIFICATION_STATUS_DICT: Final[dict[int, str]] = {
+    0: "Not Sent",
+    1: "Awaiting Reply",
+    2: "Rejected",
+    3: "Accepted",
+    4: "Pending",
+}
+
+MODBUS_CONNECTION_STATES_DICT: Final[dict[int, str]] = {
+    0: "Idle",
+    1: "Initializing",
+    2: "Normal",
+    3: "Warning",
+    4: "Error",
 }
 
 ALFEN_SENSOR_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
@@ -350,6 +503,14 @@ ALFEN_SENSOR_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
         round_digits=None,
     ),
     AlfenSensorDescription(
+        key="gprs_sim_pin",
+        name="GPRS SIM Pin",
+        icon="mdi:antenna",
+        api_param="2103_0",
+        unit=None,
+        round_digits=None,
+    ),
+    AlfenSensorDescription(
         key="gprs_sim_imsi",
         name="GPRS SIM IMSI",
         icon="mdi:antenna",
@@ -518,6 +679,14 @@ ALFEN_SENSOR_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
         round_digits=None,
     ),
     AlfenSensorDescription(
+        key="comm_wired_mac",
+        name="Wired MAC address",
+        icon="mdi:cable-data",
+        api_param="2052_1",
+        unit=None,
+        round_digits=None,
+    ),
+    AlfenSensorDescription(
         key="comm_protocol_name",
         name="Protocol Name",
         icon="mdi:information-outline",
@@ -611,6 +780,46 @@ ALFEN_SENSOR_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
         icon="mdi:information-outline",
         unit=None,
         api_param="2501_4",
+        round_digits=None,
+    ),
+    AlfenSensorDescription(
+        key="cpo_name",
+        name="CPO Name",
+        icon="mdi:information-outline",
+        unit=None,
+        api_param="2722_0",
+        round_digits=None,
+    ),
+    AlfenSensorDescription(
+        key="power_state",
+        name="power_state",
+        icon="mdi:information-outline",
+        unit=None,
+        api_param="2501_3",
+        round_digits=None,
+    ),
+    AlfenSensorDescription(
+        key="main_state",
+        name="Main State",
+        icon="mdi:information-outline",
+        unit=None,
+        api_param="2501_1",
+        round_digits=None,
+    ),
+    AlfenSensorDescription(
+        key="ocpp_boot_notification_state",
+        name="OCPP Boot notification State",
+        icon="mdi:information-outline",
+        unit=None,
+        api_param="3600_1",
+        round_digits=None,
+    ),
+    AlfenSensorDescription(
+        key="modbus_tcp_ip_connection_state",
+        name="Modbus TCP/IP Connection State",
+        icon="mdi:information-outline",
+        unit=None,
+        api_param="2540_0",
         round_digits=None,
     ),
     # 2 Socket devices
@@ -812,6 +1021,23 @@ class AlfenSensor(AlfenEntity, SensorEntity):
                 # mode3_state
                 if (self.entity_description.api_param == "2501_4"):
                     return MODE_3_STAT_DICT.get(prop[VALUE], 'Unknown')
+
+                # Socket CPRO State
+                if (self.entity_description.api_param == "2501_3"):
+                    return POWER_STATES_DICT.get(prop[VALUE], 'Unknown')
+
+                # Main CSM State
+                if (self.entity_description.api_param == "2501_1"):
+                    return MAIN_STATE_DICT.get(prop[VALUE], 'Unknown')
+
+                # OCPP Boot notification
+                if (self.entity_description.api_param == "3600_1"):
+                    return OCPP_BOOT_NOTIFICATION_STATUS_DICT.get(prop[VALUE], 'Unknown')
+
+
+                # OCPP Boot notification
+                if (self.entity_description.api_param == "2540_0"):
+                    return MODBUS_CONNECTION_STATES_DICT.get(prop[VALUE], 'Unknown')
 
 
                 if self.entity_description.api_param == "3190_2":
