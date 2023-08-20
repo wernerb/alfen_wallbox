@@ -73,11 +73,10 @@ class AlfenButton(AlfenEntity, ButtonEntity):
 
     async def async_press(self) -> None:
         """Press the button."""
-        await self.hass.async_add_executor_job(self._device.login())
-        await self.hass.async_add_executor_job(
-            self._device.request(),
-            self.entity_description.method,
-            POST_HEADER_JSON,
-            self.entity_description.url_action,
-            self.entity_description.json_action)
-        await self.hass.async_add_executor_job(self._device.logout())
+        await self._device.async_request(
+            method=self.entity_description.method,
+            headers=POST_HEADER_JSON,
+            url_cmd=self.entity_description.url_action,
+            json_data=self.entity_description.json_action
+        )
+

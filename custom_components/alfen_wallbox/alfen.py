@@ -38,7 +38,7 @@ from .const import (
     VALUE
 )
 
-POST_HEADER_JSON = {"content-type": "application/json"}
+POST_HEADER_JSON = {"Content-Type": "application/json"}
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -131,8 +131,7 @@ class AlfenDevice:
         _LOGGER.debug(f"Login response {response}")
         response.raise_for_status()
 
-
-    def logout(self) -> bool:
+    def logout(self):
         del self._session.cookies["session"]
 
         response = self._session.post(
@@ -140,7 +139,8 @@ class AlfenDevice:
             url=self.__get_url(LOGOUT),
         )
         _LOGGER.debug(f"Logout response {response}")
-        return response.status_code == 200
+        response.raise_for_status()
+
 
     def _update_value(self, api_param, value):
 
@@ -162,15 +162,15 @@ class AlfenDevice:
         _LOGGER.debug(f"Status Response {response}")
         response.raise_for_status()
         resp = response.text
-        response_json = json.loads(resp)
-
-        if self.properties is None:
-            self.properties = []
-        for resp in response_json[PROPERTIES]:
-            for prop in self.properties:
-                if prop[ID] == resp[ID]:
-                    prop[VALUE] = resp[VALUE]
-                    break
+        if resp is not None and resp != '':
+            response_json = json.loads(resp)
+            if self.properties is None:
+                self.properties = []
+            for resp in response_json[PROPERTIES]:
+                for prop in self.properties:
+                    if prop[ID] == resp[ID]:
+                        prop[VALUE] = resp[VALUE]
+                        break
 
     def _get_all_properties_value(self):
         properties = []
@@ -190,8 +190,7 @@ class AlfenDevice:
 
                 if response_json is not None:
                     properties += response_json[PROPERTIES]
-                nextRequest = response_json[TOTAL] > (
-                    offset + len(response_json[PROPERTIES]))
+                nextRequest = response_json[TOTAL] > (offset + len(response_json[PROPERTIES]))
                 offset += len(response_json[PROPERTIES])
         _LOGGER.debug(f"Properties {properties}")
         self.properties = properties
@@ -207,8 +206,13 @@ class AlfenDevice:
         _LOGGER.debug(f"Reboot response {response}")
         await hass.async_add_executor_job(self.logout)
 
-    async def request(self, method: str, headers: str, url_cmd: str, json_data=None):
+    async def async_request(self, method: str, headers: str, url_cmd: str, json_data=None):
+        await hass.async_add_executor_job(self.login)
+        response_json = await hass.async_add_executor_job(self.request, method, headers, url_cmd, json_data)
+        await hass.async_add_executor_job(self.logout)
+        return response_json
 
+    def request(self, method: str, headers: str, url_cmd: str, json_data=None):
         if method == METHOD_POST:
             response = self._session.post(
                 headers=POST_HEADER_JSON,
@@ -224,9 +228,9 @@ class AlfenDevice:
         _LOGGER.debug(f"Request response {response}")
         response.raise_for_status()
         resp = response.text
-        response_json = json.loads(resp)
-
-        return response_json
+        if resp is not None and resp != '':
+            response_json = json.loads(resp)
+            return response_json
 
 
     async def set_value(self, api_param, value):

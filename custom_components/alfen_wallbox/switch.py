@@ -54,7 +54,7 @@ ALFEN_BINARY_SENSOR_TYPES: Final[tuple[AlfenSwitchDescription, ...]] = (
     ),
     AlfenSwitchDescription(
         key="auth_local_list",
-        name="Auth. Whitelist",
+        name="Auth. Local List",
         api_param="213D_0",
     ),
     AlfenSwitchDescription(

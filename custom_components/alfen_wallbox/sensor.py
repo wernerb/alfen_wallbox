@@ -874,6 +874,7 @@ class AlfenMainSensor(AlfenEntity):
         self._sensor = "sensor"
         self.entity_description = description
 
+
     @property
     def unique_id(self):
         """Return a unique ID."""
