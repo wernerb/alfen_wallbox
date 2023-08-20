@@ -2,6 +2,8 @@
 from dataclasses import dataclass
 import logging
 from typing import Final
+
+from homeassistant import core
 from .alfen import POST_HEADER_JSON, AlfenDevice
 from .entity import AlfenEntity
 
@@ -41,7 +43,6 @@ ALFEN_BUTTON_TYPES: Final[tuple[AlfenButtonDescription, ...]] = (
     ),
 )
 
-
 async def async_setup_entry(
     hass: HomeAssistant,
     entry: ConfigEntry,
@@ -72,12 +73,11 @@ class AlfenButton(AlfenEntity, ButtonEntity):
 
     async def async_press(self) -> None:
         """Press the button."""
-        await self._device.login()
-        response = await self._device.request(
+        await self.hass.async_add_executor_job(self._device.login())
+        await self.hass.async_add_executor_job(
+            self._device.request(),
             self.entity_description.method,
             POST_HEADER_JSON,
             self.entity_description.url_action,
-            self.entity_description.json_action
-        )
-        await self._device.logout()
-        _LOGGER.debug("Response: %s", response)
+            self.entity_description.json_action)
+        await self.hass.async_add_executor_job(self._device.logout())
