@@ -20,6 +20,7 @@ LOGOUT = "logout"
 PARAM_USERNAME = "username"
 PARAM_PASSWORD = "password"
 PARAM_COMMAND = "command"
+PARAM_DISPLAY_NAME = "ha"
 
 CAT_GENERIC = "generic"
 CAT_GENERIC2 = "generic2"

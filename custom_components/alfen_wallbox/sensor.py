@@ -1053,7 +1053,7 @@ class AlfenSensor(AlfenEntity, SensorEntity):
 
     async def async_update(self):
         """Get the latest data and updates the states."""
-        await self._device.async_update()
+        self._async_update_attrs()
 
     @property
     def device_info(self) -> DeviceInfo:

@@ -336,7 +336,7 @@ class AlfenSelect(AlfenEntity, SelectEntity):
 
     async def async_update(self):
         """Update the entity."""
-        await self._device.async_update()
+        self._async_update_attrs()
 
     @callback
     def _async_update_attrs(self) -> None:

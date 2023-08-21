@@ -449,3 +449,7 @@ class AlfenNumber(AlfenEntity, NumberEntity):
         """Set the comfort power."""
         await self._device.set_comfort_power(value)
         await self.async_set_native_value(value)
+
+    async def async_update(self):
+        """Get the latest data and updates the states."""
+        self.async_set_native_value()

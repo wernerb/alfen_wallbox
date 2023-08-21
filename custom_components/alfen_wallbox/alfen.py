@@ -6,6 +6,7 @@ from urllib3 import disable_warnings
 from datetime import timedelta
 from homeassistant import core
 
+
 from homeassistant.util import Throttle
 from .const import (
     CAT,
@@ -30,6 +31,7 @@ from .const import (
     LOGIN,
     LOGOUT,
     PARAM_COMMAND,
+    PARAM_DISPLAY_NAME,
     PARAM_PASSWORD,
     PARAM_USERNAME,
     PROP,
@@ -66,7 +68,6 @@ class AlfenDevice:
         self._session.verify = False
         disable_warnings()
 
-
     async def init(self):
         await hass.async_add_executor_job(self.get_info)
         self.id = "alfen_{}".format(self.name)
@@ -77,7 +78,7 @@ class AlfenDevice:
 
     def get_info(self):
         response = self._session.get(
-            url=self.__get_url(INFO)
+            url=self.__get_url(INFO),
         )
         _LOGGER.debug(f"Response {response}")
 
@@ -117,56 +118,53 @@ class AlfenDevice:
 
     @Throttle(MIN_TIME_BETWEEN_UPDATES)
     async def async_update(self):
-        await hass.async_add_executor_job(self.login)
         await hass.async_add_executor_job(self._get_all_properties_value)
-        await hass.async_add_executor_job(self.logout)
+
+    def _post(self, cmd, payload=None):
+        response = self._session.post(
+            url=self.__get_url(cmd),
+            json=payload,
+            headers=POST_HEADER_JSON)
+        response.raise_for_status()
+        if len(response.text) > 0:
+            return response.json()
+
+    def _get(self,url, allowed_login=True):
+        response = self._session.get(url)
+
+        if response.status_code == 401 and allowed_login:
+            _LOGGER.debug("Get with login")
+            self.login()
+            return self._get(url,False)
+        response.raise_for_status()
+
+        if response is not None and response != '':
+            return json.loads(response.text)
+        return None
 
     def login(self):
         del self._session.cookies["session"]
-
-        response = self._session.post(
-            headers=POST_HEADER_JSON,
-            url=self.__get_url(LOGIN),
-            json={PARAM_USERNAME: self.username, PARAM_PASSWORD: self.password, "displayname": "ha"})
+        response = self._post(LOGIN, {PARAM_USERNAME: self.username, PARAM_PASSWORD: self.password, PARAM_DISPLAY_NAME: "ha"})
         _LOGGER.debug(f"Login response {response}")
-        response.raise_for_status()
 
     def logout(self):
         del self._session.cookies["session"]
-
-        response = self._session.post(
-            headers=POST_HEADER_JSON,
-            url=self.__get_url(LOGOUT),
-        )
+        response = self._post(LOGOUT)
         _LOGGER.debug(f"Logout response {response}")
-        response.raise_for_status()
-
 
     def _update_value(self, api_param, value):
-
-        response = self._session.post(
-            headers = POST_HEADER_JSON,
-            url = self.__get_url(PROP),
-            json={api_param: {ID: api_param, VALUE: value}}
-        )
-
+        response = self._post(PROP, {api_param: {ID: api_param, VALUE: value}})
         _LOGGER.debug(f"Set {api_param} value {value} response {response}")
-        response.raise_for_status()
 
     def _get_value(self, api_param):
-        response = self._session.get(
-            url=self.__get_url(
-                "{}?{}={}".format(PROP, ID, api_param)
-            ),
-        )
+        response = self._get(url = self.__get_url("{}?{}={}".format(PROP, ID, api_param)))
+
         _LOGGER.debug(f"Status Response {response}")
-        response.raise_for_status()
-        resp = response.text
-        if resp is not None and resp != '':
-            response_json = json.loads(resp)
+
+        if response is not None:
             if self.properties is None:
                 self.properties = []
-            for resp in response_json[PROPERTIES]:
+            for resp in response[PROPERTIES]:
                 for prop in self.properties:
                     if prop[ID] == resp[ID]:
                         prop[VALUE] = resp[VALUE]
@@ -178,34 +176,22 @@ class AlfenDevice:
             nextRequest = True
             offset = 0
             while (nextRequest):
-                response = self._session.get(
-                    url=self.__get_url("{}?{}={}&{}={}".format(
-                        PROP, CAT, cat, OFFSET, offset)),
-                )
+                response = self._get(url=self.__get_url("{}?{}={}&{}={}".format(PROP, CAT, cat, OFFSET, offset)))
                 _LOGGER.debug(f"Status Response {response}")
 
-                response.raise_for_status()
-                resp = response.text
-                response_json = json.loads(resp)
-
-                if response_json is not None:
-                    properties += response_json[PROPERTIES]
-                nextRequest = response_json[TOTAL] > (offset + len(response_json[PROPERTIES]))
-                offset += len(response_json[PROPERTIES])
+                if response is not None:
+                    properties += response[PROPERTIES]
+                nextRequest = response[TOTAL] > (offset + len(response[PROPERTIES]))
+                offset += len(response[PROPERTIES])
         _LOGGER.debug(f"Properties {properties}")
         self.properties = properties
 
     async def reboot_wallbox(self):
         await hass.async_add_executor_job(self.login)
-
-        response = await self._session.post(
-            headers=POST_HEADER_JSON,
-            url=self.__get_url(CMD),
-            json={PARAM_COMMAND: "reboot"},
-        )
+        response = self._post(CMD, {PARAM_COMMAND: "reboot"})
         _LOGGER.debug(f"Reboot response {response}")
-        await hass.async_add_executor_job(self.logout)
 
+# todo below
     async def async_request(self, method: str, headers: str, url_cmd: str, json_data=None):
         await hass.async_add_executor_job(self.login)
         response_json = await hass.async_add_executor_job(self.request, method, headers, url_cmd, json_data)
@@ -274,7 +260,6 @@ class AlfenDevice:
             return None
         await hass.async_add_executor_job(self.set_value, "2069_0", phase)
 
-
     async def set_phase_switching(self, enabled):
         _LOGGER.debug(f"Set Phase Switching {enabled}")
 
@@ -295,7 +280,6 @@ class AlfenDevice:
         if value < 1400 | value > 5000:
             return None
         await hass.async_add_executor_job(self.set_value, "3280_3", value)
-
 
     def __get_url(self, action) -> str:
         return "https://{}/api/{}".format(self.host, action)
