@@ -104,6 +104,7 @@ async def async_setup_entry(
 
 class AlfenSwitchSensor(AlfenEntity, SwitchEntity):
     """Define an Alfen binary sensor."""
+    entity_description: AlfenSwitchDescription
 
     def __init__(self,
                  device: AlfenDevice,

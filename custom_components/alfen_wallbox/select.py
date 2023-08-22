@@ -125,8 +125,8 @@ GPRS_TECHNOLOGY_DICT: Final[dict[str, int]] = {
 }
 
 DSMR_SMR_INTERFACE_DICT: Final[dict[str, int]] = {
-    "Serial" : 0,
-    "Telnet" : 1,
+    "Serial": 0,
+    "Telnet": 1,
     "HomeWizard Wi-Fi P1": 2,
 }
 
@@ -227,7 +227,7 @@ ALFEN_SELECT_TYPES: Final[tuple[AlfenSelectDescription, ...]] = (
         options_dict=GPRS_TECHNOLOGY_DICT,
         api_param="2114_0",
     ),
-     AlfenSelectDescription(
+    AlfenSelectDescription(
         key="lb_dsmr_smr_interface",
         name="Load Balancing DSMR/SMR Interface",
         icon="mdi:scale-balance",
@@ -295,6 +295,7 @@ async def async_setup_entry(
         {},
         "async_disable_rfid_auth_mode",
     )
+
 
 class AlfenSelect(AlfenEntity, SelectEntity):
     """Define Alfen select."""

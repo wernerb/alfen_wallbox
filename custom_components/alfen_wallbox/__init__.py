@@ -62,6 +62,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         hass, device.async_update(), "alfen_update"
     )
 
+    if device is not None:
+        await hass.async_add_executor_job(device.logout)
+
     return True
 
 

@@ -382,6 +382,7 @@ class AlfenNumber(AlfenEntity, NumberEntity):
     _attr_has_entity_name = True
     _attr_name = None
     _attr_should_poll = False
+    entity_description: AlfenNumberDescription
 
     def __init__(
         self,
@@ -443,7 +444,6 @@ class AlfenNumber(AlfenEntity, NumberEntity):
         """Set the green share."""
         await self._device.set_green_share(value)
         await self.async_set_native_value(value)
-
 
     async def async_set_comfort_power(self, value):
         """Set the comfort power."""

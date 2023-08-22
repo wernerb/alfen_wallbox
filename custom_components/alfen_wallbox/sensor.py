@@ -10,7 +10,7 @@ from homeassistant.helpers.typing import StateType
 from .entity import AlfenEntity
 from homeassistant import const
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import PERCENTAGE, UnitOfElectricCurrent, UnitOfElectricPotential, UnitOfEnergy, UnitOfFrequency, UnitOfPower, UnitOfTemperature
+from homeassistant.const import PERCENTAGE, UnitOfElectricCurrent, UnitOfElectricPotential, UnitOfEnergy, UnitOfFrequency, UnitOfPower, UnitOfTemperature, UnitOfTime
 import datetime
 
 from homeassistant.core import HomeAssistant, callback
@@ -319,7 +319,7 @@ ALFEN_SENSOR_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
         name="Uptime",
         icon="mdi:timer-outline",
         api_param="2060_0",
-        unit=None,
+        unit=UnitOfTime.HOURS,
         round_digits=None,
     ),
     AlfenSensorDescription(
@@ -874,7 +874,6 @@ class AlfenMainSensor(AlfenEntity):
         self._sensor = "sensor"
         self.entity_description = description
 
-
     @property
     def unique_id(self):
         """Return a unique ID."""
@@ -909,8 +908,6 @@ class AlfenMainSensor(AlfenEntity):
     async def async_update(self):
         """Update the sensor."""
         await self._device.async_update()
-
-
 
     @property
     def device_info(self):
@@ -1006,7 +1003,17 @@ class AlfenSensor(AlfenEntity, SensorEntity):
 
                 # change milliseconds to HH:MM:SS
                 if self.entity_description.api_param == "2060_0":
-                    return str(datetime.timedelta(milliseconds=prop[VALUE])).split('.', maxsplit=1)[0]
+                    result = 0
+                    value = str(datetime.timedelta(milliseconds=prop[VALUE]))
+                    days = value.split(' day')
+                    if len(days) > 1:
+                        result = int(days[0]) * 24
+                        hours = days[1].split(", ")[1].split(
+                            ':', maxsplit=1)[0]
+                    else:
+                        hours = value.split(':', maxsplit=1)[0]
+                    result += int(hours)
+                    return result
 
                 # change milliseconds to d/m/y HH:MM:SS
                 if self.entity_description.api_param == "2187_0" or self.entity_description.api_param == "2059_0":
@@ -1035,11 +1042,9 @@ class AlfenSensor(AlfenEntity, SensorEntity):
                 if (self.entity_description.api_param == "3600_1"):
                     return OCPP_BOOT_NOTIFICATION_STATUS_DICT.get(prop[VALUE], 'Unknown')
 
-
                 # OCPP Boot notification
                 if (self.entity_description.api_param == "2540_0"):
                     return MODBUS_CONNECTION_STATES_DICT.get(prop[VALUE], 'Unknown')
-
 
                 if self.entity_description.api_param == "3190_2":
                     return str(prop[VALUE]) + ': ' + DISPLAY_ERROR_DICT.get(prop[VALUE],  'Unknown')
