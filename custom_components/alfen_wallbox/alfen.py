@@ -134,7 +134,7 @@ class AlfenDevice:
             url=self.__get_url(cmd),
             json=payload,
             headers=POST_HEADER_JSON,
-            timeout=5)
+            timeout=10)
         if response.status_code == 401 and allowed_login:
             _LOGGER.debug("POST with login")
             self.login()
@@ -144,7 +144,7 @@ class AlfenDevice:
             return response
 
     def _get(self, url, allowed_login=True):
-        response = self._session.get(url, timeout=5)
+        response = self._session.get(url, timeout=10)
 
         if response.status_code == 401 and allowed_login:
             _LOGGER.debug("GET with login")
