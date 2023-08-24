@@ -140,8 +140,8 @@ class AlfenDevice:
             self.login()
             return self._post(cmd, payload, False)
         response.raise_for_status()
-        if len(response.text) > 0:
-            return response.json()
+        if response:
+            return response
 
     def _get(self, url, allowed_login=True):
         response = self._session.get(url, timeout=5)
@@ -169,7 +169,7 @@ class AlfenDevice:
 
     def _update_value(self, api_param, value):
         response = self._post(cmd=PROP, payload={api_param: {
-                              ID: api_param, VALUE: value}})
+                              ID: api_param, VALUE: str(value)}})
         _LOGGER.debug(f"Set {api_param} value {value} response {response}")
 
     def _get_value(self, api_param):

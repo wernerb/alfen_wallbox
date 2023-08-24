@@ -301,6 +301,7 @@ class AlfenSelect(AlfenEntity, SelectEntity):
     """Define Alfen select."""
 
     values_dict: dict[int, str]
+    entity_description: AlfenSelectDescription
 
     def __init__(
         self, device: AlfenDevice, description: AlfenSelectDescription
