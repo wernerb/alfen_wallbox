@@ -2,15 +2,23 @@ import logging
 from typing import Final
 from dataclasses import dataclass
 
-import voluptuous as vol
-
 from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.typing import StateType
 
 from .entity import AlfenEntity
 from homeassistant import const
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import PERCENTAGE, UnitOfElectricCurrent, UnitOfElectricPotential, UnitOfEnergy, UnitOfFrequency, UnitOfPower, UnitOfTemperature, UnitOfTime
+from homeassistant.const import (
+    PERCENTAGE,
+    UnitOfElectricCurrent,
+    UnitOfElectricPotential,
+    UnitOfEnergy,
+    UnitOfFrequency,
+    UnitOfPower,
+    UnitOfTemperature,
+    UnitOfTime
+)
+
 import datetime
 
 from homeassistant.core import HomeAssistant, callback
@@ -24,7 +32,7 @@ from homeassistant.components.sensor import (
 )
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from homeassistant.helpers import config_validation as cv, entity_platform
+from homeassistant.helpers import entity_platform
 
 from . import DOMAIN as ALFEN_DOMAIN
 
@@ -317,6 +325,14 @@ ALFEN_SENSOR_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
     AlfenSensorDescription(
         key="uptime",
         name="Uptime",
+        icon="mdi:timer-outline",
+        api_param="2060_0",
+        unit=UnitOfTime.HOURS,
+        round_digits=None,
+    ),
+    AlfenSensorDescription(
+        key="uptime_hours",
+        name="Uptime Hours",
         icon="mdi:timer-outline",
         api_param="2060_0",
         unit=UnitOfTime.HOURS,
@@ -933,7 +949,7 @@ class AlfenSensor(AlfenEntity, SensorEntity):
             _LOGGER.info(f"Initiating State sensors {self._attr_name}")
             self._attr_device_class = DEVICE_CLASS_POWER
             self._attr_state_class = SensorStateClass.MEASUREMENT
-        elif self.entity_description.key == "uptime":
+        elif self.entity_description.key == "uptime" or self.entity_description.key == "uptime_hours":
             _LOGGER.info(f"Initiating State sensors {self._attr_name}")
             self._attr_state_class = SensorStateClass.TOTAL_INCREASING
         elif self.entity_description.key == "meter_reading":
@@ -1002,7 +1018,10 @@ class AlfenSensor(AlfenEntity, SensorEntity):
                     return round((prop[VALUE] / 100), self.entity_description.round_digits)
 
                 # change milliseconds to HH:MM:SS
-                if self.entity_description.api_param == "2060_0":
+                if self.entity_description.key == "uptime":
+                    return str(datetime.timedelta(milliseconds=prop[VALUE])).split('.', maxsplit=1)[0]
+
+                if self.entity_description.key == "uptime_hours":
                     result = 0
                     value = str(datetime.timedelta(milliseconds=prop[VALUE]))
                     days = value.split(' day')
@@ -1046,8 +1065,13 @@ class AlfenSensor(AlfenEntity, SensorEntity):
                 if (self.entity_description.api_param == "2540_0"):
                     return MODBUS_CONNECTION_STATES_DICT.get(prop[VALUE], 'Unknown')
 
+                # wallbox display message
                 if self.entity_description.api_param == "3190_2":
                     return str(prop[VALUE]) + ': ' + DISPLAY_ERROR_DICT.get(prop[VALUE],  'Unknown')
+
+                # Status code
+                if self.entity_description.api_param == "2501_2":
+                    return STATUS_DICT.get(prop[VALUE], 'Unknown')
 
                 return prop[VALUE]
 

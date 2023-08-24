@@ -45,7 +45,7 @@ POST_HEADER_JSON = {"Content-Type": "application/json"}
 
 _LOGGER = logging.getLogger(__name__)
 
-MIN_TIME_BETWEEN_UPDATES = timedelta(seconds=3)
+MIN_TIME_BETWEEN_UPDATES = timedelta(seconds=5)
 hass = core.HomeAssistant()
 
 
@@ -68,8 +68,11 @@ class AlfenDevice:
         self.password = password
         self.properties = []
         self._session.verify = False
+        self.keepLogout = False
+        self.updating = False
         disable_warnings()
 
+        # todo: issue: https://github.com/leeyuentuen/alfen_wallbox/issues/52
         # use one time GET to get Number of socket
         # 205E_0
 
@@ -120,15 +123,18 @@ class AlfenDevice:
 
     @Throttle(MIN_TIME_BETWEEN_UPDATES)
     async def async_update(self):
-        await hass.async_add_executor_job(self.login)
-        await hass.async_add_executor_job(self._get_all_properties_value)
-        await hass.async_add_executor_job(self.logout)
+        if not self.updating:
+            self.updating = True
+            if not self.keepLogout:
+                await hass.async_add_executor_job(self._get_all_properties_value)
+            self.updating = False
 
     def _post(self, cmd, payload=None, allowed_login=True):
         response = self._session.post(
             url=self.__get_url(cmd),
             json=payload,
-            headers=POST_HEADER_JSON)
+            headers=POST_HEADER_JSON,
+            timeout=5)
         if response.status_code == 401 and allowed_login:
             _LOGGER.debug("POST with login")
             self.login()
@@ -138,7 +144,7 @@ class AlfenDevice:
             return response.json()
 
     def _get(self, url, allowed_login=True):
-        response = self._session.get(url)
+        response = self._session.get(url, timeout=5)
 
         if response.status_code == 401 and allowed_login:
             _LOGGER.debug("GET with login")

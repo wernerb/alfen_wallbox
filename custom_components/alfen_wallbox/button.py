@@ -43,21 +43,21 @@ ALFEN_BUTTON_TYPES: Final[tuple[AlfenButtonDescription, ...]] = (
     ),
     AlfenButtonDescription(
         key="auth_logout",
-        name="Wallbox Logout",
+        name="HTTPS API Logout",
         method=METHOD_POST,
         url_action=LOGOUT,
         json_data=None
     ),
     AlfenButtonDescription(
         key="auth_login",
-        name="Wallbox Login",
+        name="HTTPS API Login",
         method=METHOD_POST,
         url_action=LOGIN,
         json_data=None
     ),
     AlfenButtonDescription(
         key="wallbox_force_update",
-        name="Wallbox Force Update",
+        name="Force Update",
         method=METHOD_POST,
         url_action='Force Update',
         json_data=None
@@ -107,9 +107,11 @@ class AlfenButton(AlfenEntity, ButtonEntity):
                            PARAM_PASSWORD: self._device.password,
                            PARAM_DISPLAY_NAME: DISPLAY_NAME_VALUE}
             )
+            self._device.keepLogout = False
         else:
             await self._device.async_request(
                 method=self.entity_description.method,
                 cmd=self.entity_description.url_action,
                 json_data=self.entity_description.json_data
             )
+            self._device.keepLogout = True
