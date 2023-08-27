@@ -2,6 +2,8 @@
 from dataclasses import dataclass
 import logging
 from typing import Final
+
+from homeassistant import core
 from .alfen import POST_HEADER_JSON, AlfenDevice
 from .entity import AlfenEntity
 
@@ -9,7 +11,7 @@ from homeassistant.components.button import ButtonEntity, ButtonEntityDescriptio
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
-from .const import CMD, METHOD_POST, PARAM_COMMAND, COMMAND_REBOOT
+from .const import CMD, DISPLAY_NAME_VALUE, LOGIN, LOGOUT, METHOD_POST, PARAM_COMMAND, COMMAND_REBOOT, PARAM_DISPLAY_NAME, PARAM_PASSWORD, PARAM_USERNAME
 
 from . import DOMAIN as ALFEN_DOMAIN
 
@@ -23,7 +25,7 @@ class AlfenButtonDescriptionMixin:
 
     method: str
     url_action: str
-    json_action: str
+    json_data: str
 
 
 @dataclass
@@ -37,7 +39,28 @@ ALFEN_BUTTON_TYPES: Final[tuple[AlfenButtonDescription, ...]] = (
         name="Reboot Wallbox",
         method=METHOD_POST,
         url_action=CMD,
-        json_action={PARAM_COMMAND: COMMAND_REBOOT},
+        json_data={PARAM_COMMAND: COMMAND_REBOOT},
+    ),
+    AlfenButtonDescription(
+        key="auth_logout",
+        name="HTTPS API Logout",
+        method=METHOD_POST,
+        url_action=LOGOUT,
+        json_data=None
+    ),
+    AlfenButtonDescription(
+        key="auth_login",
+        name="HTTPS API Login",
+        method=METHOD_POST,
+        url_action=LOGIN,
+        json_data=None
+    ),
+    AlfenButtonDescription(
+        key="wallbox_force_update",
+        name="Force Update",
+        method=METHOD_POST,
+        url_action='Force Update',
+        json_data=None
     ),
 )
 
@@ -58,6 +81,8 @@ async def async_setup_entry(
 class AlfenButton(AlfenEntity, ButtonEntity):
     """Representation of a Alfen button entity."""
 
+    entity_description: AlfenButtonDescription
+
     def __init__(
         self,
         device: AlfenDevice,
@@ -72,12 +97,21 @@ class AlfenButton(AlfenEntity, ButtonEntity):
 
     async def async_press(self) -> None:
         """Press the button."""
-        await self._device.login()
-        response = await self._device.request(
-            self.entity_description.method,
-            POST_HEADER_JSON,
-            self.entity_description.url_action,
-            self.entity_description.json_action
-        )
-        await self._device.logout()
-        _LOGGER.debug("Response: %s", response)
+        if self.entity_description.url_action == "Force Update":
+            await self._device.async_update()
+        elif self.entity_description.url_action == LOGIN:
+            await self._device.async_request(
+                method=self.entity_description.method,
+                cmd=self.entity_description.url_action,
+                json_data={PARAM_USERNAME: self._device.username,
+                           PARAM_PASSWORD: self._device.password,
+                           PARAM_DISPLAY_NAME: DISPLAY_NAME_VALUE}
+            )
+            self._device.keepLogout = False
+        else:
+            await self._device.async_request(
+                method=self.entity_description.method,
+                cmd=self.entity_description.url_action,
+                json_data=self.entity_description.json_data
+            )
+            self._device.keepLogout = True

@@ -54,7 +54,7 @@ ALFEN_BINARY_SENSOR_TYPES: Final[tuple[AlfenSwitchDescription, ...]] = (
     ),
     AlfenSwitchDescription(
         key="auth_local_list",
-        name="Auth. Whitelist",
+        name="Auth. Local List",
         api_param="213D_0",
     ),
     AlfenSwitchDescription(
@@ -66,6 +66,11 @@ ALFEN_BINARY_SENSOR_TYPES: Final[tuple[AlfenSwitchDescription, ...]] = (
         key="auth_remote_transaction_request",
         name="Auth. Remote Transaction requests",
         api_param="209B_0",
+    ),
+    AlfenSwitchDescription(
+        key="proxy_enabled",
+        name="Proxy Enabled",
+        api_param="2117_0",
     ),
 )
 
@@ -99,6 +104,7 @@ async def async_setup_entry(
 
 class AlfenSwitchSensor(AlfenEntity, SwitchEntity):
     """Define an Alfen binary sensor."""
+    entity_description: AlfenSwitchDescription
 
     def __init__(self,
                  device: AlfenDevice,

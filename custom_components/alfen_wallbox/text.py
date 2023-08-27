@@ -17,9 +17,9 @@ from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from . import DOMAIN as ALFEN_DOMAIN
-from . import DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
+
 
 @dataclass
 class AlfenTextDescriptionMixin:
@@ -27,18 +27,43 @@ class AlfenTextDescriptionMixin:
 
     api_param: str
 
+
 @dataclass
 class AlfenTextDescription(TextEntityDescription, AlfenTextDescriptionMixin):
-        """Class to describe an Alfen text entity."""
+    """Class to describe an Alfen text entity."""
 
-ALFEN_TEXT_TYPES: Final[tuple[AlfenTextDescription,...]] = (
-      AlfenTextDescription(
-            key="auth_plug_and_charge_id",
-            name="Auth. Plug & Charge ID",
-            icon="mdi:key",
-            api_param="2063_0"
-      ),
+
+ALFEN_TEXT_TYPES: Final[tuple[AlfenTextDescription, ...]] = (
+    AlfenTextDescription(
+        key="auth_plug_and_charge_id",
+        name="Auth. Plug & Charge ID",
+        icon="mdi:key",
+        mode=TextMode.TEXT,
+        api_param="2063_0"
+    ),
+    AlfenTextDescription(
+        key="proxy_address_port",
+        name="Proxy Address And Port",
+        icon="mdi:earth",
+        mode=TextMode.TEXT,
+        api_param="2115_0"
+    ),
+    AlfenTextDescription(
+        key="proxy_username",
+        name="Proxy Username",
+        icon="mdi:account",
+        mode=TextMode.TEXT,
+        api_param="2116_0"
+    ),
+    AlfenTextDescription(
+        key="proxy_password",
+        name="Proxy Password",
+        icon="mdi:key",
+        mode=TextMode.PASSWORD,
+        api_param="2116_1"
+    ),
 )
+
 
 async def async_setup_entry(
     hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback
@@ -47,20 +72,23 @@ async def async_setup_entry(
 
     device = hass.data[ALFEN_DOMAIN][entry.entry_id]
     texts = [AlfenText(device, description)
-               for description in ALFEN_TEXT_TYPES]
+             for description in ALFEN_TEXT_TYPES]
 
     async_add_entities(texts)
+
 
 class AlfenText(AlfenEntity, TextEntity):
     """Representation of a Alfen text entity."""
 
+    entity_description: AlfenTextDescription
+
     def __init__(
-              self, device: AlfenDevice, description: AlfenTextDescription
-    )->None:
+        self, device: AlfenDevice, description: AlfenTextDescription
+    ) -> None:
         super().__init__(device)
         self._device = device
         self._attr_name = f"{device.name} {description.name}"
-
+        self._attr_mode = description.mode
         self._attr_unique_id = f"{self._device.id}_{description.key}"
         self.entity_description = description
         self._async_update_attrs()
@@ -80,5 +108,5 @@ class AlfenText(AlfenEntity, TextEntity):
     async def async_set_value(self, value: str) -> None:
         """Update the value."""
         self._attr_native_value = value
-        await self.update_state(self.entity_description.api_param,value)
+        await self.update_state(self.entity_description.api_param, value)
         self.async_write_ha_state()

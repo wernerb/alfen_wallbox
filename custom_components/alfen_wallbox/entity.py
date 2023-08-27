@@ -7,8 +7,6 @@ from homeassistant.helpers.entity import DeviceInfo, Entity
 
 _LOGGER = logging.getLogger(__name__)
 
-MIN_TIME_BETWEEN_UPDATES = timedelta(seconds=30)
-
 
 class AlfenEntity(Entity):
 
