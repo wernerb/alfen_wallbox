@@ -838,6 +838,14 @@ ALFEN_SENSOR_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
         api_param="2540_0",
         round_digits=None,
     ),
+    AlfenSensorDescription(
+        key="main_active_max_current",
+        name="Main Active Max Current",
+        icon="mdi:current-ac",
+        api_param="212C_0",
+        unit=UnitOfElectricCurrent.AMPERE,
+        round_digits=2,
+    ),
     # 2 Socket devices
     # AlfenSensorDescription(
     #     key="ps_connector_2_max_allowed_phase",
