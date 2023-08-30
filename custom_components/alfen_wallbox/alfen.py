@@ -223,7 +223,6 @@ class AlfenDevice:
         return response
 
     async def set_value(self, api_param, value):
-
         await hass.async_add_executor_job(self._update_value, api_param, value)
 
         # we expect that the value is updated so we are just update the value in the properties
@@ -240,7 +239,7 @@ class AlfenDevice:
         _LOGGER.debug(f"Set current limit {limit}A")
         if limit > 32 | limit < 1:
             return None
-        await hass.async_add_executor_job(self.set_value, "2129_0", limit)
+        await self.set_value("2129_0", limit)
 
     async def set_rfid_auth_mode(self, enabled):
         _LOGGER.debug(f"Set RFID Auth Mode {enabled}")
@@ -255,7 +254,7 @@ class AlfenDevice:
         _LOGGER.debug(f"Set current phase {phase}")
         if phase not in ('L1', 'L2', 'L3'):
             return None
-        await hass.async_add_executor_job(self.set_value, "2069_0", phase)
+        await self.set_value("2069_0", phase)
 
     async def set_phase_switching(self, enabled):
         _LOGGER.debug(f"Set Phase Switching {enabled}")
@@ -263,20 +262,19 @@ class AlfenDevice:
         value = 0
         if enabled:
             value = 1
-
-        await hass.async_add_executor_job(self.set_value, "2185_0", value)
+        await self.set_value("2185_0", value)
 
     async def set_green_share(self, value):
         _LOGGER.debug(f"Set green share value {value}%")
         if value < 0 | value > 100:
             return None
-        await hass.async_add_executor_job(self.set_value, "3280_2", value)
+        await self.set_value("3280_2", value)
 
     async def set_comfort_power(self, value):
         _LOGGER.debug(f"Set Comfort Level {value}W")
         if value < 1400 | value > 5000:
             return None
-        await hass.async_add_executor_job(self.set_value, "3280_3", value)
+        await self.set_value("3280_3", value)
 
     def __get_url(self, action) -> str:
         return "https://{}/api/{}".format(self.host, action)

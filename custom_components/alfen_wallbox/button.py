@@ -99,19 +99,26 @@ class AlfenButton(AlfenEntity, ButtonEntity):
         """Press the button."""
         if self.entity_description.url_action == "Force Update":
             await self._device.async_update()
+            return
         elif self.entity_description.url_action == LOGIN:
-            await self._device.async_request(
+            resp = await self._device.async_request(
                 method=self.entity_description.method,
                 cmd=self.entity_description.url_action,
                 json_data={PARAM_USERNAME: self._device.username,
                            PARAM_PASSWORD: self._device.password,
                            PARAM_DISPLAY_NAME: DISPLAY_NAME_VALUE}
             )
-            self._device.keepLogout = False
+            if resp.status_code == 200:
+                self._device.keepLogout = False
+                return
+            resp.raise_for_status()
         else:
-            await self._device.async_request(
+            resp = await self._device.async_request(
                 method=self.entity_description.method,
                 cmd=self.entity_description.url_action,
                 json_data=self.entity_description.json_data
             )
-            self._device.keepLogout = True
+            if resp.status_code == 200:
+                self._device.keepLogout = True
+                return
+            resp.raise_for_status()

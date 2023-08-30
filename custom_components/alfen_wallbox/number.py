@@ -56,7 +56,7 @@ ALFEN_NUMBER_TYPES: Final[tuple[AlfenNumberDescription, ...]] = (
         api_param="2068_0",
     ),
     AlfenNumberDescription(
-        key="ps_connector_max_limit",
+        key="ps_connector_max_limit", #should be main_normal_max_current
         name="Power Connector Max Current",
         state=None,
         icon="mdi:current-ac",
