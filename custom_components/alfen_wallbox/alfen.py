@@ -7,7 +7,6 @@ from datetime import timedelta
 from homeassistant import core
 
 
-from homeassistant.util import Throttle
 from .const import (
     CAT,
     CAT_GENERIC,
@@ -45,7 +44,7 @@ POST_HEADER_JSON = {"Content-Type": "application/json"}
 
 _LOGGER = logging.getLogger(__name__)
 
-MIN_TIME_BETWEEN_UPDATES = timedelta(seconds=5)
+SCAN_INTERVAL = timedelta(seconds=5)
 hass = core.HomeAssistant()
 
 
@@ -121,7 +120,6 @@ class AlfenDevice:
             "sw_version": self.info.firmware_version,
         }
 
-    @Throttle(MIN_TIME_BETWEEN_UPDATES)
     async def async_update(self):
         if not self.updating:
             self.updating = True

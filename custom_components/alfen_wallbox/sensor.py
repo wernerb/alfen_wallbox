@@ -1,6 +1,7 @@
 import logging
 from typing import Final
 from dataclasses import dataclass
+from datetime import timedelta
 
 from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.typing import StateType
@@ -45,6 +46,7 @@ from .const import (
 )
 
 _LOGGER = logging.getLogger(__name__)
+SCAN_INTERVAL = timedelta(seconds=5)
 
 
 @dataclass
@@ -370,7 +372,7 @@ ALFEN_SENSOR_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
         icon="mdi:flash",
         api_param="2221_3",
         unit=UnitOfElectricPotential.VOLT,
-        round_digits=2,
+        round_digits=1,
     ),
     AlfenSensorDescription(
         key="voltage_l2",
@@ -378,7 +380,7 @@ ALFEN_SENSOR_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
         icon="mdi:flash",
         api_param="2221_4",
         unit=UnitOfElectricPotential.VOLT,
-        round_digits=2,
+        round_digits=1,
     ),
     AlfenSensorDescription(
         key="voltage_l3",
@@ -386,7 +388,7 @@ ALFEN_SENSOR_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
         icon="mdi:flash",
         api_param="2221_5",
         unit=UnitOfElectricPotential.VOLT,
-        round_digits=2,
+        round_digits=1,
     ),
     AlfenSensorDescription(
         key="current_l1",
@@ -434,7 +436,7 @@ ALFEN_SENSOR_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
         icon="mdi:thermometer",
         api_param="2201_0",
         unit=UnitOfTemperature.CELSIUS,
-        round_digits=2,
+        round_digits=1,
     ),
 
     AlfenSensorDescription(
@@ -732,7 +734,7 @@ ALFEN_SENSOR_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
         icon="mdi:information-outline",
         api_param="2221_12",
         unit=UnitOfFrequency.HERTZ,
-        round_digits=2,
+        round_digits=0,
     ),
     AlfenSensorDescription(
         key="comm_car_cp_voltage_high",
