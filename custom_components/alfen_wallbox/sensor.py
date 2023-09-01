@@ -678,6 +678,8 @@ ALFEN_SENSOR_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
         api_param="2110_0",
         unit=const.SIGNAL_STRENGTH_DECIBELS,
         round_digits=None,
+        state_class=SensorStateClass.MEASUREMENT,
+        device_class=SensorDeviceClass.SIGNAL_STRENGTH
     ),
     # AlfenSensorDescription(
     #     key="comm_dhcp_address_2",
