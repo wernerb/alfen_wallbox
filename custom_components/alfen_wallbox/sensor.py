@@ -331,6 +331,7 @@ ALFEN_SENSOR_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
         api_param="2060_0",
         unit=UnitOfTime.HOURS,
         round_digits=None,
+        state_class=SensorStateClass.TOTAL_INCREASING
     ),
     AlfenSensorDescription(
         key="uptime_hours",
@@ -339,6 +340,7 @@ ALFEN_SENSOR_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
         api_param="2060_0",
         unit=UnitOfTime.HOURS,
         round_digits=None,
+        state_class=SensorStateClass.TOTAL_INCREASING
     ),
     AlfenSensorDescription(
         key="last_modify_datetime",
@@ -373,6 +375,8 @@ ALFEN_SENSOR_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
         api_param="2221_3",
         unit=UnitOfElectricPotential.VOLT,
         round_digits=1,
+        state_class=SensorStateClass.MEASUREMENT,
+        device_class=SensorDeviceClass.VOLTAGE,
     ),
     AlfenSensorDescription(
         key="voltage_l2",
@@ -381,6 +385,8 @@ ALFEN_SENSOR_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
         api_param="2221_4",
         unit=UnitOfElectricPotential.VOLT,
         round_digits=1,
+        state_class=SensorStateClass.MEASUREMENT,
+        device_class=SensorDeviceClass.VOLTAGE,
     ),
     AlfenSensorDescription(
         key="voltage_l3",
@@ -389,6 +395,8 @@ ALFEN_SENSOR_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
         api_param="2221_5",
         unit=UnitOfElectricPotential.VOLT,
         round_digits=1,
+        state_class=SensorStateClass.MEASUREMENT,
+        device_class=SensorDeviceClass.VOLTAGE,
     ),
     AlfenSensorDescription(
         key="current_l1",
@@ -397,6 +405,8 @@ ALFEN_SENSOR_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
         api_param="2221_A",
         unit=UnitOfElectricCurrent.AMPERE,
         round_digits=2,
+        state_class=SensorStateClass.MEASUREMENT,
+        device_class=SensorDeviceClass.CURRENT,
     ),
     AlfenSensorDescription(
         key="current_l2",
@@ -405,6 +415,8 @@ ALFEN_SENSOR_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
         api_param="2221_B",
         unit=UnitOfElectricCurrent.AMPERE,
         round_digits=2,
+        state_class=SensorStateClass.MEASUREMENT,
+        device_class=SensorDeviceClass.CURRENT,
     ),
     AlfenSensorDescription(
         key="current_l3",
@@ -413,6 +425,8 @@ ALFEN_SENSOR_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
         api_param="2221_C",
         unit=UnitOfElectricCurrent.AMPERE,
         round_digits=2,
+        state_class=SensorStateClass.MEASUREMENT,
+        device_class=SensorDeviceClass.CURRENT,
     ),
     AlfenSensorDescription(
         key="active_power_total",
@@ -421,6 +435,8 @@ ALFEN_SENSOR_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
         api_param="2221_16",
         unit=UnitOfPower.WATT,
         round_digits=2,
+        state_class=SensorStateClass.MEASUREMENT,
+        device_class=SensorDeviceClass.POWER,
     ),
     AlfenSensorDescription(
         key="meter_reading",
@@ -429,6 +445,8 @@ ALFEN_SENSOR_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
         api_param="2221_22",
         unit=UnitOfEnergy.KILO_WATT_HOUR,
         round_digits=None,
+        state_class=SensorStateClass.TOTAL_INCREASING,
+        device_class=SensorDeviceClass.ENERGY
     ),
     AlfenSensorDescription(
         key="temperature",
@@ -437,6 +455,8 @@ ALFEN_SENSOR_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
         api_param="2201_0",
         unit=UnitOfTemperature.CELSIUS,
         round_digits=1,
+        state_class=SensorStateClass.MEASUREMENT,
+        device_class=SensorDeviceClass.TEMPERATURE,
     ),
 
     AlfenSensorDescription(
@@ -446,6 +466,8 @@ ALFEN_SENSOR_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
         api_param="212B_0",
         unit=UnitOfElectricCurrent.AMPERE,
         round_digits=2,
+        state_class=SensorStateClass.MEASUREMENT,
+        device_class=SensorDeviceClass.CURRENT,
     ),
     AlfenSensorDescription(
         key="main_active_lb_max_current",
@@ -454,6 +476,8 @@ ALFEN_SENSOR_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
         api_param="212D_0",
         unit=UnitOfElectricCurrent.AMPERE,
         round_digits=2,
+        state_class=SensorStateClass.MEASUREMENT,
+        device_class=SensorDeviceClass.CURRENT,
     ),
     AlfenSensorDescription(
         key="charging_box_identifier",
@@ -479,6 +503,8 @@ ALFEN_SENSOR_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
         api_param="212F_1",
         unit=UnitOfElectricCurrent.AMPERE,
         round_digits=2,
+        state_class=SensorStateClass.MEASUREMENT,
+        device_class=SensorDeviceClass.CURRENT,
     ),
     AlfenSensorDescription(
         key="p1_measurements_2",
@@ -487,6 +513,8 @@ ALFEN_SENSOR_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
         api_param="212F_2",
         unit=UnitOfElectricCurrent.AMPERE,
         round_digits=2,
+        state_class=SensorStateClass.MEASUREMENT,
+        device_class=SensorDeviceClass.CURRENT,
     ),
     AlfenSensorDescription(
         key="p1_measurements_3",
@@ -495,6 +523,8 @@ ALFEN_SENSOR_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
         api_param="212F_3",
         unit=UnitOfElectricCurrent.AMPERE,
         round_digits=2,
+        state_class=SensorStateClass.MEASUREMENT,
+        device_class=SensorDeviceClass.CURRENT,
     ),
     AlfenSensorDescription(
         key="gprs_apn_name",
@@ -743,6 +773,8 @@ ALFEN_SENSOR_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
         api_param="2511_0",
         unit=UnitOfElectricPotential.VOLT,
         round_digits=2,
+        state_class=SensorStateClass.MEASUREMENT,
+        device_class=SensorDeviceClass.VOLTAGE,
     ),
     AlfenSensorDescription(
         key="comm_car_cp_voltage_low",
@@ -751,6 +783,8 @@ ALFEN_SENSOR_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
         api_param="2511_1",
         unit=UnitOfElectricPotential.VOLT,
         round_digits=2,
+        state_class=SensorStateClass.MEASUREMENT,
+        device_class=SensorDeviceClass.VOLTAGE,
     ),
     AlfenSensorDescription(
         key="comm_car_pp_resistance",
@@ -759,6 +793,7 @@ ALFEN_SENSOR_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
         api_param="2511_2",
         unit="Ω",
         round_digits=1,
+        state_class=SensorStateClass.MEASUREMENT,
     ),
     AlfenSensorDescription(
         key="comm_car_pwm_duty_cycle",
@@ -767,6 +802,8 @@ ALFEN_SENSOR_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
         api_param="2511_3",
         unit=PERCENTAGE,
         round_digits=1,
+        state_class=SensorStateClass.MEASUREMENT,
+        device_class=SensorDeviceClass.POWER_FACTOR,
     ),
     AlfenSensorDescription(
         key="ps_connector_1_max_allowed_phase",
@@ -847,6 +884,8 @@ ALFEN_SENSOR_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
         api_param="212C_0",
         unit=UnitOfElectricCurrent.AMPERE,
         round_digits=2,
+        state_class=SensorStateClass.MEASUREMENT,
+        device_class=SensorDeviceClass.CURRENT,
     ),
     AlfenSensorDescription(
         key="main_start_max_current",
@@ -971,17 +1010,11 @@ class AlfenSensor(AlfenEntity, SensorEntity):
         self._attr_name = f"{device.name} {description.name}"
         self._attr_unique_id = f"{self._attr_unique_id}-{description.key}"
         self.entity_description = description
-        if self.entity_description.key == "active_power_total":
-            _LOGGER.info(f"Initiating State sensors {self._attr_name}")
-            self._attr_device_class = DEVICE_CLASS_POWER
-            self._attr_state_class = SensorStateClass.MEASUREMENT
-        elif self.entity_description.key == "uptime" or self.entity_description.key == "uptime_hours":
-            _LOGGER.info(f"Initiating State sensors {self._attr_name}")
-            self._attr_state_class = SensorStateClass.TOTAL_INCREASING
-        elif self.entity_description.key == "meter_reading":
-            _LOGGER.info(f"Initiating State sensors {self._attr_name}")
-            self._attr_device_class = DEVICE_CLASS_ENERGY
-            self._attr_state_class = SensorStateClass.TOTAL_INCREASING
+        if description.state_class is not None:
+            self._attr_state_class = description.state_class
+        if description.device_class is not None:
+            self._attr_device_class = description.device_class
+
         self._async_update_attrs()
 
     def _get_current_value(self) -> StateType | None:
