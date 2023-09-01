@@ -367,6 +367,7 @@ ALFEN_SENSOR_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
         api_param="2056_0",
         unit=None,
         round_digits=None,
+        state_class=SensorStateClass.TOTAL_INCREASING,
     ),
     AlfenSensorDescription(
         key="voltage_l1",
