@@ -70,11 +70,8 @@ class AlfenDevice:
         self._session.verify = False
         self.keepLogout = False
         self.updating = False
+        self.number_socket = 1
         disable_warnings()
-
-        # todo: issue: https://github.com/leeyuentuen/alfen_wallbox/issues/52
-        # use one time GET to get Number of socket
-        # 205E_0
 
     async def init(self):
         await hass.async_add_executor_job(self.get_info)
@@ -83,6 +80,14 @@ class AlfenDevice:
             self.name = f"{self.info.identity} ({self.host})"
 
         await self.async_update()
+        self._get_number_of_socket()
+
+    def _get_number_of_socket(self):
+        for prop in self.properties:
+            if prop[ID] == '205E_0':
+                self.number_socket = int(prop[VALUE])
+                break
+
 
     def get_info(self):
         response = self._session.get(
