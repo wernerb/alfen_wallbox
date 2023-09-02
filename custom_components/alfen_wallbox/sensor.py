@@ -945,7 +945,37 @@ ALFEN_SENSOR_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
         round_digits=2,
         state_class=SensorStateClass.MEASUREMENT,
         device_class=SensorDeviceClass.POWER,
-    )
+    ),
+    AlfenSensorDescription(
+        key="active_power_p1_voltage_l1",
+        name="P1 Meter Active Voltage L1",
+        icon="mdi:flash",
+        api_param="5221_3",
+        unit=UnitOfElectricPotential.VOLT,
+        round_digits=1,
+        state_class=SensorStateClass.MEASUREMENT,
+        device_class=SensorDeviceClass.VOLTAGE,
+    ),
+    AlfenSensorDescription(
+        key="active_power_p1_voltage_l2",
+        name="P1 Meter Active Voltage L2",
+        icon="mdi:flash",
+        api_param="5221_4",
+        unit=UnitOfElectricPotential.VOLT,
+        round_digits=1,
+        state_class=SensorStateClass.MEASUREMENT,
+        device_class=SensorDeviceClass.VOLTAGE,
+    ),
+    AlfenSensorDescription(
+        key="active_power_p1_voltage_l3",
+        name="P1 Meter Active Voltage L3",
+        icon="mdi:flash",
+        api_param="5221_5",
+        unit=UnitOfElectricPotential.VOLT,
+        round_digits=1,
+        state_class=SensorStateClass.MEASUREMENT,
+        device_class=SensorDeviceClass.VOLTAGE,
+    ),
     # 2 Socket devices
     # AlfenSensorDescription(
     #     key="ps_connector_2_max_allowed_phase",
@@ -1110,11 +1140,11 @@ class AlfenSensor(AlfenEntity, SensorEntity):
             current_l3 = None
 
             for prop in self._device.properties:
-                if prop[ID] == "2221_3":
+                if prop[ID] == "5221_3":
                     voltage_l1 =  prop[VALUE]
-                if prop[ID] == "2221_4":
+                if prop[ID] == "5221_4":
                     voltage_l2 =  prop[VALUE]
-                if prop[ID] == "2221_5":
+                if prop[ID] == "5221_5":
                     voltage_l3 =  prop[VALUE]
                 if prop[ID] == "212F_1":
                     current_l1 =  prop[VALUE]
