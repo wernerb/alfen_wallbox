@@ -1,3 +1,6 @@
 {
-    "name": "Alfen Wallbox"
+    "name": "Alfen Wallbox",
+    "domains": ["binary_sensor", "button", "number", "select", "sensor", "switch", "text"],
+    "homeassistant": "2023.1.0",
+    "iot_class": "cloud_polling",
 }

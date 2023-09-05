@@ -11,6 +11,7 @@ from dataclasses import dataclass
 from .entity import AlfenEntity
 from .alfen import AlfenDevice
 from homeassistant.const import (
+    CURRENCY_EURO,
     PERCENTAGE,
     UnitOfElectricCurrent,
     UnitOfPower,
@@ -55,8 +56,8 @@ ALFEN_NUMBER_TYPES: Final[tuple[AlfenNumberDescription, ...]] = (
         api_param="2068_0",
     ),
     AlfenNumberDescription(
-        key="ps_connector_max_limit",
-        name="Power Connector Max Current",
+        key="main_normal_max_current_socket_1",
+        name="Power Connector Max Current Socket 1",
         state=None,
         icon="mdi:current-ac",
         assumed_state=False,
@@ -194,19 +195,180 @@ ALFEN_NUMBER_TYPES: Final[tuple[AlfenNumberDescription, ...]] = (
         unit_of_measurement=UnitOfTime.SECONDS,
         api_param="2169_0",
     ),
+    AlfenNumberDescription(
+        key="ws_wired_socket_timeout",
+        name="WS Wired websocket timeout (s)",
+        state=None,
+        icon="mdi:timer-sand",
+        assumed_state=False,
+        device_class=None,
+        native_min_value=0,
+        native_max_value=30,
+        native_step=1,
+        custom_mode=None,
+        unit_of_measurement=UnitOfTime.SECONDS,
+        api_param="208B_1",
+    ),
+    AlfenNumberDescription(
+        key="ws_mobile_socket_timeout",
+        name="WS Mobile websocket timeout (s)",
+        state=None,
+        icon="mdi:timer-sand",
+        assumed_state=False,
+        device_class=None,
+        native_min_value=0,
+        native_max_value=30,
+        native_step=1,
+        custom_mode=None,
+        unit_of_measurement=UnitOfTime.SECONDS,
+        api_param="208B_2",
+    ),
+    AlfenNumberDescription(
+        key="ocpp_wired_ocpp_send_timeout",
+        name="OCPP Wired OCPP send timeout (s)",
+        state=None,
+        icon="mdi:timer-sand",
+        assumed_state=False,
+        device_class=None,
+        native_min_value=0,
+        native_max_value=30,
+        native_step=1,
+        custom_mode=None,
+        unit_of_measurement=UnitOfTime.SECONDS,
+        api_param="208D_1",
+    ),
+    AlfenNumberDescription(
+        key="ocpp_mobile_ocpp_send_timeout",
+        name="OCPP Mobile OCPP send timeout (s)",
+        state=None,
+        icon="mdi:timer-sand",
+        assumed_state=False,
+        device_class=None,
+        native_min_value=0,
+        native_max_value=30,
+        native_step=1,
+        custom_mode=None,
+        unit_of_measurement=UnitOfTime.SECONDS,
+        api_param="208D_2",
+    ),
+    AlfenNumberDescription(
+        key="ocpp_wired_ocpp_reply_timeout",
+        name="OCPP Wired OCPP reply timeout (s)",
+        state=None,
+        icon="mdi:timer-sand",
+        assumed_state=False,
+        device_class=None,
+        native_min_value=0,
+        native_max_value=30,
+        native_step=1,
+        custom_mode=None,
+        unit_of_measurement=UnitOfTime.SECONDS,
+        api_param="208E_1",
+    ),
+    AlfenNumberDescription(
+        key="ocpp_mobile_ocpp_reply_timeout",
+        name="OCPP Mobile OCPP reply timeout (s)",
+        state=None,
+        icon="mdi:timer-sand",
+        assumed_state=False,
+        device_class=None,
+        native_min_value=0,
+        native_max_value=30,
+        native_step=1,
+        custom_mode=None,
+        unit_of_measurement=UnitOfTime.SECONDS,
+        api_param="208E_1",
+    ),
+    AlfenNumberDescription(
+        key="heartbeat_interval",
+        name="Heartbeat interval (s)",
+        state=None,
+        icon="mdi:timer-sand",
+        assumed_state=False,
+        device_class=None,
+        native_min_value=0,
+        native_max_value=9000,
+        native_step=100,
+        custom_mode=NumberMode.BOX,
+        unit_of_measurement=UnitOfTime.SECONDS,
+        api_param="2086_0",
+    ),
+    AlfenNumberDescription(
+        key="price_start_tariff",
+        name="Price Start Tariff",
+        state=None,
+        icon="mdi:currency-eur",
+        assumed_state=False,
+        device_class=None,
+        native_min_value=0,
+        native_max_value=5,
+        native_step=0.1,
+        custom_mode=NumberMode.BOX,
+        unit_of_measurement=CURRENCY_EURO,
+        api_param="3262_2",
+    ),
+    AlfenNumberDescription(
+        key="price_price_per_kwh",
+        name="Price per kWh",
+        state=None,
+        icon="mdi:currency-eur",
+        assumed_state=False,
+        device_class=None,
+        native_min_value=0,
+        native_max_value=5,
+        native_step=0.1,
+        custom_mode=NumberMode.BOX,
+        unit_of_measurement=CURRENCY_EURO,
+        api_param="3262_3",
+    ),
+    AlfenNumberDescription(
+        key="price_price_per_minute",
+        name="Price per minute",
+        state=None,
+        icon="mdi:currency-eur",
+        assumed_state=False,
+        device_class=None,
+        native_min_value=0,
+        native_max_value=5,
+        native_step=0.1,
+        custom_mode=NumberMode.BOX,
+        unit_of_measurement=CURRENCY_EURO,
+        api_param="3262_4",
+    ),
 
 )
 
+ALFEN_NUMBER_DUAL_SOCKET_TYPES: Final[tuple[AlfenNumberDescription, ...]] = (
+    AlfenNumberDescription(
+        key="main_normal_max_current_socket_2",
+        name="Power Connector Max Current Socket 2",
+        state=None,
+        icon="mdi:current-ac",
+        assumed_state=False,
+        device_class=NumberDeviceClass.CURRENT,
+        native_min_value=0,
+        native_max_value=32,
+        native_step=1,
+        custom_mode=None,
+        unit_of_measurement=UnitOfElectricCurrent.AMPERE,
+        api_param="3129_0",
+    ),
+)
 
 async def async_setup_entry(
     hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback
 ) -> None:
     """Set up Alfen select entities from a config entry."""
+    device: AlfenDevice
     device = hass.data[ALFEN_DOMAIN][entry.entry_id]
     numbers = [AlfenNumber(device, description)
                for description in ALFEN_NUMBER_TYPES]
 
     async_add_entities(numbers)
+
+    if device.number_socket == 2:
+        numbers = [AlfenNumber(device, description)
+               for description in ALFEN_NUMBER_DUAL_SOCKET_TYPES]
 
     platform = entity_platform.current_platform.get()
 
@@ -241,6 +403,7 @@ class AlfenNumber(AlfenEntity, NumberEntity):
     _attr_has_entity_name = True
     _attr_name = None
     _attr_should_poll = False
+    entity_description: AlfenNumberDescription
 
     def __init__(
         self,
@@ -303,8 +466,11 @@ class AlfenNumber(AlfenEntity, NumberEntity):
         await self._device.set_green_share(value)
         await self.async_set_native_value(value)
 
-
     async def async_set_comfort_power(self, value):
         """Set the comfort power."""
         await self._device.set_comfort_power(value)
         await self.async_set_native_value(value)
+
+    async def async_update(self):
+        """Get the latest data and updates the states."""
+        self.async_set_native_value()

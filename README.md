@@ -19,23 +19,23 @@ Changing Green Share %
 ```
 service: alfen_wallbox.set_green_share
 data:
-  entity_id: sensor.wallbox
-  value: 95
+  entity_id: number.wallbox_solar_green_share
+  value: 80
 ```
 
 Changing Comfort Charging Power in Watt
 ```
 service: alfen_wallbox.set_comfort_power
 data:
-  entity_id: sensor.wallbox
-  value: 1450
+  entity_id: number.wallbox_solar_comfort_level
+  value: 1400
 ```
 
 Enable phase switching
 ```
 service: alfen_wallbox.enable_phase_switching
 data:
-  entity_id: sensor.wallbox
+  entity_id: switch.wallbox_enable_phase_switching
 ```
 
 
@@ -43,8 +43,30 @@ Disable phase switching
 ```
 service: alfen_wallbox.disable_phase_switching
 data:
-  entity_id: sensor.wallbox
+  entity_id: switch.wallbox_enable_phase_switching
 ```
+
+Enable RFID Authorization Mode
+```
+service: alfen_wallbox.enable_rfid_authorization_mode
+data:
+  entity_id: select.wallbox_authorization_mode
+```
+
+Disable RFID Authorization Mode
+```
+service: alfen_wallbox.disable_rfid_authorization_mode
+data:
+  entity_id: select.wallbox_authorization_mode
+```
+
+Reboot wallbox
+```
+service: alfen_wallbox.reboot_wallbox
+data:
+  entity_id: alfen_wallbox.garage
+```
+
 
 > After reverse engineering the API myself I found out that there is already a python libary wrapping the Alfen API.
 > https://gitlab.com/LordGaav/alfen-eve/-/tree/develop/alfeneve

@@ -119,13 +119,14 @@ GPRS_NETWORK_MODE_DICT: Final[dict[str, int]] = {
 }
 
 GPRS_TECHNOLOGY_DICT: Final[dict[str, int]] = {
-    "2G": 0,
-    "4G": 2,
+    "2G (GPRS)": 0,
+    "3G (UMTS)": 1,
+    "4G (LTE)": 2,
 }
 
 DSMR_SMR_INTERFACE_DICT: Final[dict[str, int]] = {
-    "Serial" : 0,
-    "Telnet" : 1,
+    "Serial": 0,
+    "Telnet": 1,
     "HomeWizard Wi-Fi P1": 2,
 }
 
@@ -226,7 +227,7 @@ ALFEN_SELECT_TYPES: Final[tuple[AlfenSelectDescription, ...]] = (
         options_dict=GPRS_TECHNOLOGY_DICT,
         api_param="2114_0",
     ),
-     AlfenSelectDescription(
+    AlfenSelectDescription(
         key="lb_dsmr_smr_interface",
         name="Load Balancing DSMR/SMR Interface",
         icon="mdi:scale-balance",
@@ -295,10 +296,12 @@ async def async_setup_entry(
         "async_disable_rfid_auth_mode",
     )
 
+
 class AlfenSelect(AlfenEntity, SelectEntity):
     """Define Alfen select."""
 
     values_dict: dict[int, str]
+    entity_description: AlfenSelectDescription
 
     def __init__(
         self, device: AlfenDevice, description: AlfenSelectDescription
@@ -335,7 +338,7 @@ class AlfenSelect(AlfenEntity, SelectEntity):
 
     async def async_update(self):
         """Update the entity."""
-        await self._device.async_update()
+        self._async_update_attrs()
 
     @callback
     def _async_update_attrs(self) -> None:
