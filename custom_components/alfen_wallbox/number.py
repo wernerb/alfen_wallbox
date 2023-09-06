@@ -355,6 +355,7 @@ ALFEN_NUMBER_DUAL_SOCKET_TYPES: Final[tuple[AlfenNumberDescription, ...]] = (
     ),
 )
 
+
 async def async_setup_entry(
     hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback
 ) -> None:
@@ -368,7 +369,8 @@ async def async_setup_entry(
 
     if device.number_socket == 2:
         numbers = [AlfenNumber(device, description)
-               for description in ALFEN_NUMBER_DUAL_SOCKET_TYPES]
+                   for description in ALFEN_NUMBER_DUAL_SOCKET_TYPES]
+        async_add_entities(numbers)
 
     platform = entity_platform.current_platform.get()
 

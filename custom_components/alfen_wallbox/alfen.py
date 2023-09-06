@@ -4,7 +4,8 @@ import requests
 
 from urllib3 import disable_warnings
 from datetime import timedelta
-from homeassistant import core
+
+from homeassistant.core import HomeAssistant
 
 
 from .const import (
@@ -45,7 +46,6 @@ POST_HEADER_JSON = {"Content-Type": "application/json"}
 _LOGGER = logging.getLogger(__name__)
 
 SCAN_INTERVAL = timedelta(seconds=5)
-hass = core.HomeAssistant()
 TIMEOUT = 30
 
 
@@ -71,10 +71,12 @@ class AlfenDevice:
         self.keepLogout = False
         self.updating = False
         self.number_socket = 1
+        self._hass = None
         disable_warnings()
 
-    async def init(self):
-        await hass.async_add_executor_job(self.get_info)
+    async def init(self, hass: HomeAssistant):
+        self._hass = hass
+        await self._hass.async_add_executor_job(self.get_info)
         self.id = "alfen_{}".format(self.name)
         if self.name is None:
             self.name = f"{self.info.identity} ({self.host})"
@@ -87,7 +89,6 @@ class AlfenDevice:
             if prop[ID] == '205E_0':
                 self.number_socket = int(prop[VALUE])
                 break
-
 
     def get_info(self):
         response = self._session.get(
@@ -130,7 +131,7 @@ class AlfenDevice:
         if not self.updating:
             self.updating = True
             if not self.keepLogout:
-                await hass.async_add_executor_job(self._get_all_properties_value)
+                await self._hass.async_add_executor_job(self._get_all_properties_value)
             self.updating = False
 
     def _post(self, cmd, payload=None, allowed_login=True):
@@ -214,7 +215,7 @@ class AlfenDevice:
         _LOGGER.debug(f"Reboot response {response}")
 
     async def async_request(self, method: str, cmd: str, json_data=None):
-        response_json = await hass.async_add_executor_job(self.request, method, cmd, json_data)
+        response_json = await self._hass.async_add_executor_job(self.request, method, cmd, json_data)
         return response_json
 
     def request(self, method: str, cmd: str, json_data=None):
@@ -227,7 +228,7 @@ class AlfenDevice:
         return response
 
     async def set_value(self, api_param, value):
-        await hass.async_add_executor_job(self._update_value, api_param, value)
+        await self._hass.async_add_executor_job(self._update_value, api_param, value)
 
         # we expect that the value is updated so we are just update the value in the properties
         for prop in self.properties:
@@ -237,7 +238,7 @@ class AlfenDevice:
                 break
 
     async def get_value(self, api_param):
-        await hass.async_add_executor_job(self._get_value, api_param)
+        await self._hass.async_add_executor_job(self._get_value, api_param)
 
     async def set_current_limit(self, limit):
         _LOGGER.debug(f"Set current limit {limit}A")

@@ -994,8 +994,8 @@ ALFEN_SENSOR_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
         device_class=SensorDeviceClass.CURRENT,
     ),
     AlfenSensorDescription(
-        key="main_station_active_max_current",
-        name="Main Station Active Max Current",
+        key="main_station_active_max_current_socket_1",
+        name="Main Station Active Max Current Socket 1",
         icon="mdi:current-ac",
         api_param="2161_0",
         unit=UnitOfElectricCurrent.AMPERE,
@@ -1007,12 +1007,12 @@ ALFEN_SENSOR_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
 
 ALFEN_SENSOR_DUAL_SOCKET_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
     AlfenSensorDescription(
-         key="ps_connector_2_max_allowed_phase",
-         name="Connector 2 Max Allowed of Phases",
-         icon="mdi:scale-balance",
-         unit=None,
-         api_param="312F_0",
-         round_digits=None,
+        key="ps_connector_2_max_allowed_phase",
+        name="Connector 2 Max Allowed of Phases",
+        icon="mdi:scale-balance",
+        unit=None,
+        api_param="312F_0",
+        round_digits=None,
     ),
     AlfenSensorDescription(
         key="main_state_socket_2",
@@ -1114,8 +1114,8 @@ ALFEN_SENSOR_DUAL_SOCKET_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
         device_class=SensorDeviceClass.CURRENT,
     ),
     AlfenSensorDescription(
-        key="main_external_min_current_socket_1",
-        name="Main External Min Current Socket 1",
+        key="main_external_min_current_socket_2",
+        name="Main External Min Current Socket 2",
         icon="mdi:current-ac",
         api_param="3160_0",
         unit=UnitOfElectricCurrent.AMPERE,
@@ -1151,13 +1151,13 @@ ALFEN_SENSOR_DUAL_SOCKET_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
     ),
 )
 
+
 async def async_setup_platform(
         hass: HomeAssistant,
         config: ConfigEntry,
         async_add_entities: AddEntitiesCallback,
         discovery_info=None):
     pass
-
 
 
 async def async_setup_entry(
@@ -1311,31 +1311,31 @@ class AlfenSensor(AlfenEntity, SensorEntity):
 
             for prop in self._device.properties:
                 if prop[ID] == "5221_3":
-                    voltage_l1 =  prop[VALUE]
+                    voltage_l1 = prop[VALUE]
                 if prop[ID] == "5221_4":
-                    voltage_l2 =  prop[VALUE]
+                    voltage_l2 = prop[VALUE]
                 if prop[ID] == "5221_5":
-                    voltage_l3 =  prop[VALUE]
+                    voltage_l3 = prop[VALUE]
                 if prop[ID] == "212F_1":
-                    current_l1 =  prop[VALUE]
+                    current_l1 = prop[VALUE]
                 if prop[ID] == "212F_2":
-                    current_l2 =  prop[VALUE]
+                    current_l2 = prop[VALUE]
                 if prop[ID] == "212F_3":
-                    current_l3 =  prop[VALUE]
-            
+                    current_l3 = prop[VALUE]
+
             if self.entity_description.key == "active_power_p1_l1":
                 if voltage_l1 is not None and current_l1 is not None:
-                    return round( float(voltage_l1) * float(current_l1) , 2)
+                    return round(float(voltage_l1) * float(current_l1), 2)
             if self.entity_description.key == "active_power_p1_l2":
                 if voltage_l2 is not None and current_l2 is not None:
-                    return round( float(voltage_l2) * float(current_l2) , 2)
+                    return round(float(voltage_l2) * float(current_l2), 2)
             if self.entity_description.key == "active_power_p1_l3":
                 if voltage_l3 is not None and current_l3 is not None:
-                    return round( float(voltage_l3) * float(current_l3) , 2)
+                    return round(float(voltage_l3) * float(current_l3), 2)
             if self.entity_description.key == "active_power_p1_total":
                 if voltage_l1 is not None and current_l1 is not None and voltage_l2 is not None and current_l2 is not None and voltage_l3 is not None and current_l3 is not None:
-                    return round( (float(voltage_l1) * float(current_l1) + float(voltage_l2) * float(current_l2) + float(voltage_l3) * float(current_l3)) , 2)
-                
+                    return round((float(voltage_l1) * float(current_l1) + float(voltage_l2) * float(current_l2) + float(voltage_l3) * float(current_l3)), 2)
+
         for prop in self._device.properties:
             if prop[ID] == self.entity_description.api_param:
                 # some exception of return value
