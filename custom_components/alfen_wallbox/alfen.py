@@ -4,10 +4,10 @@ import requests
 
 from urllib3 import disable_warnings
 from datetime import timedelta
-from homeassistant import core
+
+from homeassistant.core import HomeAssistant
 
 
-from homeassistant.util import Throttle
 from .const import (
     CAT,
     CAT_GENERIC,
@@ -45,12 +45,13 @@ POST_HEADER_JSON = {"Content-Type": "application/json"}
 
 _LOGGER = logging.getLogger(__name__)
 
-MIN_TIME_BETWEEN_UPDATES = timedelta(seconds=5)
-hass = core.HomeAssistant()
+SCAN_INTERVAL = timedelta(seconds=5)
+TIMEOUT = 30
 
 
 class AlfenDevice:
     def __init__(self,
+                 hass: HomeAssistant,
                  host: str,
                  name: str,
                  username: str,
@@ -70,19 +71,24 @@ class AlfenDevice:
         self._session.verify = False
         self.keepLogout = False
         self.updating = False
+        self.number_socket = 1
+        self._hass = hass
         disable_warnings()
 
-        # todo: issue: https://github.com/leeyuentuen/alfen_wallbox/issues/52
-        # use one time GET to get Number of socket
-        # 205E_0
-
     async def init(self):
-        await hass.async_add_executor_job(self.get_info)
+        await self._hass.async_add_executor_job(self.get_info)
         self.id = "alfen_{}".format(self.name)
         if self.name is None:
             self.name = f"{self.info.identity} ({self.host})"
 
         await self.async_update()
+        self._get_number_of_socket()
+
+    def _get_number_of_socket(self):
+        for prop in self.properties:
+            if prop[ID] == '205E_0':
+                self.number_socket = int(prop[VALUE])
+                break
 
     def get_info(self):
         response = self._session.get(
@@ -121,12 +127,11 @@ class AlfenDevice:
             "sw_version": self.info.firmware_version,
         }
 
-    @Throttle(MIN_TIME_BETWEEN_UPDATES)
     async def async_update(self):
         if not self.updating:
             self.updating = True
             if not self.keepLogout:
-                await hass.async_add_executor_job(self._get_all_properties_value)
+                await self._hass.async_add_executor_job(self._get_all_properties_value)
             self.updating = False
 
     def _post(self, cmd, payload=None, allowed_login=True):
@@ -134,7 +139,7 @@ class AlfenDevice:
             url=self.__get_url(cmd),
             json=payload,
             headers=POST_HEADER_JSON,
-            timeout=10)
+            timeout=TIMEOUT)
         if response.status_code == 401 and allowed_login:
             _LOGGER.debug("POST with login")
             self.login()
@@ -144,7 +149,7 @@ class AlfenDevice:
             return response
 
     def _get(self, url, allowed_login=True):
-        response = self._session.get(url, timeout=10)
+        response = self._session.get(url, timeout=TIMEOUT)
 
         if response.status_code == 401 and allowed_login:
             _LOGGER.debug("GET with login")
@@ -210,7 +215,7 @@ class AlfenDevice:
         _LOGGER.debug(f"Reboot response {response}")
 
     async def async_request(self, method: str, cmd: str, json_data=None):
-        response_json = await hass.async_add_executor_job(self.request, method, cmd, json_data)
+        response_json = await self._hass.async_add_executor_job(self.request, method, cmd, json_data)
         return response_json
 
     def request(self, method: str, cmd: str, json_data=None):
@@ -223,7 +228,7 @@ class AlfenDevice:
         return response
 
     async def set_value(self, api_param, value):
-        await hass.async_add_executor_job(self._update_value, api_param, value)
+        await self._hass.async_add_executor_job(self._update_value, api_param, value)
 
         # we expect that the value is updated so we are just update the value in the properties
         for prop in self.properties:
@@ -233,7 +238,7 @@ class AlfenDevice:
                 break
 
     async def get_value(self, api_param):
-        await hass.async_add_executor_job(self._get_value, api_param)
+        await self._hass.async_add_executor_job(self._get_value, api_param)
 
     async def set_current_limit(self, limit):
         _LOGGER.debug(f"Set current limit {limit}A")
@@ -286,10 +291,6 @@ class AlfenDeviceInfo:
         self.firmware_version = response["FWVersion"]
         self.model_id = response["Model"]
 
-        if ALFEN_PRODUCT_MAP[self.model_id] is None:
-            self.model = self.model_id
-        else:
-            self.model = f"{ALFEN_PRODUCT_MAP[self.model_id]} ({self.model_id})"
-
+        self.model = ALFEN_PRODUCT_MAP.get(self.model_id, self.model_id)
         self.object_id = response["ObjectId"]
         self.type = response["Type"]

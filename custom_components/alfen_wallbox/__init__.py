@@ -6,7 +6,6 @@ import logging
 
 from aiohttp import ClientConnectionError
 from async_timeout import timeout
-from homeassistant.helpers.event import track_time_interval
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import (
@@ -35,7 +34,6 @@ PLATFORMS = [
     Platform.BUTTON,
     Platform.TEXT
 ]
-SCAN_INTERVAL = timedelta(seconds=5)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -59,10 +57,6 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
 
-    # track_time_interval(hass, device.async_update(), SCAN_INTERVAL)
-    entry.async_create_background_task(
-        hass, device.async_update(), "alfen_update"
-    )
     if device is not None:
         await hass.async_add_executor_job(device.logout)
 
@@ -88,7 +82,7 @@ async def alfen_setup(hass: HomeAssistant, host: str, name: str, username: str, 
 
     try:
         with timeout(TIMEOUT):
-            device = AlfenDevice(host, name, username, password)
+            device = AlfenDevice(hass, host, name, username, password)
             await device.init()
     except asyncio.TimeoutError:
         _LOGGER.debug("Connection to %s timed out", host)

@@ -56,8 +56,8 @@ ALFEN_NUMBER_TYPES: Final[tuple[AlfenNumberDescription, ...]] = (
         api_param="2068_0",
     ),
     AlfenNumberDescription(
-        key="ps_connector_max_limit", #should be main_normal_max_current
-        name="Power Connector Max Current",
+        key="main_normal_max_current_socket_1",
+        name="Power Connector Max Current Socket 1",
         state=None,
         icon="mdi:current-ac",
         assumed_state=False,
@@ -338,16 +338,39 @@ ALFEN_NUMBER_TYPES: Final[tuple[AlfenNumberDescription, ...]] = (
 
 )
 
+ALFEN_NUMBER_DUAL_SOCKET_TYPES: Final[tuple[AlfenNumberDescription, ...]] = (
+    AlfenNumberDescription(
+        key="main_normal_max_current_socket_2",
+        name="Power Connector Max Current Socket 2",
+        state=None,
+        icon="mdi:current-ac",
+        assumed_state=False,
+        device_class=NumberDeviceClass.CURRENT,
+        native_min_value=0,
+        native_max_value=32,
+        native_step=1,
+        custom_mode=None,
+        unit_of_measurement=UnitOfElectricCurrent.AMPERE,
+        api_param="3129_0",
+    ),
+)
+
 
 async def async_setup_entry(
     hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback
 ) -> None:
     """Set up Alfen select entities from a config entry."""
+    device: AlfenDevice
     device = hass.data[ALFEN_DOMAIN][entry.entry_id]
     numbers = [AlfenNumber(device, description)
                for description in ALFEN_NUMBER_TYPES]
 
     async_add_entities(numbers)
+
+    if device.number_socket == 2:
+        numbers = [AlfenNumber(device, description)
+                   for description in ALFEN_NUMBER_DUAL_SOCKET_TYPES]
+        async_add_entities(numbers)
 
     platform = entity_platform.current_platform.get()
 
@@ -452,4 +475,4 @@ class AlfenNumber(AlfenEntity, NumberEntity):
 
     async def async_update(self):
         """Get the latest data and updates the states."""
-        self.async_set_native_value()
+        self._get_current_option()

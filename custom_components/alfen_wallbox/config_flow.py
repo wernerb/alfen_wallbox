@@ -37,7 +37,7 @@ class FlowHandler(config_entries.ConfigFlow):
 
         try:
             device = AlfenDevice(
-                host, name, username, password
+                self.hass, host, name, username, password
             )
             with timeout(TIMEOUT):
                 await device.init()
