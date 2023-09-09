@@ -3,7 +3,7 @@
 
 This is a custom component to allow control of Alfen Wallboxes in [HomeAssistant](https://home-assistant.io).
 
-The component is a fork of the [Garo Wallbox custom integration](https://github.com/sockless-coding/garo_wallbox).
+The component is a fork of the [Garo Wallbox custom integration](https://github.com/sockless-coding/garo_wallbox) and [egnerfl custom integration](https://github.com/egnerfl/alfen_wallbox)
 
 ![Screenshot 2023-07-02 at 18 09 47](https://github.com/leeyuentuen/alfen_wallbox/assets/1487966/322e9e05-117f-4adc-b159-7177533fde01)
 
@@ -13,7 +13,7 @@ The component is a fork of the [Garo Wallbox custom integration](https://github.
 
 
 Example of running in Services:
-Note; the name of the configured charging point is "wallbox" in these examples.
+Note; The name of the configured charging point is "wallbox" in these examples.
 
 Changing Green Share %
 ```
@@ -68,12 +68,12 @@ data:
 ```
 
 
-> After reverse engineering the API myself I found out that there is already a python libary wrapping the Alfen API.
+> After reverse engineering the API myself I found out that there is already a Python libary wrapping the Alfen API.
 > https://gitlab.com/LordGaav/alfen-eve/-/tree/develop/alfeneve
 
 ## Installation
 
-### Install using HACS (recomended)
+### Install using HACS (recommended)
 If you do not have HACS installed yet visit https://hacs.xyz for installation instructions.
 In HACS go to the Integrations section hit the big + at the bottom right and search for **Alfen Wallbox**.
 
