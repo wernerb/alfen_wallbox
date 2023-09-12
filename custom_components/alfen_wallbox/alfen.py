@@ -151,6 +151,7 @@ class AlfenDevice:
                     _LOGGER.debug("POST with login")
                     await self.login()
                     return await self._post(cmd, payload, False)
+                self.wait = False
                 return response
         except json.JSONDecodeError as e:
             # skip tailing comma error from alfen
