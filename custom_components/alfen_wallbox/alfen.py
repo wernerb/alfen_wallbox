@@ -1,6 +1,8 @@
 import json
 import logging
 import ssl
+
+from aiohttp import ClientResponse
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
 from urllib3 import disable_warnings
@@ -135,7 +137,7 @@ class AlfenDevice:
             await self._get_all_properties_value()
             self.updating = False
 
-    async def _post(self, cmd, payload=None, allowed_login=True):
+    async def _post(self, cmd, payload=None, allowed_login=True) -> ClientResponse | None:
         try:
             self.wait = True
             _LOGGER.debug("Send Post Request")
@@ -149,15 +151,13 @@ class AlfenDevice:
                     _LOGGER.debug("POST with login")
                     await self.login()
                     return await self._post(cmd, payload, False)
-                resp = await response.json(content_type=None)
-                self.wait = False
-                return resp
+                return response
         except json.JSONDecodeError as e:
             # skip tailing comma error from alfen
             _LOGGER.debug('trailing comma is not allowed')
             if e.msg == "trailing comma is not allowed":
                 self.wait = False
-                return True
+                return None
 
             _LOGGER.error("JSONDecodeError error on POST %s", str(e))
         except TimeoutError as e:
@@ -167,7 +167,7 @@ class AlfenDevice:
         self.wait = False
         return None
 
-    async def _get(self, url, allowed_login=True):
+    async def _get(self, url, allowed_login=True) -> ClientResponse | None:
         try:
             async with self._session.get(url, timeout=TIMEOUT, ssl=self.ssl) as response:
                 if response.status == 401 and allowed_login:
@@ -200,14 +200,15 @@ class AlfenDevice:
             _LOGGER.error("Unexpected error on LOGOUT %s", str(e))
             return None
 
-    async def _update_value(self, api_param, value):
+    async def _update_value(self, api_param, value) -> ClientResponse | None:
         try:
             self.wait = True
             response = await self._post(cmd=PROP, payload={api_param: {
                 ID: api_param, VALUE: str(value)}})
-            _LOGGER.debug(f"Set {api_param} value {value} response {response}")
+            resp = await response.json(content_type=None)
+            _LOGGER.debug(f"Set {api_param} value {value} response {resp}")
             self.wait = False
-            return response
+            return resp
         except Exception as e:  # pylint: disable=broad-except
             _LOGGER.error("Unexpected error on UPDATE VALUE %s", str(e))
             return None
@@ -249,15 +250,14 @@ class AlfenDevice:
         response = await self._post(cmd=CMD, payload={PARAM_COMMAND: "reboot"})
         _LOGGER.debug(f"Reboot response {response}")
 
-    async def async_request(self, method: str, cmd: str, json_data=None):
+    async def async_request(self, method: str, cmd: str, json_data=None) -> ClientResponse | None:
         try:
-            response_json = await self._hass.async_add_executor_job(self.request, method, cmd, json_data)
-            return response_json
+            return await self.request(method, cmd, json_data)
         except Exception as e:  # pylint: disable=broad-except
             _LOGGER.error("Unexpected error async request %s", str(e))
             return None
 
-    async def request(self, method: str, cmd: str, json_data=None):
+    async def request(self, method: str, cmd: str, json_data=None) -> ClientResponse:
         if method == METHOD_POST:
             response = await self._post(cmd=cmd, payload=json_data)
         elif method == METHOD_GET:
@@ -279,7 +279,7 @@ class AlfenDevice:
     async def get_value(self, api_param):
         await self._get_value(api_param)
 
-    async def set_current_limit(self, limit):
+    async def set_current_limit(self, limit) -> None:
         _LOGGER.debug(f"Set current limit {limit}A")
         if limit > 32 | limit < 1:
             return None
@@ -294,7 +294,7 @@ class AlfenDevice:
 
         await self.set_value("2126_0", value)
 
-    async def set_current_phase(self, phase):
+    async def set_current_phase(self, phase) -> None:
         _LOGGER.debug(f"Set current phase {phase}")
         if phase not in ('L1', 'L2', 'L3'):
             return None
@@ -308,13 +308,13 @@ class AlfenDevice:
             value = 1
         await self.set_value("2185_0", value)
 
-    async def set_green_share(self, value):
+    async def set_green_share(self, value) -> None:
         _LOGGER.debug(f"Set green share value {value}%")
         if value < 0 | value > 100:
             return None
         await self.set_value("3280_2", value)
 
-    async def set_comfort_power(self, value):
+    async def set_comfort_power(self, value) -> None:
         _LOGGER.debug(f"Set Comfort Level {value}W")
         if value < 1400 | value > 5000:
             return None
