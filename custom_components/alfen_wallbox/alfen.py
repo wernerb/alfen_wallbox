@@ -278,10 +278,11 @@ class AlfenDevice:
         response = await self._update_value(api_param, value)
         if response:
             # we expect that the value is updated so we are just update the value in the properties
-            for prop in self.properties:
+            for index, prop in enumerate(self.properties):
                 if prop[ID] == api_param:
                     _LOGGER.debug(f"Set {api_param} value {value}")
                     prop[VALUE] = value
+                    self.properties[index] = prop
                     break
 
     async def get_value(self, api_param):

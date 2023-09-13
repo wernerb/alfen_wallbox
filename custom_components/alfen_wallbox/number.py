@@ -440,39 +440,42 @@ class AlfenNumber(AlfenEntity, NumberEntity):
     @property
     def native_value(self) -> float | None:
         """Return the entity value to represent the entity state."""
-        for prop in self._device.properties:
-            if prop[ID] == self.entity_description.api_param:
-                return prop[VALUE]
-        return None
+        return self._get_current_option()
 
     async def async_set_native_value(self, value: float) -> None:
         """Update the current value."""
         await self._device.set_value(self.entity_description.api_param, int(value))
-        self._attr_native_value = self._get_current_option()
-        self.async_write_ha_state()
+        self._set_current_option()
 
     def _get_current_option(self) -> str | None:
         """Return the current option."""
         for prop in self._device.properties:
             if prop[ID] == self.entity_description.api_param:
+                _LOGGER.debug("%s Value: %s",
+                              self.entity_description.name, prop[VALUE])
                 return prop[VALUE]
         return None
+
+    def _set_current_option(self):
+        """Set the current option."""
+        self._attr_native_value = self._get_current_option()
+        self.async_write_ha_state()
 
     async def async_set_current_limit(self, limit):
         """Set the current limit."""
         await self._device.set_current_limit(limit)
-        self._get_current_option()
+        self._set_current_option()
 
     async def async_set_green_share(self, value):
         """Set the green share."""
         await self._device.set_green_share(value)
-        self._get_current_option()
+        self._set_current_option()
 
     async def async_set_comfort_power(self, value):
         """Set the comfort power."""
         await self._device.set_comfort_power(value)
-        self._get_current_option()
+        self._set_current_option()
 
     async def async_update(self):
         """Get the latest data and updates the states."""
-        self._get_current_option()
+        self._set_current_option()
