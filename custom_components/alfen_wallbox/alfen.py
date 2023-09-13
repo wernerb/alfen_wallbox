@@ -201,17 +201,24 @@ class AlfenDevice:
             _LOGGER.error("Unexpected error on LOGOUT %s", str(e))
             return None
 
-    async def _update_value(self, api_param, value) -> ClientResponse | None:
+    async def _update_value(self, api_param, value, allowed_login=True) -> ClientResponse | None:
         try:
             self.wait = True
-            response = await self._post(cmd=PROP, payload={api_param: {
-                ID: api_param, VALUE: str(value)}})
-            resp = await response.json(content_type=None)
-            _LOGGER.debug(f"Set {api_param} value {value} response {resp}")
-            self.wait = False
-            return resp
+            async with self._session.post(
+                    url=self.__get_url(PROP),
+                    json={api_param: {ID: api_param, VALUE: str(value)}},
+                    headers=POST_HEADER_JSON,
+                    timeout=TIMEOUT,
+                    ssl=self.ssl) as response:
+                if response.status == 401 and allowed_login:
+                    _LOGGER.debug("POST(Update) with login")
+                    await self.login()
+                    return await self._update_value(api_param, value, False)
+                self.wait = False
+                return response
         except Exception as e:  # pylint: disable=broad-except
             _LOGGER.error("Unexpected error on UPDATE VALUE %s", str(e))
+            self.wait = False
             return None
 
     async def _get_value(self, api_param):
