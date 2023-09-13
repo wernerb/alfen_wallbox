@@ -444,7 +444,7 @@ class AlfenNumber(AlfenEntity, NumberEntity):
 
     async def async_set_native_value(self, value: float) -> None:
         """Update the current value."""
-        await self._device.set_value(self.entity_description.api_param, int(value))
+        await self._device.set_value(self.entity_description.api_param, float(value))
         self._set_current_option()
 
     def _get_current_option(self) -> str | None:
