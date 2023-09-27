@@ -16,6 +16,7 @@ from .const import (
     CAT_GENERIC,
     CAT_GENERIC2,
     CAT_METER1,
+    CAT_METER2,
     CAT_METER4,
     CAT_OCPP,
     CAT_STATES,
@@ -239,7 +240,7 @@ class AlfenDevice:
     async def _get_all_properties_value(self):
         _LOGGER.debug(f"Get properties")
         properties = []
-        for cat in (CAT_GENERIC, CAT_GENERIC2, CAT_METER1, CAT_STATES, CAT_TEMP, CAT_OCPP, CAT_METER4, CAT_MBUS_TCP, CAT_COMM, CAT_DISPLAY):
+        for cat in (CAT_GENERIC, CAT_GENERIC2, CAT_METER1, CAT_STATES, CAT_TEMP, CAT_OCPP, CAT_METER4, CAT_MBUS_TCP, CAT_COMM, CAT_DISPLAY, CAT_METER2):
             nextRequest = True
             offset = 0
             while (nextRequest):

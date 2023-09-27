@@ -34,6 +34,9 @@ CAT_OCPP = "ocpp"
 CAT_MBUS_TCP = "MbusTCP"
 CAT_COMM = "comm"
 CAT_DISPLAY = "display"
+#CAT_LEDS = "leds"
+#CAT_ACCELERO = "accelero"
+CAT_METER2 = "meter2"
 
 COMMAND_REBOOT = "reboot"
 

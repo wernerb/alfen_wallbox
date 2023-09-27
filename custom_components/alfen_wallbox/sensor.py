@@ -430,8 +430,8 @@ ALFEN_SENSOR_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
         device_class=SensorDeviceClass.CURRENT,
     ),
     AlfenSensorDescription(
-        key="active_power_total",
-        name="Active Power Total",
+        key="active_power_total_socket_1",
+        name="Active Power Total Socket 1",
         icon="mdi:circle-slice-3",
         api_param="2221_16",
         unit=UnitOfPower.WATT,
@@ -440,8 +440,8 @@ ALFEN_SENSOR_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
         device_class=SensorDeviceClass.POWER,
     ),
     AlfenSensorDescription(
-        key="meter_reading",
-        name="Meter Reading",
+        key="meter_reading_socket_1",
+        name="Meter Reading Socket 1",
         icon="mdi:counter",
         api_param="2221_22",
         unit=UnitOfEnergy.KILO_WATT_HOUR,
@@ -1149,6 +1149,26 @@ ALFEN_SENSOR_DUAL_SOCKET_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
         api_param="3191_2",
         round_digits=None,
     ),
+    AlfenSensorDescription(
+        key="meter_reading_socket_2",
+        name="Meter Reading Socket 2",
+        icon="mdi:counter",
+        api_param="3221_22",
+        unit=UnitOfEnergy.KILO_WATT_HOUR,
+        round_digits=None,
+        state_class=SensorStateClass.TOTAL_INCREASING,
+        device_class=SensorDeviceClass.ENERGY
+    ),
+    AlfenSensorDescription(
+        key="active_power_total_socket_2",
+        name="Active Power Total Socket 2",
+        icon="mdi:circle-slice-3",
+        api_param="3221_16",
+        unit=UnitOfPower.WATT,
+        round_digits=2,
+        state_class=SensorStateClass.MEASUREMENT,
+        device_class=SensorDeviceClass.POWER,
+    ),
 )
 
 
@@ -1351,7 +1371,7 @@ class AlfenSensor(AlfenEntity, SensorEntity):
                         return STATUS_DICT.get(prop[VALUE], 'Unknown')
 
                 # meter_reading from w to kWh
-                if self.entity_description.api_param == "2221_22":
+                if self.entity_description.api_param == "2221_22" or self.entity_description.api_param == "3221_22":
                     return round((prop[VALUE] / 1000), 2)
 
                 # Car PWM Duty cycle %
