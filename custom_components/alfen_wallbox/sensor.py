@@ -1061,11 +1061,11 @@ ALFEN_SENSOR_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
         key="smart_meter_active_power_total",
         name="Smart Meter Active Power Total",
         icon="mdi:flash",
-        api_param="5221_8",
-        unit=UnitOfEnergy.KILO_WATT_HOUR,
-        round_digits=1,
-        state_class=SensorStateClass.TOTAL_INCREASING,
-        device_class=SensorDeviceClass.ENERGY,
+        api_param="5221_16",
+        unit=UnitOfPower.WATT,
+        round_digits=2,
+        state_class=SensorStateClass.MEASUREMENT,
+        device_class=SensorDeviceClass.POWER,
     ),
 
     AlfenSensorDescription(
