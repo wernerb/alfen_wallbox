@@ -1,5 +1,5 @@
 from homeassistant.helpers import entity_platform
-from .const import ID, SERVICE_SET_COMFORT_POWER, SERVICE_SET_CURRENT_LIMIT, SERVICE_SET_GREEN_SHARE, VALUE
+from .const import ID, LICENSE_HIGH_POWER, SERVICE_SET_COMFORT_POWER, SERVICE_SET_CURRENT_LIMIT, SERVICE_SET_GREEN_SHARE, VALUE
 from homeassistant.components.number import NumberDeviceClass, NumberEntity, NumberEntityDescription, NumberMode
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
@@ -50,7 +50,7 @@ ALFEN_NUMBER_TYPES: Final[tuple[AlfenNumberDescription, ...]] = (
         assumed_state=False,
         device_class=NumberDeviceClass.CURRENT,
         native_min_value=1,
-        native_max_value=32,
+        native_max_value=16,
         native_step=1,
         custom_mode=None,
         unit_of_measurement=UnitOfElectricCurrent.AMPERE,
@@ -65,7 +65,7 @@ ALFEN_NUMBER_TYPES: Final[tuple[AlfenNumberDescription, ...]] = (
         assumed_state=False,
         device_class=NumberDeviceClass.CURRENT,
         native_min_value=0,
-        native_max_value=32,
+        native_max_value=16,
         native_step=1,
         custom_mode=None,
         unit_of_measurement=UnitOfElectricCurrent.AMPERE,
@@ -80,7 +80,7 @@ ALFEN_NUMBER_TYPES: Final[tuple[AlfenNumberDescription, ...]] = (
         assumed_state=False,
         device_class=NumberDeviceClass.CURRENT,
         native_min_value=0,
-        native_max_value=32,
+        native_max_value=16,
         native_step=1,
         custom_mode=None,
         unit_of_measurement=UnitOfElectricCurrent.AMPERE,
@@ -95,7 +95,7 @@ ALFEN_NUMBER_TYPES: Final[tuple[AlfenNumberDescription, ...]] = (
         assumed_state=False,
         device_class=NumberDeviceClass.CURRENT,
         native_min_value=0,
-        native_max_value=32,
+        native_max_value=16,
         native_step=1,
         custom_mode=None,
         unit_of_measurement=UnitOfElectricCurrent.AMPERE,
@@ -369,7 +369,7 @@ ALFEN_NUMBER_DUAL_SOCKET_TYPES: Final[tuple[AlfenNumberDescription, ...]] = (
         assumed_state=False,
         device_class=NumberDeviceClass.CURRENT,
         native_min_value=0,
-        native_max_value=32,
+        native_max_value=16,
         native_step=1,
         custom_mode=None,
         unit_of_measurement=UnitOfElectricCurrent.AMPERE,
@@ -459,6 +459,16 @@ class AlfenNumber(AlfenEntity, NumberEntity):
             self._attr_native_max_value = description.native_max_value
         if description.native_step is not None:
             self._attr_native_step = description.native_step
+
+        # override the amps and set them on 32A if there is a license for it
+        override_amps_api_key = [
+            '2068_0', '2129_0', '2062_0', '2067_0', '3129_0'
+        ]
+        # check if device licenses has the high power socket license
+        if LICENSE_HIGH_POWER in self._device.licenses:
+            if description.api_param in override_amps_api_key:
+                self._attr_max_value = 32
+                self._attr_native_max_value = 32
 
     @property
     def native_value(self) -> float | None:

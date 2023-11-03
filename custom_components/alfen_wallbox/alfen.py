@@ -29,6 +29,7 @@ from .const import (
     DOMAIN,
     ALFEN_PRODUCT_MAP,
     ID,
+    LICENSES,
     METHOD_GET,
     METHOD_POST,
     OFFSET,
@@ -70,6 +71,7 @@ class AlfenDevice:
             self.username = "admin"
         self.password = password
         self.properties = []
+        self.licenses = []
         self._session.verify = False
         self.keepLogout = False
         self.wait = False
@@ -95,6 +97,14 @@ class AlfenDevice:
         for prop in self.properties:
             if prop[ID] == '205E_0':
                 self.number_socket = int(prop[VALUE])
+                break
+
+    def get_licenses(self):
+        for prop in self.properties:
+            if prop[ID] == '21A2_0':
+                for key, value in LICENSES.items():
+                    if int(prop[VALUE]) & int(value):
+                        self.licenses.append(key)
                 break
 
     async def get_info(self):

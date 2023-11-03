@@ -3,7 +3,19 @@ import logging
 from dataclasses import dataclass
 from typing import Final
 
-from .const import ID, VALUE
+from .const import (
+    ID,
+    LICENSE_NONE,
+    LICENSE_SCN,
+    LICENSE_LOAD_BALANCING_STATIC,
+    LICENSE_LOAD_BALANCING_ACTIVE,
+    LICENSE_HIGH_POWER,
+    LICENSE_RFID,
+    LICENSE_PERSONALIZED_DISPLAY,
+    LICENSE_MOBILE,
+    LICENSE_PAYMENT_GIROE,
+    VALUE
+)
 from .alfen import AlfenDevice
 from .entity import AlfenEntity
 
@@ -20,7 +32,6 @@ _LOGGER = logging.getLogger(__name__)
 @dataclass
 class AlfenBinaryDescriptionMixin:
     """Define an entity description mixin for binary sensor entities."""
-
     api_param: str
 
 
@@ -36,6 +47,55 @@ ALFEN_BINARY_SENSOR_TYPES: Final[tuple[AlfenBinaryDescription, ...]] = (
         device_class=None,
         api_param="205B_0",
     ),
+    AlfenBinaryDescription(
+        key="license_scn",
+        name="License Smart Charging Network",
+        device_class=None,
+        api_param=None,
+    ),
+    AlfenBinaryDescription(
+        key="license_active_loadbalancing",
+        name="License Active Loadbalancing",
+        device_class=None,
+        api_param=None,
+    ),
+    AlfenBinaryDescription(
+        key="license_static_loadbalancing",
+        name="License Static Loadbalancing",
+        device_class=None,
+        api_param=None,
+    ),
+    AlfenBinaryDescription(
+        key="license_high_power_sockets",
+        name="License 32A Output per Socket",
+        device_class=None,
+        api_param=None,
+    ),
+    AlfenBinaryDescription(
+        key="license_rfid_reader",
+        name="License RFID Reader",
+        device_class=None,
+        api_param=None,
+    ),
+    AlfenBinaryDescription(
+        key="license_personalized_display",
+        name="License Personalized Display",
+        device_class=None,
+        api_param=None,
+    ),
+    AlfenBinaryDescription(
+        key="license_mobile_3G_4G",
+        name="License Mobile 3G & 4G",
+        device_class=None,
+        api_param=None,
+    ),
+    AlfenBinaryDescription(
+        key="license_giro_e",
+        name="License Giro-e Payment",
+        device_class=None,
+        api_param=None,
+    ),
+
 )
 
 
@@ -68,17 +128,49 @@ class AlfenBinarySensor(AlfenEntity, BinarySensorEntity):
         self._attr_unique_id = f"{self._device.id}_{description.key}"
         self.entity_description = description
 
+        # custom code for license
+        if self.entity_description.api_param is None:
+            # check if license is available
+            if '21A2_0' in self._device.properties:
+                if self._device.properties['21A2_0'][VALUE] == LICENSE_NONE:
+                    return False
+            if self.entity_description.key == "license_scn":
+                self._attr_is_on = LICENSE_SCN in self._device.licenses
+            if self.entity_description.key == "license_active_loadbalancing":
+                self._attr_is_on = LICENSE_SCN in self._device.licenses or LICENSE_LOAD_BALANCING_ACTIVE in self._device.licenses
+            if self.entity_description.key == "license_static_loadbalancing":
+                self._attr_is_on = LICENSE_SCN in self._device.licenses or LICENSE_LOAD_BALANCING_STATIC in self._device.licenses or LICENSE_LOAD_BALANCING_STATIC in self._device.licenses
+            if self.entity_description.key == "license_high_power_sockets":
+                self._attr_is_on = LICENSE_HIGH_POWER in self._device.licenses
+            if self.entity_description.key == "license_rfid_reader":
+                self._attr_is_on = LICENSE_RFID in self._device.licenses
+            if self.entity_description.key == "license_personalized_display":
+                self._attr_is_on = LICENSE_PERSONALIZED_DISPLAY in self._device.licenses
+            if self.entity_description.key == "license_mobile_3G_4G":
+                self._attr_is_on = LICENSE_MOBILE in self._device.licenses
+            if self.entity_description.key == "license_giro_e":
+                self._attr_is_on = LICENSE_PAYMENT_GIROE in self._device.licenses
+#            if self.entity_description.key == "license_qrcode":
+#                self._attr_is_on = LICENSE_PAYMENT_QRCODE in self._device.licenses
+#            if self.entity_description.key == "license_expose_smartmeterdata":
+#                self._attr_is_on = LICENSE_EXPOSE_SMARTMETERDATA in self._device.licenses
+
     @property
     def available(self) -> bool:
-        for prop in self._device.properties:
-            if prop[ID] == self.entity_description.api_param:
-                return True
-        return False
+        if self.entity_description.api_param is not None:
+            for prop in self._device.properties:
+                if prop[ID] == self.entity_description.api_param:
+                    return True
+            return False
+        else:
+            return True
 
     @property
     def is_on(self) -> bool:
-        for prop in self._device.properties:
-            if prop[ID] == self.entity_description.api_param:
-                return prop[VALUE] == 1
-
-        return False
+        if self.entity_description.api_param is not None:
+            for prop in self._device.properties:
+                if prop[ID] == self.entity_description.api_param:
+                    return prop[VALUE] == 1
+            return False
+        else:
+            return self._attr_is_on
