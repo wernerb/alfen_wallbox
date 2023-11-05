@@ -136,6 +136,16 @@ DIRECT_EXTERNAL_SUSPEND_SIGNAL: Final[dict[str, int]] = {
     "Allowed, suspend when open": 2
 }
 
+SOCKET_TYPE_DICT: Final[dict[str, int]] = {
+    "Fixed Cable Unknown": 0,
+    "Mennekes": 1,
+    "FCT": 2,
+    "Schuko": 3,
+    "FIXED_CABLE_TYPE_1": 4,
+    "FIXED_CABLE_TYPE_2": 5,
+    "UNKNOWN": 99,
+}
+
 ALFEN_SELECT_TYPES: Final[tuple[AlfenSelectDescription, ...]] = (
     AlfenSelectDescription(
         key="lb_solar_charging_mode",
@@ -259,7 +269,25 @@ ALFEN_SELECT_TYPES: Final[tuple[AlfenSelectDescription, ...]] = (
         options_dict=DIRECT_EXTERNAL_SUSPEND_SIGNAL,
         api_param="216C_0",
     ),
+    AlfenSelectDescription(
+        key="ps_socket_type_socket_1",
+        name="Socket Type Socket 1",
+        icon="mdi:cable-data",
+        options=list(SOCKET_TYPE_DICT),
+        options_dict=SOCKET_TYPE_DICT,
+        api_param="2125_0",
+    ),
+)
 
+ALFEN_SELECT_DUAL_SOCKET_TYPES: Final[tuple[AlfenSelectDescription, ...]] = (
+    AlfenSelectDescription(
+        key="ps_socket_type_socket_2",
+        name="Socket Type Socket 2",
+        icon="mdi:cable-data",
+        options=list(SOCKET_TYPE_DICT),
+        options_dict=SOCKET_TYPE_DICT,
+        api_param="3125_0",
+    ),
 )
 
 
@@ -267,12 +295,17 @@ async def async_setup_entry(
     hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback
 ) -> None:
     """Add Alfen Select from a config_entry"""
-
+    device: AlfenDevice
     device = hass.data[ALFEN_DOMAIN][entry.entry_id]
     selects = [AlfenSelect(device, description)
                for description in ALFEN_SELECT_TYPES]
 
     async_add_entities(selects)
+
+    if device.number_socket == 2:
+        numbers = [AlfenSelect(device, description)
+                   for description in ALFEN_SELECT_DUAL_SOCKET_TYPES]
+        async_add_entities(numbers)
 
     platform = entity_platform.current_platform.get()
 
