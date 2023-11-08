@@ -70,6 +70,7 @@ data:
 
 > After reverse engineering the API myself I found out that there is already a Python libary wrapping the Alfen API.
 > https://gitlab.com/LordGaav/alfen-eve/-/tree/develop/alfeneve
+> https://github.com/leeyuentuen/alfen_wallbox/wiki/API-paramID
 
 ## Installation
 
