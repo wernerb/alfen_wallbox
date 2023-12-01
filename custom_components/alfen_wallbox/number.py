@@ -514,8 +514,8 @@ class AlfenNumber(AlfenEntity, NumberEntity):
         # check if device licenses has the high power socket license
         if LICENSE_HIGH_POWER in self._device.licenses:
             if description.api_param in override_amps_api_key:
-                self._attr_max_value = 32
-                self._attr_native_max_value = 32
+                self._attr_max_value = 40
+                self._attr_native_max_value = 40
 
     @property
     def native_value(self) -> float | None:
