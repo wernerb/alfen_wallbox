@@ -1,14 +1,16 @@
-from datetime import timedelta
+"""Base entity for Alfen Wallbox integration."""
 import logging
+
+from homeassistant.helpers.entity import DeviceInfo, Entity
 
 from .alfen import AlfenDevice
 from .const import DOMAIN as ALFEN_DOMAIN
-from homeassistant.helpers.entity import DeviceInfo, Entity
 
 _LOGGER = logging.getLogger(__name__)
 
 
 class AlfenEntity(Entity):
+    """Define a base Alfen entity."""
 
     def __init__(self, device: AlfenDevice) -> None:
         """Initialize the Alfen entity."""

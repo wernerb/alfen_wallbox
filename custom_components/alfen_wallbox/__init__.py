@@ -1,29 +1,24 @@
 """Alfen Wallbox integration."""
 
 import asyncio
-from datetime import timedelta
+from asyncio import timeout
 import logging
 
 from aiohttp import ClientConnectionError
-from async_timeout import timeout
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import (
     CONF_HOST,
     CONF_NAME,
-    CONF_USERNAME,
     CONF_PASSWORD,
+    CONF_USERNAME,
     Platform,
 )
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryNotReady
 
 from .alfen import AlfenDevice
-
-from .const import (
-    DOMAIN,
-    TIMEOUT,
-)
+from .const import DOMAIN, TIMEOUT
 
 PLATFORMS = [
     Platform.SENSOR,
@@ -45,6 +40,7 @@ async def async_setup(hass: HomeAssistant, config: dict) -> bool:
 
 
 async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> bool:
+    """Set up Alfen Wallbox from a config entry."""
     conf = config_entry.data
     device = await alfen_setup(
         hass, conf[CONF_HOST], conf[CONF_NAME], conf[CONF_USERNAME], conf[CONF_PASSWORD]

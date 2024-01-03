@@ -1,41 +1,39 @@
+"""Alfen Wallbox API."""
 import json
 import logging
 import ssl
 
 from aiohttp import ClientResponse
-from homeassistant.helpers.aiohttp_client import async_get_clientsession
-
 from urllib3 import disable_warnings
 
 from homeassistant.core import HomeAssistant
-from homeassistant.util import Throttle
-
+from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
 from .const import (
+    ALFEN_PRODUCT_MAP,
     CAT,
+    CAT_COMM,
+    CAT_DISPLAY,
     CAT_GENERIC,
     CAT_GENERIC2,
+    CAT_MBUS_TCP,
     CAT_METER1,
     CAT_METER2,
     CAT_METER4,
     CAT_OCPP,
     CAT_STATES,
     CAT_TEMP,
-    CAT_MBUS_TCP,
-    CAT_COMM,
-    CAT_DISPLAY,
     CMD,
     DISPLAY_NAME_VALUE,
     DOMAIN,
-    ALFEN_PRODUCT_MAP,
     ID,
+    INFO,
     LICENSES,
+    LOGIN,
+    LOGOUT,
     METHOD_GET,
     METHOD_POST,
     OFFSET,
-    INFO,
-    LOGIN,
-    LOGOUT,
     PARAM_COMMAND,
     PARAM_DISPLAY_NAME,
     PARAM_PASSWORD,
@@ -44,7 +42,7 @@ from .const import (
     PROPERTIES,
     TIMEOUT,
     TOTAL,
-    VALUE
+    VALUE,
 )
 
 POST_HEADER_JSON = {"Content-Type": "application/json"}
@@ -88,18 +86,21 @@ class AlfenDevice:
         self.ssl = context
 
     async def init(self):
+        """Initialize the Alfen API."""
         await self.get_info()
-        self.id = "alfen_{}".format(self.name)
+        self.id = f"alfen_{self.name}"
         if self.name is None:
             self.name = f"{self.info.identity} ({self.host})"
 
     def get_number_of_socket(self):
+        """Get number of socket from the properties."""
         for prop in self.properties:
             if prop[ID] == '205E_0':
                 self.number_socket = int(prop[VALUE])
                 break
 
     def get_licenses(self):
+        """Get licenses from the properties."""
         for prop in self.properties:
             if prop[ID] == '21A2_0':
                 for key, value in LICENSES.items():
@@ -108,6 +109,7 @@ class AlfenDevice:
                 break
 
     async def get_info(self):
+        """Get info from the API."""
         response = await self._session.get(
             url=self.__get_url(INFO), ssl=self.ssl
         )
@@ -129,6 +131,7 @@ class AlfenDevice:
 
     @property
     def status(self) -> str:
+        """Return the status of the device."""
         return self._status
 
     @property
@@ -143,12 +146,14 @@ class AlfenDevice:
         }
 
     async def async_update(self):
+        """Update the device properties."""
         if not self.keepLogout and not self.wait and not self.updating:
             self.updating = True
             await self._get_all_properties_value()
             self.updating = False
 
     async def _post(self, cmd, payload=None, allowed_login=True) -> ClientResponse | None:
+        """Send a POST request to the API."""
         try:
             self.wait = True
             _LOGGER.debug("Send Post Request")
@@ -180,6 +185,7 @@ class AlfenDevice:
         return None
 
     async def _get(self, url, allowed_login=True) -> ClientResponse | None:
+        """Send a GET request to the API."""
         try:
             async with self._session.get(url, timeout=TIMEOUT, ssl=self.ssl) as response:
                 if response.status == 401 and allowed_login:
@@ -196,6 +202,7 @@ class AlfenDevice:
             return None
 
     async def login(self):
+        """Login to the API."""
         try:
             response = await self._post(cmd=LOGIN, payload={
                 PARAM_USERNAME: self.username, PARAM_PASSWORD: self.password, PARAM_DISPLAY_NAME: DISPLAY_NAME_VALUE})
@@ -205,6 +212,7 @@ class AlfenDevice:
             return None
 
     async def logout(self):
+        """Logout from the API."""
         try:
             response = await self._post(cmd=LOGOUT)
             _LOGGER.debug(f"Logout response {response}")
@@ -213,6 +221,7 @@ class AlfenDevice:
             return None
 
     async def _update_value(self, api_param, value, allowed_login=True) -> ClientResponse | None:
+        """Update a value on the API."""
         try:
             self.wait = True
             async with self._session.post(
@@ -233,8 +242,9 @@ class AlfenDevice:
             return None
 
     async def _get_value(self, api_param):
+        """Get a value from the API."""
         response = await self._get(url=self.__get_url(
-            "{}?{}={}".format(PROP, ID, api_param)))
+            f"{PROP}?{ID}={api_param}"))
 
         _LOGGER.debug(f"Status Response {response}")
 
@@ -248,6 +258,7 @@ class AlfenDevice:
                         break
 
     async def _get_all_properties_value(self):
+        """Get all properties from the API."""
         _LOGGER.debug(f"Get properties")
         properties = []
         for cat in (CAT_GENERIC, CAT_GENERIC2, CAT_METER1, CAT_STATES, CAT_TEMP, CAT_OCPP, CAT_METER4, CAT_MBUS_TCP, CAT_COMM, CAT_DISPLAY, CAT_METER2):
@@ -255,7 +266,7 @@ class AlfenDevice:
             offset = 0
             while (nextRequest):
                 response = await self._get(url=self.__get_url(
-                    "{}?{}={}&{}={}".format(PROP, CAT, cat, OFFSET, offset)))
+                    f"{PROP}?{CAT}={cat}&{OFFSET}={offset}"))
                 _LOGGER.debug(f"Status Response {response}")
                 if response is not None:
                     properties += response[PROPERTIES]
@@ -266,10 +277,12 @@ class AlfenDevice:
         self.properties = properties
 
     async def reboot_wallbox(self):
+        """Reboot the wallbox."""
         response = await self._post(cmd=CMD, payload={PARAM_COMMAND: "reboot"})
         _LOGGER.debug(f"Reboot response {response}")
 
     async def async_request(self, method: str, cmd: str, json_data=None) -> ClientResponse | None:
+        """Send a request to the API."""
         try:
             return await self.request(method, cmd, json_data)
         except Exception as e:  # pylint: disable=broad-except
@@ -277,6 +290,7 @@ class AlfenDevice:
             return None
 
     async def request(self, method: str, cmd: str, json_data=None) -> ClientResponse:
+        """Send a request to the API."""
         if method == METHOD_POST:
             response = await self._post(cmd=cmd, payload=json_data)
         elif method == METHOD_GET:
@@ -286,6 +300,7 @@ class AlfenDevice:
         return response
 
     async def set_value(self, api_param, value):
+        """Set a value on the API."""
         response = await self._update_value(api_param, value)
         if response:
             # we expect that the value is updated so we are just update the value in the properties
@@ -297,15 +312,18 @@ class AlfenDevice:
                     break
 
     async def get_value(self, api_param):
+        """Get a value from the API."""
         await self._get_value(api_param)
 
     async def set_current_limit(self, limit) -> None:
+        """Set the current limit."""
         _LOGGER.debug(f"Set current limit {limit}A")
         if limit > 32 | limit < 1:
             return None
         await self.set_value("2129_0", limit)
 
     async def set_rfid_auth_mode(self, enabled):
+        """Set the RFID Auth Mode."""
         _LOGGER.debug(f"Set RFID Auth Mode {enabled}")
 
         value = 0
@@ -315,12 +333,14 @@ class AlfenDevice:
         await self.set_value("2126_0", value)
 
     async def set_current_phase(self, phase) -> None:
+        """Set the current phase."""
         _LOGGER.debug(f"Set current phase {phase}")
         if phase not in ('L1', 'L2', 'L3'):
             return None
         await self.set_value("2069_0", phase)
 
     async def set_phase_switching(self, enabled):
+        """Set the phase switching."""
         _LOGGER.debug(f"Set Phase Switching {enabled}")
 
         value = 0
@@ -329,23 +349,28 @@ class AlfenDevice:
         await self.set_value("2185_0", value)
 
     async def set_green_share(self, value) -> None:
+        """Set the green share."""
         _LOGGER.debug(f"Set green share value {value}%")
         if value < 0 | value > 100:
             return None
         await self.set_value("3280_2", value)
 
     async def set_comfort_power(self, value) -> None:
+        """Set the comfort power."""
         _LOGGER.debug(f"Set Comfort Level {value}W")
         if value < 1400 | value > 5000:
             return None
         await self.set_value("3280_3", value)
 
     def __get_url(self, action) -> str:
-        return "https://{}/api/{}".format(self.host, action)
+        """Get the URL for the API."""
+        return f"https://{self.host}/api/{action}"
 
 
 class AlfenDeviceInfo:
+    """Representation of a Alfen device info."""
     def __init__(self, response) -> None:
+        """Initialize the Alfen device info."""
         self.identity = response["Identity"]
         self.firmware_version = response["FWVersion"]
         self.model_id = response["Model"]

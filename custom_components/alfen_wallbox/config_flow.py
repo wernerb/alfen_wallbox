@@ -1,16 +1,15 @@
 """Config flow for the Alfen Wallbox platform."""
 import asyncio
+from asyncio import timeout
 import logging
 
 from aiohttp import ClientError
-from async_timeout import timeout
 import voluptuous as vol
 
 from homeassistant import config_entries
-from homeassistant.const import CONF_HOST, CONF_NAME, CONF_USERNAME, CONF_PASSWORD
+from homeassistant.const import CONF_HOST, CONF_NAME, CONF_PASSWORD, CONF_USERNAME
 
 from .alfen import AlfenDevice
-
 from .const import DOMAIN, TIMEOUT
 
 _LOGGER = logging.getLogger(__name__)

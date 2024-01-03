@@ -1,4 +1,4 @@
-
+"""Constants for the Alfen Wallbox integration."""
 DOMAIN = "alfen_wallbox"
 
 ID = "id"
