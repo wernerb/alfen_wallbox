@@ -186,7 +186,7 @@ ALFEN_NUMBER_TYPES: Final[tuple[AlfenNumberDescription, ...]] = (
         native_max_value=30,
         native_step=1,
         custom_mode=None,
-        unit_of_measurement=UnitOfElectricCurrent.AMPERE,
+        unit_of_measurement=UnitOfTime.SECONDS,
         api_param="21B9_0",
         round_digits=None,
     ),
@@ -381,7 +381,7 @@ ALFEN_NUMBER_TYPES: Final[tuple[AlfenNumberDescription, ...]] = (
         native_max_value=30,
         native_step=1,
         custom_mode=None,
-        unit_of_measurement=CURRENCY_EURO,
+        unit_of_measurement=UnitOfTime.SECONDS,
         api_param="2136_0",
         round_digits=None
     ),
@@ -397,7 +397,7 @@ ALFEN_NUMBER_TYPES: Final[tuple[AlfenNumberDescription, ...]] = (
         native_max_value=30,
         native_step=1,
         custom_mode=None,
-        unit_of_measurement=CURRENCY_EURO,
+        unit_of_measurement=UnitOfTime.SECONDS,
         api_param="2184_0",
         round_digits=None
     ),
@@ -413,7 +413,7 @@ ALFEN_NUMBER_TYPES: Final[tuple[AlfenNumberDescription, ...]] = (
         native_max_value=30,
         native_step=1,
         custom_mode=None,
-        unit_of_measurement=CURRENCY_EURO,
+        unit_of_measurement=UnitOfTime.SECONDS,
         api_param="2168_0",
         round_digits=None
     ),
