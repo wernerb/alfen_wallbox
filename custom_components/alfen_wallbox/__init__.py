@@ -1,10 +1,10 @@
 """Alfen Wallbox integration."""
 
 import asyncio
-from asyncio import timeout
 import logging
 
 from aiohttp import ClientConnectionError
+from async_timeout import timeout
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import (
