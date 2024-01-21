@@ -1,13 +1,17 @@
+"""Support for Alfen Eve Single Proline Wallbox."""
+from dataclasses import dataclass
+import datetime
+from datetime import timedelta
 import logging
 from typing import Final
-from dataclasses import dataclass
-from datetime import timedelta
 
-from homeassistant.helpers.entity import DeviceInfo
-from homeassistant.helpers.typing import StateType
-
-from .entity import AlfenEntity
 from homeassistant import const
+from homeassistant.components.sensor import (
+    SensorDeviceClass,
+    SensorEntity,
+    SensorEntityDescription,
+    SensorStateClass,
+)
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import (
     PERCENTAGE,
@@ -17,33 +21,18 @@ from homeassistant.const import (
     UnitOfFrequency,
     UnitOfPower,
     UnitOfTemperature,
-    UnitOfTime
+    UnitOfTime,
 )
-
-import datetime
-
 from homeassistant.core import HomeAssistant, callback
-from homeassistant.components.sensor import (
-    DEVICE_CLASS_ENERGY,
-    DEVICE_CLASS_POWER,
-    SensorEntity,
-    SensorEntityDescription,
-    SensorStateClass,
-    SensorDeviceClass
-)
-from homeassistant.helpers.entity_platform import AddEntitiesCallback
-
 from homeassistant.helpers import entity_platform
+from homeassistant.helpers.entity import DeviceInfo
+from homeassistant.helpers.entity_platform import AddEntitiesCallback
+from homeassistant.helpers.typing import StateType
 
 from . import DOMAIN as ALFEN_DOMAIN
-
-
 from .alfen import AlfenDevice
-from .const import (
-    ID,
-    SERVICE_REBOOT_WALLBOX,
-    VALUE,
-)
+from .const import ID, SERVICE_REBOOT_WALLBOX, VALUE
+from .entity import AlfenEntity
 
 _LOGGER = logging.getLogger(__name__)
 SCAN_INTERVAL = timedelta(seconds=5)
@@ -1430,6 +1419,7 @@ async def async_setup_platform(
         config: ConfigEntry,
         async_add_entities: AddEntitiesCallback,
         discovery_info=None):
+    """Set up the Alfen sensor."""
     pass
 
 
@@ -1463,6 +1453,7 @@ async def async_setup_entry(
 
 
 class AlfenMainSensor(AlfenEntity):
+    """Representation of a Alfen Main Sensor."""
 
     entity_description: AlfenSensorDescription
 
@@ -1617,14 +1608,14 @@ class AlfenSensor(AlfenEntity, SensorEntity):
                 # some exception of return value
 
                 # Display state status
-                if self.entity_description.api_param == "3190_1" or self.entity_description.api_param == "3191_1":
+                if self.entity_description.api_param in ("3190_1", "3191_1"):
                     if prop[VALUE] == 28:
                         return "See error Number"
                     else:
                         return STATUS_DICT.get(prop[VALUE], 'Unknown')
 
                 # meter_reading from w to kWh
-                if self.entity_description.api_param == "2221_22" or self.entity_description.api_param == "3221_22":
+                if self.entity_description.api_param in ("2221_22", "3221_22"):
                     return round((prop[VALUE] / 1000), 2)
 
                 # Car PWM Duty cycle %
@@ -1649,7 +1640,7 @@ class AlfenSensor(AlfenEntity, SensorEntity):
                     return result
 
                 # change milliseconds to d/m/y HH:MM:SS
-                if self.entity_description.api_param == "2187_0" or self.entity_description.api_param == "2059_0":
+                if self.entity_description.api_param in ("2187_0", "2059_0"):
                     return datetime.datetime.fromtimestamp(prop[VALUE] / 1000).strftime("%d/%m/%Y %H:%M:%S")
 
                 # Allowed phase 1 or Allowed Phase 2
@@ -1660,15 +1651,15 @@ class AlfenSensor(AlfenEntity, SensorEntity):
                     return round(prop[VALUE], self.entity_description.round_digits)
 
                 # mode3_state
-                if self.entity_description.api_param == "2501_4" or self.entity_description.api_param == "2502_4":
+                if self.entity_description.api_param in ("2501_4", "2502_4"):
                     return MODE_3_STAT_DICT.get(prop[VALUE], 'Unknown')
 
                 # Socket CPRO State
-                if self.entity_description.api_param == "2501_3" or self.entity_description.api_param == "2502_3":
+                if self.entity_description.api_param in ("2501_3", "2502_3"):
                     return POWER_STATES_DICT.get(prop[VALUE], 'Unknown')
 
                 # Main CSM State
-                if self.entity_description.api_param == "2501_1" or self.entity_description.api_param == "2502_1":
+                if self.entity_description.api_param in ("2501_1", "2502_1"):
                     return MAIN_STATE_DICT.get(prop[VALUE], 'Unknown')
 
                 # OCPP Boot notification
@@ -1680,11 +1671,11 @@ class AlfenSensor(AlfenEntity, SensorEntity):
                     return MODBUS_CONNECTION_STATES_DICT.get(prop[VALUE], 'Unknown')
 
                 # wallbox display message
-                if self.entity_description.api_param == "3190_2" or self.entity_description.api_param == "3191_2":
+                if self.entity_description.api_param in ("3190_2", "3191_2"):
                     return str(prop[VALUE]) + ': ' + DISPLAY_ERROR_DICT.get(prop[VALUE],  'Unknown')
 
                 # Status code
-                if self.entity_description.api_param == "2501_2" or self.entity_description.api_param == "2502_2":
+                if self.entity_description.api_param in ("2501_2", "2502_2"):
                     return STATUS_DICT.get(prop[VALUE], 'Unknown')
 
                 return prop[VALUE]

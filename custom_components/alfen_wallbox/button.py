@@ -1,20 +1,28 @@
-
+"""Button entity for Alfen EV chargers."""""
 from dataclasses import dataclass
 import logging
 from typing import Final
-
-from homeassistant import core
-from .alfen import POST_HEADER_JSON, AlfenDevice
-from .entity import AlfenEntity
 
 from homeassistant.components.button import ButtonEntity, ButtonEntityDescription
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
-from .const import CMD, DISPLAY_NAME_VALUE, LOGIN, LOGOUT, METHOD_POST, PARAM_COMMAND, COMMAND_REBOOT, PARAM_DISPLAY_NAME, PARAM_PASSWORD, PARAM_USERNAME
 
 from . import DOMAIN as ALFEN_DOMAIN
-
+from .alfen import AlfenDevice
+from .const import (
+    CMD,
+    COMMAND_REBOOT,
+    DISPLAY_NAME_VALUE,
+    LOGIN,
+    LOGOUT,
+    METHOD_POST,
+    PARAM_COMMAND,
+    PARAM_DISPLAY_NAME,
+    PARAM_PASSWORD,
+    PARAM_USERNAME,
+)
+from .entity import AlfenEntity
 
 _LOGGER = logging.getLogger(__name__)
 

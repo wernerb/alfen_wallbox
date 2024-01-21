@@ -1,28 +1,26 @@
-import logging
-from typing import Final, Any
-
+"""Alfen Wallbox Select Entities."""
 from dataclasses import dataclass
-
-from homeassistant.helpers import entity_platform
-
-from .const import ID, SERVICE_DISABLE_RFID_AUTHORIZATION_MODE, SERVICE_ENABLE_RFID_AUTHORIZATION_MODE, SERVICE_SET_CURRENT_PHASE, VALUE
-from .entity import AlfenEntity
-
-from homeassistant.config_entries import ConfigEntry
-from homeassistant.helpers.entity_platform import AddEntitiesCallback
-
-from .alfen import AlfenDevice
-
-from homeassistant.components.select import (
-    SelectEntity,
-    SelectEntityDescription,
-)
-
-from homeassistant.core import HomeAssistant, callback
-from . import DOMAIN as ALFEN_DOMAIN
+import logging
+from typing import Final
 
 import voluptuous as vol
 
+from homeassistant.components.select import SelectEntity, SelectEntityDescription
+from homeassistant.config_entries import ConfigEntry
+from homeassistant.core import HomeAssistant, callback
+from homeassistant.helpers import entity_platform
+from homeassistant.helpers.entity_platform import AddEntitiesCallback
+
+from . import DOMAIN as ALFEN_DOMAIN
+from .alfen import AlfenDevice
+from .const import (
+    ID,
+    SERVICE_DISABLE_RFID_AUTHORIZATION_MODE,
+    SERVICE_ENABLE_RFID_AUTHORIZATION_MODE,
+    SERVICE_SET_CURRENT_PHASE,
+    VALUE,
+)
+from .entity import AlfenEntity
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -369,6 +367,7 @@ class AlfenSelect(AlfenEntity, SelectEntity):
 
     async def async_select_option(self, option: str) -> None:
         """Change the selected option."""
+
         value = {v: k for k, v in self.values_dict.items()}[option]
         await self._device.set_value(self.entity_description.api_param, value)
         self.async_write_ha_state()

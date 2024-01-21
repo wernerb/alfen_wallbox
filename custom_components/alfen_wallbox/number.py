@@ -1,15 +1,17 @@
-from homeassistant.helpers import entity_platform
-from .const import ID, LICENSE_HIGH_POWER, SERVICE_SET_COMFORT_POWER, SERVICE_SET_CURRENT_LIMIT, SERVICE_SET_GREEN_SHARE, VALUE
-from homeassistant.components.number import NumberDeviceClass, NumberEntity, NumberEntityDescription, NumberMode
-from homeassistant.config_entries import ConfigEntry
-from homeassistant.helpers.entity_platform import AddEntitiesCallback
-from . import DOMAIN as ALFEN_DOMAIN
-from homeassistant.core import HomeAssistant
+"""Support for Alfen Eve Proline Wallbox."""
+from dataclasses import dataclass
 import logging
 from typing import Final
-from dataclasses import dataclass
-from .entity import AlfenEntity
-from .alfen import AlfenDevice
+
+import voluptuous as vol
+
+from homeassistant.components.number import (
+    NumberDeviceClass,
+    NumberEntity,
+    NumberEntityDescription,
+    NumberMode,
+)
+from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import (
     CURRENCY_EURO,
     PERCENTAGE,
@@ -17,11 +19,21 @@ from homeassistant.const import (
     UnitOfPower,
     UnitOfTime,
 )
+from homeassistant.core import HomeAssistant
+from homeassistant.helpers import config_validation as cv, entity_platform
+from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-import voluptuous as vol
-
-from homeassistant.helpers import config_validation as cv
-
+from . import DOMAIN as ALFEN_DOMAIN
+from .alfen import AlfenDevice
+from .const import (
+    ID,
+    LICENSE_HIGH_POWER,
+    SERVICE_SET_COMFORT_POWER,
+    SERVICE_SET_CURRENT_LIMIT,
+    SERVICE_SET_GREEN_SHARE,
+    VALUE,
+)
+from .entity import AlfenEntity
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -29,6 +41,7 @@ _LOGGER = logging.getLogger(__name__)
 @dataclass
 class AlfenNumberDescriptionMixin:
     """Define an entity description mixin for select entities."""
+
     assumed_state: bool
     state: float
     api_param: str
@@ -173,7 +186,7 @@ ALFEN_NUMBER_TYPES: Final[tuple[AlfenNumberDescription, ...]] = (
         native_max_value=30,
         native_step=1,
         custom_mode=None,
-        unit_of_measurement=UnitOfElectricCurrent.AMPERE,
+        unit_of_measurement=UnitOfTime.SECONDS,
         api_param="21B9_0",
         round_digits=None,
     ),
@@ -368,7 +381,7 @@ ALFEN_NUMBER_TYPES: Final[tuple[AlfenNumberDescription, ...]] = (
         native_max_value=30,
         native_step=1,
         custom_mode=None,
-        unit_of_measurement=CURRENCY_EURO,
+        unit_of_measurement=UnitOfTime.SECONDS,
         api_param="2136_0",
         round_digits=None
     ),
@@ -384,7 +397,7 @@ ALFEN_NUMBER_TYPES: Final[tuple[AlfenNumberDescription, ...]] = (
         native_max_value=30,
         native_step=1,
         custom_mode=None,
-        unit_of_measurement=CURRENCY_EURO,
+        unit_of_measurement=UnitOfTime.SECONDS,
         api_param="2184_0",
         round_digits=None
     ),
@@ -400,7 +413,7 @@ ALFEN_NUMBER_TYPES: Final[tuple[AlfenNumberDescription, ...]] = (
         native_max_value=30,
         native_step=1,
         custom_mode=None,
-        unit_of_measurement=CURRENCY_EURO,
+        unit_of_measurement=UnitOfTime.SECONDS,
         api_param="2168_0",
         round_digits=None
     ),

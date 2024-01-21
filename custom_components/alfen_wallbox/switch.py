@@ -1,20 +1,22 @@
-import logging
-
 from dataclasses import dataclass
+import logging
 from typing import Any, Final
-
-from homeassistant.helpers import entity_platform
-
-from .const import ID, SERVICE_DISABLE_PHASE_SWITCHING, SERVICE_ENABLE_PHASE_SWITCHING, VALUE
-from .alfen import AlfenDevice
-from .entity import AlfenEntity
 
 from homeassistant.components.switch import SwitchEntity, SwitchEntityDescription
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
+from homeassistant.helpers import entity_platform
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from . import DOMAIN as ALFEN_DOMAIN
+from .alfen import AlfenDevice
+from .const import (
+    ID,
+    SERVICE_DISABLE_PHASE_SWITCHING,
+    SERVICE_ENABLE_PHASE_SWITCHING,
+    VALUE,
+)
+from .entity import AlfenEntity
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -104,6 +106,7 @@ async def async_setup_entry(
 
 class AlfenSwitchSensor(AlfenEntity, SwitchEntity):
     """Define an Alfen binary sensor."""
+
     entity_description: AlfenSwitchDescription
 
     def __init__(self,
@@ -119,6 +122,7 @@ class AlfenSwitchSensor(AlfenEntity, SwitchEntity):
 
     @property
     def available(self) -> bool:
+        """Return True if entity is available."""
         for prop in self._device.properties:
             if prop[ID] == self.entity_description.api_param:
                 return True
@@ -126,6 +130,7 @@ class AlfenSwitchSensor(AlfenEntity, SwitchEntity):
 
     @property
     def is_on(self) -> bool:
+        """Return True if entity is on."""
         for prop in self._device.properties:
             if prop[ID] == self.entity_description.api_param:
                 return prop[VALUE] == 1
