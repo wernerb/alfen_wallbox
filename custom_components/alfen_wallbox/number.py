@@ -146,21 +146,6 @@ ALFEN_NUMBER_TYPES: Final[tuple[AlfenNumberDescription, ...]] = (
         round_digits=None,
     ),
     AlfenNumberDescription(
-        key="lb_solar_charging_comfort_level_limit_max",
-        name="Solar Comfort Level (limit max)",
-        state=None,
-        icon="mdi:current-ac",
-        assumed_state=False,
-        device_class=NumberDeviceClass.POWER_FACTOR,
-        native_min_value=1350,
-        native_max_value=3300,
-        native_step=50,
-        custom_mode=None,
-        unit_of_measurement=UnitOfPower.WATT,
-        api_param="3280_3",
-        round_digits=None,
-    ),
-    AlfenNumberDescription(
         key="dp_light_intensity",
         name="Display Light Intensity %",
         state=None,
@@ -567,6 +552,16 @@ class AlfenNumber(AlfenEntity, NumberEntity):
 
                 if self.entity_description.round_digits is not None:
                     return round(prop[VALUE], self.entity_description.round_digits)
+
+                # change comfort level depends on max allowed phase
+                if self.entity_description.key == "lb_solar_charging_comfort_level":
+                    if self._device.max_allowed_phases == 3:
+                        self._attr_max_value = self.entity_description.native_max_value
+                        self._attr_native_max_value = self.entity_description.native_max_value
+                    else:
+                        self._attr_max_value = 3300
+                        self._attr_native_max_value = 3300
+
                 return prop[VALUE]
         return None
 

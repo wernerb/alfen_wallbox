@@ -382,6 +382,8 @@ class AlfenSelect(AlfenEntity, SelectEntity):
         """Return the current option."""
         for prop in self._device.properties:
             if prop[ID] == self.entity_description.api_param:
+                if self.entity_description.key == "ps_installation_max_allowed_phase":
+                    self._device.max_allowed_phases = prop[VALUE]
                 return prop[VALUE]
         return None
 
