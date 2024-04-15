@@ -170,6 +170,7 @@ class AlfenDevice:
                     _LOGGER.debug("POST with login")
                     await self.login()
                     return await self._post(cmd, payload, False)
+                response.raise_for_status()
                 return response
         except json.JSONDecodeError as e:
             # skip tailing comma error from alfen
@@ -194,6 +195,8 @@ class AlfenDevice:
                     _LOGGER.debug("GET with login")
                     await self.login()
                     return await self._get(url, False)
+
+                response.raise_for_status()
                 _resp = await response.json(content_type=None)
                 return _resp
         except TimeoutError as e:
@@ -236,6 +239,7 @@ class AlfenDevice:
                     _LOGGER.debug("POST(Update) with login")
                     await self.login()
                     return await self._update_value(api_param, value, False)
+                response.raise_for_status()
                 return response
         except Exception as e:  # pylint: disable=broad-except
             _LOGGER.error("Unexpected error on UPDATE VALUE %s", str(e))
