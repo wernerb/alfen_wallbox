@@ -149,9 +149,11 @@ class AlfenDevice:
     async def async_update(self):
         """Update the device properties."""
         if not self.keepLogout and not self.wait and not self.updating:
-            self.updating = True
-            await self._get_all_properties_value()
-            self.updating = False
+            try:
+                self.updating = True
+                await self._get_all_properties_value()
+            finally:
+                self.updating = False
 
     async def _post(self, cmd, payload=None, allowed_login=True) -> ClientResponse | None:
         """Send a POST request to the API."""
@@ -168,13 +170,11 @@ class AlfenDevice:
                     _LOGGER.debug("POST with login")
                     await self.login()
                     return await self._post(cmd, payload, False)
-                self.wait = False
                 return response
         except json.JSONDecodeError as e:
             # skip tailing comma error from alfen
             _LOGGER.debug('trailing comma is not allowed')
             if e.msg == "trailing comma is not allowed":
-                self.wait = False
                 return None
 
             _LOGGER.error("JSONDecodeError error on POST %s", str(e))
@@ -182,7 +182,8 @@ class AlfenDevice:
             _LOGGER.warning("Timeout on POST")
         except Exception as e:  # pylint: disable=broad-except
             _LOGGER.error("Unexpected error on POST %s", str(e))
-        self.wait = False
+        finally:
+            self.wait = False
         return None
 
     async def _get(self, url, allowed_login=True) -> ClientResponse | None:
@@ -235,12 +236,12 @@ class AlfenDevice:
                     _LOGGER.debug("POST(Update) with login")
                     await self.login()
                     return await self._update_value(api_param, value, False)
-                self.wait = False
                 return response
         except Exception as e:  # pylint: disable=broad-except
             _LOGGER.error("Unexpected error on UPDATE VALUE %s", str(e))
-            self.wait = False
             return None
+        finally:
+            self.wait = False
 
     async def _get_value(self, api_param):
         """Get a value from the API."""
