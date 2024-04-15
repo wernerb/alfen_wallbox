@@ -76,6 +76,7 @@ class AlfenDevice:
         self.updating = False
         self.number_socket = 1
         self._hass = hass
+        self.max_allowed_phases = 1
         disable_warnings()
 
         # Default ciphers needed as of python 3.10

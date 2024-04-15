@@ -552,6 +552,16 @@ class AlfenNumber(AlfenEntity, NumberEntity):
 
                 if self.entity_description.round_digits is not None:
                     return round(prop[VALUE], self.entity_description.round_digits)
+
+                # change comfort level depends on max allowed phase
+                if self.entity_description.key == "lb_solar_charging_comfort_level":
+                    if self._device.max_allowed_phases == 3:
+                        self._attr_max_value = self.entity_description.native_max_value
+                        self._attr_native_max_value = self.entity_description.native_max_value
+                    else:
+                        self._attr_max_value = 3300
+                        self._attr_native_max_value = 3300
+
                 return prop[VALUE]
         return None
 
