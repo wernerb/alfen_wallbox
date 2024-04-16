@@ -31,11 +31,11 @@ from homeassistant.helpers.typing import StateType
 
 from . import DOMAIN as ALFEN_DOMAIN
 from .alfen import AlfenDevice
-from .const import ID, SERVICE_REBOOT_WALLBOX, VALUE
+from .const import ID, SERVICE_REBOOT_WALLBOX, VALUE, INTERVAL
 from .entity import AlfenEntity
 
 _LOGGER = logging.getLogger(__name__)
-SCAN_INTERVAL = timedelta(seconds=5)
+SCAN_INTERVAL = timedelta(seconds=INTERVAL)
 
 
 @dataclass

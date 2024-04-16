@@ -40,6 +40,7 @@ from .const import (
     PARAM_USERNAME,
     PROP,
     PROPERTIES,
+    INTERVAL,
     TIMEOUT,
     TOTAL,
     VALUE,
@@ -62,6 +63,7 @@ class AlfenDevice:
         self.name = name
         self._status = None
         self._session = async_get_clientsession(hass, verify_ssl=False)
+        self._session.connector._keepalive_timeout = 2 * INTERVAL
         self.username = username
         self.info = None
         self.id = None
