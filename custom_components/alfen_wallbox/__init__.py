@@ -1,6 +1,7 @@
 """Alfen Wallbox integration."""
 
 import asyncio
+from datetime import timedelta
 import logging
 
 from aiohttp import ClientConnectionError
@@ -11,11 +12,13 @@ from homeassistant.const import (
     CONF_HOST,
     CONF_NAME,
     CONF_PASSWORD,
+    CONF_SCAN_INTERVAL,
     CONF_USERNAME,
     Platform,
 )
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryNotReady
+from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 
 from .alfen import AlfenDevice
 from .const import DOMAIN, TIMEOUT
@@ -42,15 +45,26 @@ async def async_setup(hass: HomeAssistant, config: dict) -> bool:
 async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> bool:
     """Set up Alfen Wallbox from a config entry."""
     conf = config_entry.data
+
+    # if CONF_SCAN_INTERVAL not in conf, then we give 5
     device = await alfen_setup(
-        hass, conf[CONF_HOST], conf[CONF_NAME], conf[CONF_USERNAME], conf[CONF_PASSWORD]
+        hass, conf[CONF_HOST], conf[CONF_NAME], conf[CONF_USERNAME], conf[CONF_PASSWORD], conf[CONF_SCAN_INTERVAL] if CONF_SCAN_INTERVAL in conf else 5
     )
     if not device:
         return False
 
-    await device.async_update()
     device.get_number_of_socket()
     device.get_licenses()
+
+    coordinator = DataUpdateCoordinator(
+        hass,
+        _LOGGER,
+        name="Alfen Wallbox",
+        update_method=device.async_update,
+        update_interval=timedelta(seconds=device.scan_interval)
+        )
+
+    await coordinator.async_config_entry_first_refresh()
 
     hass.data.setdefault(DOMAIN, {})
     hass.data[DOMAIN][config_entry.entry_id] = device
@@ -74,12 +88,12 @@ async def async_unload_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> 
     return unload_ok
 
 
-async def alfen_setup(hass: HomeAssistant, host: str, name: str, username: str, password: str) -> AlfenDevice | None:
+async def alfen_setup(hass: HomeAssistant, host: str, name: str, username: str, password: str, scan_interval:int) -> AlfenDevice | None:
     """Create a Alfen instance only once."""
 
     try:
         with timeout(TIMEOUT):
-            device = AlfenDevice(hass, host, name, username, password)
+            device = AlfenDevice(hass, host, name, username, password, scan_interval)
             await device.init()
     except asyncio.TimeoutError:
         _LOGGER.debug("Connection to %s timed out", host)

@@ -7,7 +7,13 @@ from async_timeout import timeout
 import voluptuous as vol
 
 from homeassistant import config_entries
-from homeassistant.const import CONF_HOST, CONF_NAME, CONF_PASSWORD, CONF_USERNAME
+from homeassistant.const import (
+    CONF_HOST,
+    CONF_NAME,
+    CONF_PASSWORD,
+    CONF_SCAN_INTERVAL,
+    CONF_USERNAME,
+)
 
 from .alfen import AlfenDevice
 from .const import DOMAIN, TIMEOUT
@@ -22,21 +28,26 @@ class FlowHandler(config_entries.ConfigFlow):
     VERSION = 1
     CONNECTION_CLASS = config_entries.CONN_CLASS_LOCAL_POLL
 
-    async def _create_entry(self, host, name, username, password) -> None:
+    async def _create_entry(self, host:str, name:str, username:str, password:str, scan_interval:int) -> None:
         """Register new entry."""
         # Check if ip already is registered
         for entry in self._async_current_entries():
             if entry.data[CONF_HOST] == host:
                 return self.async_abort(reason="already_configured")
 
-        return self.async_create_entry(title=host, data={CONF_HOST: host, CONF_NAME: name, CONF_USERNAME: username, CONF_PASSWORD: password})
+        return self.async_create_entry(title=host, data={CONF_HOST: host, CONF_NAME: name, CONF_USERNAME: username, CONF_PASSWORD: password, CONF_SCAN_INTERVAL: scan_interval})
 
-    async def _create_device(self, host, name, username, password):
+    async def _create_device(self, host:str, name:str, username:str, password:str, scan_interval:int):
         """Create device."""
 
         try:
             device = AlfenDevice(
-                self.hass, host, name, username, password
+                self.hass,
+                host,
+                name,
+                username,
+                password,
+                scan_interval
             )
             with timeout(TIMEOUT):
                 await device.init()
@@ -49,7 +60,7 @@ class FlowHandler(config_entries.ConfigFlow):
             _LOGGER.exception("Unexpected error creating device")
             return self.async_abort(reason="device_fail")
 
-        return await self._create_entry(host, name, username, password)
+        return await self._create_entry(host, name, username, password, scan_interval)
 
     async def async_step_user(self, user_input=None):
         """User initiated config flow."""
@@ -59,10 +70,11 @@ class FlowHandler(config_entries.ConfigFlow):
                     vol.Required(CONF_HOST): str,
                     vol.Required(CONF_USERNAME, default="admin"): str,
                     vol.Required(CONF_PASSWORD): str,
-                    vol.Optional(CONF_NAME): str
+                    vol.Optional(CONF_NAME): str,
+                    vol.Optional(CONF_SCAN_INTERVAL, default=5): int
                 })
             )
-        return await self._create_device(user_input[CONF_HOST], user_input[CONF_NAME], user_input[CONF_USERNAME], user_input[CONF_PASSWORD])
+        return await self._create_device(user_input[CONF_HOST], user_input[CONF_NAME], user_input[CONF_USERNAME], user_input[CONF_PASSWORD], user_input[CONF_SCAN_INTERVAL])
 
     async def async_step_import(self, user_input):
         """Import a config entry."""

@@ -28,6 +28,7 @@ from .const import (
     DOMAIN,
     ID,
     INFO,
+    INTERVAL,
     LICENSES,
     LOGIN,
     LOGOUT,
@@ -40,7 +41,6 @@ from .const import (
     PARAM_USERNAME,
     PROP,
     PROPERTIES,
-    INTERVAL,
     TIMEOUT,
     TOTAL,
     VALUE,
@@ -52,18 +52,23 @@ _LOGGER = logging.getLogger(__name__)
 
 
 class AlfenDevice:
+    """Alfen Device."""
+
     def __init__(self,
                  hass: HomeAssistant,
                  host: str,
                  name: str,
                  username: str,
-                 password: str) -> None:
+                 password: str,
+                 scan_interval:int) -> None:
+        """Init."""
 
         self.host = host
         self.name = name
         self._status = None
         self._session = async_get_clientsession(hass, verify_ssl=False)
-        self._session.connector._keepalive_timeout = 2 * INTERVAL
+        self._session.connector._keepalive_timeout = 2 * scan_interval
+        self.scan_interval = scan_interval
         self.username = username
         self.info = None
         self.id = None

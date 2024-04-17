@@ -40,7 +40,7 @@ CAT_METER2 = "meter2"
 
 COMMAND_REBOOT = "reboot"
 
-INTERVAL = 30
+INTERVAL = 5
 TIMEOUT = 20
 
 SERVICE_REBOOT_WALLBOX = "reboot_wallbox"
