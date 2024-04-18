@@ -1124,6 +1124,22 @@ ALFEN_SENSOR_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
         state_class=SensorStateClass.MEASUREMENT,
         device_class=SensorDeviceClass.CURRENT,
     ),
+    AlfenSensorDescription(
+        key="custom_tag_socket_1_start",
+        name="Tag Socket 1 Start",
+        icon="mdi:badge-account-outline",
+        api_param=None,
+        unit=None,
+        round_digits=None,
+    ),
+    AlfenSensorDescription(
+        key="custom_tag_socket_1_stop",
+        name="Tag Socket 1 Stop",
+        icon="mdi:badge-account-outline",
+        api_param=None,
+        unit=None,
+        round_digits=None,
+    ),
 )
 
 ALFEN_SENSOR_DUAL_SOCKET_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
@@ -1410,6 +1426,22 @@ ALFEN_SENSOR_DUAL_SOCKET_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
         state_class=SensorStateClass.MEASUREMENT,
         device_class=SensorDeviceClass.CURRENT,
     ),
+    AlfenSensorDescription(
+        key="custom_tag_socket_2_start",
+        name="Tag Socket 2 Start",
+        icon="mdi:badge-account-outline",
+        api_param=None,
+        unit=None,
+        round_digits=None,
+    ),
+    AlfenSensorDescription(
+        key="custom_tag_socket_2_stop",
+        name="Tag Socket 2 Stop",
+        icon="mdi:badge-account-outline",
+        api_param=None,
+        unit=None,
+        round_digits=None,
+    ),
 )
 
 
@@ -1604,6 +1636,40 @@ class AlfenSensor(AlfenEntity, SensorEntity):
             if self.entity_description.key == "smart_meter_total":
                 if voltage_l1 is not None and current_l1 is not None and voltage_l2 is not None and current_l2 is not None and voltage_l3 is not None and current_l3 is not None:
                     return round((float(voltage_l1) * float(current_l1) + float(voltage_l2) * float(current_l2) + float(voltage_l3) * float(current_l3)), 2)
+
+            if self.entity_description.key == "custom_tag_socket_1_start":
+                if self._device.latest_tag is None:
+                    return "No Tag"
+                for (key,value) in self._device.latest_tag.items():
+                    if key[0] == "socket 1" and key[1] ==  "start":
+                        return value
+                return "No Tag"
+
+            if self.entity_description.key == "custom_tag_socket_1_stop":
+                if self._device.latest_tag is None:
+                    return "No Tag"
+                for (key,value) in self._device.latest_tag.items():
+                    if key[0] == "socket 1" and key[1] ==  "stop":
+                        return value
+                return "No Tag"
+
+            if self.entity_description.key == "custom_tag_socket_2_start":
+                if self._device.latest_tag is None:
+                    return "No Tag"
+                for (key,value) in self._device.latest_tag.items():
+                    if key[0] == "socket 2" and key[1] ==  "start":
+                        return value
+                return "No Tag"
+
+            if self.entity_description.key == "custom_tag_socket_2_stop":
+                if self._device.latest_tag is None:
+                    return "No Tag"
+                for (key,value) in self._device.latest_tag.items():
+                    if key[0] == "socket 2" and key[1] ==  "stop":
+                        return value
+                return "No Tag"
+
+
 
         for prop in self._device.properties:
             if prop[ID] == self.entity_description.api_param:

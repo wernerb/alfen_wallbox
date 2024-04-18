@@ -84,6 +84,8 @@ class AlfenDevice:
         self.number_socket = 1
         self._hass = hass
         self.max_allowed_phases = 1
+        self.latest_tag = None
+        self.transaction_offset = 0
         disable_warnings()
 
         # Default ciphers needed as of python 3.10
@@ -159,6 +161,9 @@ class AlfenDevice:
             try:
                 self.updating = True
                 await self._get_all_properties_value()
+                await self._get_transaction()
+
+
             finally:
                 self.updating = False
 
@@ -194,7 +199,7 @@ class AlfenDevice:
             self.wait = False
         return None
 
-    async def _get(self, url, allowed_login=True) -> ClientResponse | None:
+    async def _get(self, url, allowed_login=True, json_decode=True) -> ClientResponse | None:
         """Send a GET request to the API."""
         try:
             async with self._session.get(url, timeout=TIMEOUT, ssl=self.ssl) as response:
@@ -204,7 +209,10 @@ class AlfenDevice:
                     return await self._get(url, False)
 
                 response.raise_for_status()
-                _resp = await response.json(content_type=None)
+                if json_decode:
+                    _resp = await response.json(content_type=None)
+                else:
+                    _resp = await response.text()
                 return _resp
         except TimeoutError as e:
             _LOGGER.warning("Timeout on GET")
@@ -303,6 +311,78 @@ class AlfenDevice:
         """Reboot the wallbox."""
         response = await self._post(cmd=CMD, payload={PARAM_COMMAND: "reboot"})
         _LOGGER.debug(f"Reboot response {response}")
+
+    async def _get_transaction(self):
+        _LOGGER.debug("Get Transaction")
+        offset = self.transaction_offset
+        transactionLoop = True
+        counter = 0
+        while transactionLoop:
+            response = await self._get(url=self.__get_url("transactions?offset="+ str(offset)), json_decode=False)
+            #_LOGGER.debug(response)
+            # split this text into lines with \n
+            lines = str(response).splitlines()
+            for line in lines:
+                if line is None:
+                    transactionLoop = False
+                    break
+
+                try:
+                    if "version" in line:
+                        line = line.split(":2,", 2)[1]
+
+                    if "txstart" in line:
+                        tid = line.split(":", 2)[0].split("_", 2)[0]
+                        socket = line.split(", ", 2)[1]
+                        tag = line.split("kWh ", 2)[1].split(" ", 2)[0]
+
+
+                        if self.latest_tag is None:
+                            self.latest_tag = {}
+                        self.latest_tag[socket,"start"] = tag
+
+                    elif "txstop" in line:
+                        tid = line.split(":", 2)[0].split("_", 2)[0]
+                        socket = line.split(", ", 2)[1]
+                        tag = line.split("kWh ", 2)[1].split(" ", 2)[0]
+
+                        if self.latest_tag is None:
+                            self.latest_tag = {}
+                        self.latest_tag[socket,"stop"] = tag
+                    elif "mv" in line:
+                        tid = line.split("_", 2)[0]
+                    elif 'dto' in line:
+                        continue
+                    else:
+                        _LOGGER.debug("Unknown line" + line)
+                        continue
+
+
+                except IndexError:
+                    break
+
+
+                # check if tid is integer
+                try:
+                    offset = int(tid)
+                    if self.transaction_offset == offset:
+                        counter += 1
+                    else:
+                        self.transaction_offset = offset
+                        counter = 0
+
+                    if counter == 2:
+                        _LOGGER.debug(self.latest_tag)
+                        transactionLoop = False
+                        break
+                except ValueError:
+                    continue
+
+                # check if last line is reached
+                if line == lines[-1]:
+                    break
+
+
 
     async def async_request(self, method: str, cmd: str, json_data=None) -> ClientResponse | None:
         """Send a request to the API."""
