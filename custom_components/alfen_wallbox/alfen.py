@@ -163,7 +163,6 @@ class AlfenDevice:
                 await self._get_all_properties_value()
                 await self._get_transaction()
 
-
             finally:
                 self.updating = False
 

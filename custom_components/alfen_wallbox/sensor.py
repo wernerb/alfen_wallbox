@@ -1154,7 +1154,7 @@ ALFEN_SENSOR_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
         icon="mdi:clock",
         api_param=None,
         unit=UnitOfTime.MINUTES,
-        round_digits=None,
+        round_digits=0,
     ),
     AlfenSensorDescription(
         key="custom_tag_socket_1_charged",
@@ -1170,7 +1170,7 @@ ALFEN_SENSOR_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
         icon="mdi:clock",
         api_param=None,
         unit=UnitOfTime.MINUTES,
-        round_digits=None,
+        round_digits=0,
     ),
 
 
@@ -1490,7 +1490,7 @@ ALFEN_SENSOR_DUAL_SOCKET_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
         icon="mdi:clock",
         api_param=None,
         unit=UnitOfTime.MINUTES,
-        round_digits=None,
+        round_digits=0,
     ),
     AlfenSensorDescription(
         key="custom_tag_socket_2_charged",
@@ -1506,7 +1506,7 @@ ALFEN_SENSOR_DUAL_SOCKET_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
         icon="mdi:clock",
         api_param=None,
         unit=UnitOfTime.MINUTES,
-        round_digits=None,
+        round_digits=0,
     ),
 )
 
@@ -1819,10 +1819,14 @@ class AlfenSensor(AlfenEntity, SensorEntity):
                     # if we have stopkWh and it is higher then mvkWh, then we are not charging anymore and we should return 0
                     if stopkWh is not None and float(stopkWh) >= float(mvkWh):
                         return 0
-                    return round(float(mvkWh) - float(startkWh), 2)
+                    value = round(float(mvkWh) - float(startkWh), 2)
+                    if self.entity_description.round_digits is not None:
+                        return round(value, self.entity_description.round_digits)
 
                 if startkWh is not None and stopkWh is not None and self.entity_description.key == 'custom_tag_socket_2_charged':
-                    return round(float(stopkWh) - float(startkWh), 2)
+                    value = round(float(stopkWh) - float(startkWh), 2)
+                    if self.entity_description.round_digits is not None:
+                        return round(value, self.entity_description.round_digits)
 
             if self.entity_description.key in ["custom_tag_socket_2_charging_time", "custom_tag_socket_2_charged_time"]:
                 if self._device.latest_tag is None:
@@ -1851,7 +1855,9 @@ class AlfenSensor(AlfenEntity, SensorEntity):
                     if stopDate < startDate:
                         return 0
                     # return the value in minutes
-                    return round((stopDate - startDate).total_seconds() / 60, 2)
+                    value = round((stopDate - startDate).total_seconds() / 60, 2)
+                    if self.entity_description.round_digits is not None:
+                        return round(value, self.entity_description.round_digits)
 
                 if startDate is not None and mvDate is not None and self.entity_description.key == 'custom_tag_socket_2_charging_time':
                     startDate = datetime.datetime.strptime(startDate, '%Y-%m-%d %H:%M:%S')
@@ -1860,7 +1866,9 @@ class AlfenSensor(AlfenEntity, SensorEntity):
                     if mvDate < startDate:
                         return 0
                     # return the value in minutes
-                    return round((mvDate - startDate).total_seconds() / 60, 2)
+                    value= round((mvDate - startDate).total_seconds() / 60, 2)
+                    if self.entity_description.round_digits is not None:
+                        return round(value, self.entity_description.round_digits)
 
 
             if self.entity_description.key == "custom_tag_socket_2_stop":
@@ -1868,7 +1876,8 @@ class AlfenSensor(AlfenEntity, SensorEntity):
                     return "No Tag"
                 for (key,value) in self._device.latest_tag.items():
                     if key[0] == "socket 2" and key[1] ==  "stop" and key[2] == "tag":
-                        return value
+                        if self.entity_description.round_digits is not None:
+                            return round(value, self.entity_description.round_digits)
                 return "No Tag"
 
 
