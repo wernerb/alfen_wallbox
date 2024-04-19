@@ -1766,7 +1766,10 @@ class AlfenSensor(AlfenEntity, SensorEntity):
                     if stopDate < startDate:
                         return 0
                     # return the value in minutes
-                    return round((stopDate - startDate).total_seconds() / 60, 2)
+                    value = round((stopDate - startDate).total_seconds() / 60, 2)
+                    if self.entity_description.round_digits is not None:
+                        return round(value, self.entity_description.round_digits)
+
 
                 if startDate is not None and mvDate is not None and self.entity_description.key == 'custom_tag_socket_1_charging_time':
                     startDate = datetime.datetime.strptime(startDate, '%Y-%m-%d %H:%M:%S')
@@ -1777,7 +1780,10 @@ class AlfenSensor(AlfenEntity, SensorEntity):
                     if stopDate is not None and stopDate > startDate:
                         return 0
                     # return the value in minutes
-                    return round((mvDate - startDate).total_seconds() / 60, 2)
+
+                    value = round((mvDate - startDate).total_seconds() / 60, 2)
+                    if self.entity_description.round_digits is not None:
+                        return round(value, self.entity_description.round_digits)
 
 
             if self.entity_description.key == "custom_tag_socket_1_stop":
