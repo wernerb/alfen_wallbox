@@ -1125,21 +1125,14 @@ ALFEN_SENSOR_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
         device_class=SensorDeviceClass.CURRENT,
     ),
     AlfenSensorDescription(
-        key="custom_tag_socket_1_start",
-        name="Tag Socket 1 Start",
+        key="custom_tag_socket_1",
+        name="Tag Socket 1",
         icon="mdi:badge-account-outline",
         api_param=None,
         unit=None,
         round_digits=None,
     ),
-    AlfenSensorDescription(
-        key="custom_tag_socket_1_stop",
-        name="Tag Socket 1 Stop",
-        icon="mdi:badge-account-outline",
-        api_param=None,
-        unit=None,
-        round_digits=None,
-    ),
+
     AlfenSensorDescription(
         key="custom_tag_socket_1_charging",
         name="Tag Socket 1 Charging",
@@ -1461,8 +1454,8 @@ ALFEN_SENSOR_DUAL_SOCKET_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
         device_class=SensorDeviceClass.CURRENT,
     ),
     AlfenSensorDescription(
-        key="custom_tag_socket_2_start",
-        name="Tag Socket 2 Start",
+        key="custom_tag_socket_2",
+        name="Tag Socket 2",
         icon="mdi:badge-account-outline",
         api_param=None,
         unit=None,
@@ -1702,7 +1695,7 @@ class AlfenSensor(AlfenEntity, SensorEntity):
                 if voltage_l1 is not None and current_l1 is not None and voltage_l2 is not None and current_l2 is not None and voltage_l3 is not None and current_l3 is not None:
                     return round((float(voltage_l1) * float(current_l1) + float(voltage_l2) * float(current_l2) + float(voltage_l3) * float(current_l3)), 2)
 
-            if self.entity_description.key == "custom_tag_socket_1_start":
+            if self.entity_description.key == "custom_tag_socket_1":
                 if self._device.latest_tag is None:
                     return "No Tag"
                 for (key,value) in self._device.latest_tag.items():
@@ -1788,15 +1781,7 @@ class AlfenSensor(AlfenEntity, SensorEntity):
                         return round(value, self.entity_description.round_digits)
 
 
-            if self.entity_description.key == "custom_tag_socket_1_stop":
-                if self._device.latest_tag is None:
-                    return "No Tag"
-                for (key,value) in self._device.latest_tag.items():
-                    if key[0] == "socket 1" and key[1] ==  "stop" and key[2] == "tag":
-                        return value
-                return "No Tag"
-
-            if self.entity_description.key == "custom_tag_socket_2_start":
+            if self.entity_description.key == "custom_tag_socket_2":
                 if self._device.latest_tag is None:
                     return "No Tag"
                 for (key,value) in self._device.latest_tag.items():
@@ -1878,16 +1863,6 @@ class AlfenSensor(AlfenEntity, SensorEntity):
                     value= round((mvDate - startDate).total_seconds() / 60, 2)
                     if self.entity_description.round_digits is not None:
                         return round(value, self.entity_description.round_digits)
-
-
-            if self.entity_description.key == "custom_tag_socket_2_stop":
-                if self._device.latest_tag is None:
-                    return "No Tag"
-                for (key,value) in self._device.latest_tag.items():
-                    if key[0] == "socket 2" and key[1] ==  "stop" and key[2] == "tag":
-                        if self.entity_description.round_digits is not None:
-                            return round(value, self.entity_description.round_digits)
-                return "No Tag"
 
 
 
