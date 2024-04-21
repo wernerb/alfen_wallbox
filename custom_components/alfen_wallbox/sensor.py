@@ -1737,7 +1737,10 @@ class AlfenSensor(AlfenEntity, SensorEntity):
                     return round(float(mvkWh) - float(startkWh), 2)
 
                 if startkWh is not None and stopkWh is not None and self.entity_description.key == 'custom_tag_socket_1_charged':
-                    return round(float(stopkWh) - float(startkWh), 2)
+                    value = round(float(stopkWh) - float(startkWh), 2)
+                    if value > 0:
+                        if self.entity_description.round_digits is not None:
+                            return round(value, self.entity_description.round_digits)
 
             if self.entity_description.key in ["custom_tag_socket_1_charging_time", "custom_tag_socket_1_charged_time"]:
                 if self._device.latest_tag is None:
@@ -1764,7 +1767,7 @@ class AlfenSensor(AlfenEntity, SensorEntity):
                     stopDate = datetime.datetime.strptime(stopDate, '%Y-%m-%d %H:%M:%S')
 
                     if stopDate < startDate:
-                        return 0
+                        return
                     # return the value in minutes
                     value = round((stopDate - startDate).total_seconds() / 60, 2)
                     if self.entity_description.round_digits is not None:
@@ -1831,8 +1834,9 @@ class AlfenSensor(AlfenEntity, SensorEntity):
 
                 if startkWh is not None and stopkWh is not None and self.entity_description.key == 'custom_tag_socket_2_charged':
                     value = round(float(stopkWh) - float(startkWh), 2)
-                    if self.entity_description.round_digits is not None:
-                        return round(value, self.entity_description.round_digits)
+                    if value > 0:
+                        if self.entity_description.round_digits is not None:
+                            return round(value, self.entity_description.round_digits)
 
             if self.entity_description.key in ["custom_tag_socket_2_charging_time", "custom_tag_socket_2_charged_time"]:
                 if self._device.latest_tag is None:
@@ -1859,7 +1863,7 @@ class AlfenSensor(AlfenEntity, SensorEntity):
                     stopDate = datetime.datetime.strptime(stopDate, '%Y-%m-%d %H:%M:%S')
 
                     if stopDate < startDate:
-                        return 0
+                        return
                     # return the value in minutes
                     value = round((stopDate - startDate).total_seconds() / 60, 2)
                     if self.entity_description.round_digits is not None:
