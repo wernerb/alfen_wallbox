@@ -53,18 +53,10 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> b
     if not device:
         return False
 
+    await device.async_update()
     device.get_number_of_socket()
     device.get_licenses()
 
-    coordinator = DataUpdateCoordinator(
-        hass,
-        _LOGGER,
-        name="Alfen Wallbox",
-        update_method=device.async_update,
-        update_interval=timedelta(seconds=device.scan_interval)
-        )
-
-    await coordinator.async_config_entry_first_refresh()
 
     hass.data.setdefault(DOMAIN, {})
     hass.data[DOMAIN][config_entry.entry_id] = device

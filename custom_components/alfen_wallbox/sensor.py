@@ -31,11 +31,11 @@ from homeassistant.helpers.typing import StateType
 
 from . import DOMAIN as ALFEN_DOMAIN
 from .alfen import AlfenDevice
-from .const import ID, SERVICE_REBOOT_WALLBOX, VALUE
+from .const import ID, INTERVAL, SERVICE_REBOOT_WALLBOX, VALUE
 from .entity import AlfenEntity
 
 _LOGGER = logging.getLogger(__name__)
-
+SCAN_INTERVAL = timedelta(seconds=INTERVAL)
 
 @dataclass
 class AlfenSensorDescriptionMixin:
@@ -1532,7 +1532,6 @@ async def async_setup_entry(
         AlfenSensor(device, description) for description in ALFEN_SENSOR_TYPES
     ]
 
-    # update the scan interval based on the device scan_interval
 
     async_add_entities(sensors)
     async_add_entities([AlfenMainSensor(device, ALFEN_SENSOR_TYPES[0])])

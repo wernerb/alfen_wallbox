@@ -1,4 +1,5 @@
 """Alfen Wallbox API."""
+import datetime
 import json
 import logging
 import ssl
@@ -28,7 +29,6 @@ from .const import (
     DOMAIN,
     ID,
     INFO,
-    INTERVAL,
     LICENSES,
     LOGIN,
     LOGOUT,
@@ -86,6 +86,10 @@ class AlfenDevice:
         self.max_allowed_phases = 1
         self.latest_tag = None
         self.transaction_offset = 0
+        self.transaction_counter = 0
+
+        # set next update time as current time
+        self.next_update = datetime.datetime.now()
         disable_warnings()
 
         # Default ciphers needed as of python 3.10
@@ -157,14 +161,28 @@ class AlfenDevice:
 
     async def async_update(self):
         """Update the device properties."""
+
+        # add next update time
+        if self.next_update > datetime.datetime.now():
+            _LOGGER.debug(f"Next update {self.next_update}")
+            return
+
         if not self.keepLogout and not self.wait and not self.updating:
             try:
                 self.updating = True
                 await self._get_all_properties_value()
-                await self._get_transaction()
+                if self.transaction_counter == 0:
+                    await self._get_transaction()
+                self.transaction_counter += 1
 
             finally:
                 self.updating = False
+
+            self.next_update = datetime.datetime.now() + datetime.timedelta(seconds=self.scan_interval)
+            # if the transaction counter is 50, reset it (transaction is only update every 30 sec, so it's about 30 times
+            # transaction only update every 15min, so we update very 10minutes
+            if self.transaction_counter >= (60 / self.scan_interval) * 10:
+                self.transaction_counter = 0
 
     async def _post(self, cmd, payload=None, allowed_login=True) -> ClientResponse | None:
         """Send a POST request to the API."""
@@ -288,7 +306,7 @@ class AlfenDevice:
                 attempt += 1
                 cmd = f"{PROP}?{CAT}={cat}&{OFFSET}={offset}"
                 response = await self._get(url=self.__get_url(cmd))
-                _LOGGER.debug(f"Status Response {cmd}: {response}")
+                #_LOGGER.debug(f"Status Response {cmd}: {response}")
 
                 if response is not None:
                     attempt = 0
@@ -303,7 +321,7 @@ class AlfenDevice:
                     self.properties = []
                     return
 
-        _LOGGER.debug(f"Properties {properties}")
+        #_LOGGER.debug(f"Properties {properties}")
         self.properties = properties
 
     async def reboot_wallbox(self):
