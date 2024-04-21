@@ -1,7 +1,6 @@
 """Alfen Wallbox integration."""
 
 import asyncio
-from datetime import timedelta
 import logging
 
 from aiohttp import ClientConnectionError
@@ -18,7 +17,6 @@ from homeassistant.const import (
 )
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryNotReady
-from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 
 from .alfen import AlfenDevice
 from .const import DOMAIN, TIMEOUT
