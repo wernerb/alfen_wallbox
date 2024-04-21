@@ -70,8 +70,8 @@ class FlowHandler(config_entries.ConfigFlow):
                     vol.Required(CONF_HOST): str,
                     vol.Required(CONF_USERNAME, default="admin"): str,
                     vol.Required(CONF_PASSWORD): str,
-                    vol.Optional(CONF_NAME): str,
-                    vol.Optional(CONF_SCAN_INTERVAL, default=5): int
+                    vol.Required(CONF_NAME): str,
+                    vol.Required(CONF_SCAN_INTERVAL, default=5): int
                 })
             )
         return await self._create_device(user_input[CONF_HOST], user_input[CONF_NAME], user_input[CONF_USERNAME], user_input[CONF_PASSWORD], user_input[CONF_SCAN_INTERVAL])
