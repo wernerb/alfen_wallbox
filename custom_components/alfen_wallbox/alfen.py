@@ -340,7 +340,7 @@ class AlfenDevice:
             # split this text into lines with \n
             lines = str(response).splitlines()
             for line in lines:
-                if line is None:
+                if line is None or response is None:
                     transactionLoop = False
                     break
 
@@ -393,10 +393,11 @@ class AlfenDevice:
                         self.latest_tag[socket,"stop","kWh"] = kWh
 
                         # store the latest start kwh and date
-                        if self.latest_tag[socket,"start","kWh"] is not None:
-                            self.latest_tag[socket,"last_start","kWh"] = self.latest_tag[socket,"start","kWh"]
-                        if self.latest_tag[socket,"start","date"] is not None:
-                            self.latest_tag[socket,"last_start","date"] = self.latest_tag[socket,"start","date"]
+                        for key in list(self.latest_tag):
+                            if key[0] == socket and key[1] ==  "start" and key[2] == "kWh":
+                                self.latest_tag[socket,"last_start","kWh"] = self.latest_tag[socket,"start","kWh"]
+                            if key[0] == socket and key[1] ==  "start" and key[2] == "date":
+                                self.latest_tag[socket,"last_start","date"] = self.latest_tag[socket,"start","date"]
 
                     elif "mv" in line:
                         #_LOGGER.debug("mv line: " + line)
@@ -415,7 +416,7 @@ class AlfenDevice:
                     elif 'dto' in line:
                         continue
                     else:
-                        _LOGGER.debug("Unknown line" + line)
+                        _LOGGER.debug(f"Unknown line: {line}")
                         continue
 
 
