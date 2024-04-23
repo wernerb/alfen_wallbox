@@ -392,6 +392,12 @@ class AlfenDevice:
                         self.latest_tag[socket,"stop","date"] = date
                         self.latest_tag[socket,"stop","kWh"] = kWh
 
+                        # store the latest start kwh and date
+                        if self.latest_tag[socket,"start","kWh"] is not None:
+                            self.latest_tag[socket,"last_start","kWh"] = self.latest_tag[socket,"start","kWh"]
+                        if self.latest_tag[socket,"start","date"] is not None:
+                            self.latest_tag[socket,"last_start","date"] = self.latest_tag[socket,"start","date"]
+
                     elif "mv" in line:
                         #_LOGGER.debug("mv line: " + line)
                         tid = splitline[0].split("_", 2)[0]

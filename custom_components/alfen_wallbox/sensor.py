@@ -1663,6 +1663,7 @@ class AlfenSensor(AlfenEntity, SensorEntity):
         startkWh = None
         mvkWh = None
         stopkWh = None
+        lastkWh = None
 
         for (key,value) in self._device.latest_tag.items():
             if key[0] == socket and key[1] ==  "start" and key[2] == "kWh":
@@ -1673,6 +1674,9 @@ class AlfenSensor(AlfenEntity, SensorEntity):
                 continue
             if key[0] == socket and key[1] ==  "stop" and key[2] == "kWh":
                 stopkWh = value
+                continue
+            if key[0] == socket and key[1] ==  "last_start" and key[2] == "kWh":
+                lastkWh = value
                 continue
 
         # if the entity_key end with _charging, then we are calculating the charging
@@ -1686,9 +1690,9 @@ class AlfenSensor(AlfenEntity, SensorEntity):
             return value
 
         # if the entity_key end with _charged, then we are calculating the charged
-        if startkWh is not None and stopkWh is not None and entity_description.key.endswith('_charged'):
-            if float(stopkWh) >= float(startkWh):
-                value =  round(float(stopkWh) - float(startkWh), 2)
+        if lastkWh is not None and stopkWh is not None and entity_description.key.endswith('_charged'):
+            if float(stopkWh) >= float(lastkWh):
+                value =  round(float(stopkWh) - float(lastkWh), 2)
                 if entity_description.round_digits is not None:
                     return round(value, entity_description.round_digits if entity_description.round_digits > 0 else None)
                 return value
@@ -1701,6 +1705,7 @@ class AlfenSensor(AlfenEntity, SensorEntity):
         startDate = None
         mvDate = None
         stopDate = None
+        lastDate = None
 
         for (key,value) in self._device.latest_tag.items():
             if key[0] == "socket 1" and key[1] ==  "start" and key[2] == "date":
@@ -1711,6 +1716,9 @@ class AlfenSensor(AlfenEntity, SensorEntity):
                 continue
             if key[0] == "socket 1" and key[1] ==  "stop" and key[2] == "date":
                 stopDate = value
+                continue
+            if key[0] == "socket 1" and key[1] ==  "last_start" and key[2] == "date":
+                lastDate = value
                 continue
 
         if startDate is not None and mvDate is not None and entity_description.key.endswith('_charging_time'):
@@ -1729,14 +1737,14 @@ class AlfenSensor(AlfenEntity, SensorEntity):
             return value
 
 
-        if startDate is not None and stopDate is not None and entity_description.key.endswith('_charged_time'):
-            startDate = datetime.datetime.strptime(startDate, '%Y-%m-%d %H:%M:%S')
+        if lastDate is not None and stopDate is not None and entity_description.key.endswith('_charged_time'):
+            lastDate = datetime.datetime.strptime(lastDate, '%Y-%m-%d %H:%M:%S')
             stopDate = datetime.datetime.strptime(stopDate, '%Y-%m-%d %H:%M:%S')
 
-            if stopDate < startDate:
+            if stopDate < lastDate:
                 return None
             # return the value in minutes
-            value = round((stopDate - startDate).total_seconds() / 60, 2)
+            value = round((stopDate - lastDate).total_seconds() / 60, 2)
             if entity_description.round_digits is not None:
                 return round(value, entity_description.round_digits if entity_description.round_digits > 0 else None)
             return value
