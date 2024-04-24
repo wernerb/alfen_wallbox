@@ -87,6 +87,7 @@ class AlfenDevice:
         self.latest_tag = None
         self.transaction_offset = 0
         self.transaction_counter = 0
+        self.initilize = False
 
         # set next update time as current time
         self.next_update = datetime.datetime.now()
@@ -171,9 +172,11 @@ class AlfenDevice:
             try:
                 self.updating = True
                 await self._get_all_properties_value()
-                if self.transaction_counter == 0:
+
+                if self.transaction_counter == 0 and not self.initilize:
                     await self._get_transaction()
-                self.transaction_counter += 1
+                if not self.initilize:
+                    self.transaction_counter += 1
 
             finally:
                 self.updating = False

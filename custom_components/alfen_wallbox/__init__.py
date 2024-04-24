@@ -51,6 +51,7 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> b
     if not device:
         return False
 
+    device.initilize = True
     await device.async_update()
     device.get_number_of_socket()
     device.get_licenses()
@@ -60,7 +61,7 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> b
     hass.data[DOMAIN][config_entry.entry_id] = device
 
     await hass.config_entries.async_forward_entry_setups(config_entry, PLATFORMS)
-
+    device.initilize = False
     return True
 
 
