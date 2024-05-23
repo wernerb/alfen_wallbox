@@ -371,6 +371,21 @@ ALFEN_NUMBER_TYPES: Final[tuple[AlfenNumberDescription, ...]] = (
         round_digits=2
     ),
     AlfenNumberDescription(
+        key="price_price_other",
+        name="Price other",
+        state=None,
+        icon="mdi:currency-eur",
+        assumed_state=False,
+        device_class=None,
+        native_min_value=-5,
+        native_max_value=5,
+        native_step=0.01,
+        custom_mode=NumberMode.BOX,
+        unit_of_measurement=CURRENCY_EURO,
+        api_param="3262_6",
+        round_digits=2
+    ),
+    AlfenNumberDescription(
         key="ev_disconnection_timeout",
         name="Car Disconnection Timeout (s)",
         state=None,
