@@ -59,6 +59,13 @@ ALFEN_TEXT_TYPES: Final[tuple[AlfenTextDescription, ...]] = (
         mode=TextMode.PASSWORD,
         api_param="2116_1"
     ),
+    AlfenTextDescription(
+        key="price_other_description",
+        name="Price other description",
+        icon="mdi:tag-text-outline",
+        mode=TextMode.TEXT,
+        api_param="3262_7"
+    ),
 )
 
 
