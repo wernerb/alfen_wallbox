@@ -1,13 +1,17 @@
+"""Support for Alfen Eve Single Proline Wallbox."""
+from dataclasses import dataclass
+import datetime
+from datetime import timedelta
 import logging
 from typing import Final
-from dataclasses import dataclass
-from datetime import timedelta
 
-from homeassistant.helpers.entity import DeviceInfo
-from homeassistant.helpers.typing import StateType
-
-from .entity import AlfenEntity
 from homeassistant import const
+from homeassistant.components.sensor import (
+    SensorDeviceClass,
+    SensorEntity,
+    SensorEntityDescription,
+    SensorStateClass,
+)
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import (
     PERCENTAGE,
@@ -17,37 +21,21 @@ from homeassistant.const import (
     UnitOfFrequency,
     UnitOfPower,
     UnitOfTemperature,
-    UnitOfTime
+    UnitOfTime,
 )
-
-import datetime
-
 from homeassistant.core import HomeAssistant, callback
-from homeassistant.components.sensor import (
-    DEVICE_CLASS_ENERGY,
-    DEVICE_CLASS_POWER,
-    SensorEntity,
-    SensorEntityDescription,
-    SensorStateClass,
-    SensorDeviceClass
-)
-from homeassistant.helpers.entity_platform import AddEntitiesCallback
-
 from homeassistant.helpers import entity_platform
+from homeassistant.helpers.entity import DeviceInfo
+from homeassistant.helpers.entity_platform import AddEntitiesCallback
+from homeassistant.helpers.typing import StateType
 
 from . import DOMAIN as ALFEN_DOMAIN
-
-
 from .alfen import AlfenDevice
-from .const import (
-    ID,
-    SERVICE_REBOOT_WALLBOX,
-    VALUE,
-)
+from .const import ID, INTERVAL, SERVICE_REBOOT_WALLBOX, VALUE
+from .entity import AlfenEntity
 
 _LOGGER = logging.getLogger(__name__)
-SCAN_INTERVAL = timedelta(seconds=5)
-
+SCAN_INTERVAL = timedelta(seconds=INTERVAL)
 
 @dataclass
 class AlfenSensorDescriptionMixin:
@@ -329,7 +317,7 @@ ALFEN_SENSOR_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
         name="Uptime",
         icon="mdi:timer-outline",
         api_param="2060_0",
-        unit=UnitOfTime.HOURS,
+        unit=UnitOfTime.DAYS,
         round_digits=None,
         state_class=SensorStateClass.TOTAL_INCREASING
     ),
@@ -370,8 +358,16 @@ ALFEN_SENSOR_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
         state_class=SensorStateClass.TOTAL_INCREASING,
     ),
     AlfenSensorDescription(
-        key="voltage_l1",
-        name="Voltage L1",
+        key="frequency_socket_1",
+        name="Frequency Socket 1",
+        icon="mdi:information-outline",
+        api_param="2221_12",
+        unit=UnitOfFrequency.HERTZ,
+        round_digits=0,
+    ),
+    AlfenSensorDescription(
+        key="voltage_l1_socket_1",
+        name="Voltage L1N Socket 1",
         icon="mdi:flash",
         api_param="2221_3",
         unit=UnitOfElectricPotential.VOLT,
@@ -380,8 +376,8 @@ ALFEN_SENSOR_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
         device_class=SensorDeviceClass.VOLTAGE,
     ),
     AlfenSensorDescription(
-        key="voltage_l2",
-        name="Voltage L2",
+        key="voltage_l2_socket_1",
+        name="Voltage L2N Socket 1",
         icon="mdi:flash",
         api_param="2221_4",
         unit=UnitOfElectricPotential.VOLT,
@@ -390,8 +386,8 @@ ALFEN_SENSOR_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
         device_class=SensorDeviceClass.VOLTAGE,
     ),
     AlfenSensorDescription(
-        key="voltage_l3",
-        name="Voltage L3",
+        key="voltage_l3_socket_1",
+        name="Voltage L3N Socket 1",
         icon="mdi:flash",
         api_param="2221_5",
         unit=UnitOfElectricPotential.VOLT,
@@ -399,9 +395,49 @@ ALFEN_SENSOR_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
         state_class=SensorStateClass.MEASUREMENT,
         device_class=SensorDeviceClass.VOLTAGE,
     ),
+    # AlfenSensorDescription(
+    #     key="voltage_l1l2_socket_1",
+    #     name="Voltage L1L2 Socket 1",
+    #     icon="mdi:flash",
+    #     api_param="2221_6",
+    #     unit=UnitOfElectricPotential.VOLT,
+    #     round_digits=1,
+    #     state_class=SensorStateClass.MEASUREMENT,
+    #     device_class=SensorDeviceClass.VOLTAGE,
+    # ),
+    # AlfenSensorDescription(
+    #     key="voltage_l2l3_socket_1",
+    #     name="Voltage L2L3 Socket 1",
+    #     icon="mdi:flash",
+    #     api_param="2221_7",
+    #     unit=UnitOfElectricPotential.VOLT,
+    #     round_digits=1,
+    #     state_class=SensorStateClass.MEASUREMENT,
+    #     device_class=SensorDeviceClass.VOLTAGE,
+    # ),
+    # AlfenSensorDescription(
+    #     key="voltage_l3l1_socket_1",
+    #     name="Voltage L3L1 Socket 1",
+    #     icon="mdi:flash",
+    #     api_param="2221_8",
+    #     unit=UnitOfElectricPotential.VOLT,
+    #     round_digits=1,
+    #     state_class=SensorStateClass.MEASUREMENT,
+    #     device_class=SensorDeviceClass.VOLTAGE,
+    # ),
     AlfenSensorDescription(
-        key="current_l1",
-        name="Current L1",
+        key="current_n_socket_1",
+        name="Current N Socket 1",
+        icon="mdi:current-ac",
+        api_param="2221_9",
+        unit=UnitOfElectricCurrent.AMPERE,
+        round_digits=2,
+        state_class=SensorStateClass.MEASUREMENT,
+        device_class=SensorDeviceClass.CURRENT,
+    ),
+    AlfenSensorDescription(
+        key="current_l1_socket_1",
+        name="Current L1 Socket 1",
         icon="mdi:current-ac",
         api_param="2221_A",
         unit=UnitOfElectricCurrent.AMPERE,
@@ -410,8 +446,8 @@ ALFEN_SENSOR_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
         device_class=SensorDeviceClass.CURRENT,
     ),
     AlfenSensorDescription(
-        key="current_l2",
-        name="Current L2",
+        key="current_l2_socket_1",
+        name="Current L2 Socket 1",
         icon="mdi:current-ac",
         api_param="2221_B",
         unit=UnitOfElectricCurrent.AMPERE,
@@ -420,8 +456,8 @@ ALFEN_SENSOR_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
         device_class=SensorDeviceClass.CURRENT,
     ),
     AlfenSensorDescription(
-        key="current_l3",
-        name="Current L3",
+        key="current_l3_socket_1",
+        name="Current L3 Socket 1",
         icon="mdi:current-ac",
         api_param="2221_C",
         unit=UnitOfElectricCurrent.AMPERE,
@@ -430,8 +466,18 @@ ALFEN_SENSOR_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
         device_class=SensorDeviceClass.CURRENT,
     ),
     AlfenSensorDescription(
-        key="active_power_total",
-        name="Active Power Total",
+        key="current_total_socket_1",
+        name="Current total Socket 1",
+        icon="mdi:current-ac",
+        api_param="2221_D",
+        unit=UnitOfElectricCurrent.AMPERE,
+        round_digits=2,
+        state_class=SensorStateClass.MEASUREMENT,
+        device_class=SensorDeviceClass.CURRENT,
+    ),
+    AlfenSensorDescription(
+        key="active_power_total_socket_1",
+        name="Active Power Total Socket 1",
         icon="mdi:circle-slice-3",
         api_param="2221_16",
         unit=UnitOfPower.WATT,
@@ -440,8 +486,8 @@ ALFEN_SENSOR_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
         device_class=SensorDeviceClass.POWER,
     ),
     AlfenSensorDescription(
-        key="meter_reading",
-        name="Meter Reading",
+        key="meter_reading_socket_1",
+        name="Meter Reading Socket 1",
         icon="mdi:counter",
         api_param="2221_22",
         unit=UnitOfEnergy.KILO_WATT_HOUR,
@@ -465,7 +511,7 @@ ALFEN_SENSOR_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
         icon="mdi:current-ac",
         api_param="212B_0",
         unit=UnitOfElectricCurrent.AMPERE,
-        round_digits=2,
+        round_digits=1,
         state_class=SensorStateClass.MEASUREMENT,
         device_class=SensorDeviceClass.CURRENT,
     ),
@@ -475,7 +521,7 @@ ALFEN_SENSOR_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
         icon="mdi:current-ac",
         api_param="212D_0",
         unit=UnitOfElectricCurrent.AMPERE,
-        round_digits=2,
+        round_digits=1,
         state_class=SensorStateClass.MEASUREMENT,
         device_class=SensorDeviceClass.CURRENT,
     ),
@@ -761,14 +807,6 @@ ALFEN_SENSOR_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
         round_digits=None,
     ),
     AlfenSensorDescription(
-        key="net_quality_hertz",
-        name="Net Quality Hz",
-        icon="mdi:information-outline",
-        api_param="2221_12",
-        unit=UnitOfFrequency.HERTZ,
-        round_digits=0,
-    ),
-    AlfenSensorDescription(
         key="comm_car_cp_voltage_high_socket_1",
         name="Car CP Voltage High Socket 1",
         icon="mdi:lightning-bolt",
@@ -903,11 +941,13 @@ ALFEN_SENSOR_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
         icon="mdi:current-ac",
         api_param="212A_0",
         unit=UnitOfElectricCurrent.AMPERE,
+        state_class=SensorStateClass.MEASUREMENT,
+        device_class=SensorDeviceClass.CURRENT,
         round_digits=2,
     ),
     AlfenSensorDescription(
-        key="active_power_p1_l1",
-        name="P1 Meter Active Power L1",
+        key="smart_meter_l1",
+        name="Smart Meter Power L1",
         icon="mdi:transmission-tower",
         api_param=None,
         unit=UnitOfPower.WATT,
@@ -916,8 +956,8 @@ ALFEN_SENSOR_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
         device_class=SensorDeviceClass.POWER,
     ),
     AlfenSensorDescription(
-        key="active_power_p1_l2",
-        name="P1 Meter Active Power L2",
+        key="smart_meter_l2",
+        name="Smart Meter Power L2",
         icon="mdi:transmission-tower",
         api_param=None,
         unit=UnitOfPower.WATT,
@@ -926,8 +966,8 @@ ALFEN_SENSOR_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
         device_class=SensorDeviceClass.POWER,
     ),
     AlfenSensorDescription(
-        key="active_power_p1_l3",
-        name="P1 Meter Active Power L3",
+        key="smart_meter_l3",
+        name="Smart Meter Power L3",
         icon="mdi:transmission-tower",
         api_param=None,
         unit=UnitOfPower.WATT,
@@ -936,8 +976,8 @@ ALFEN_SENSOR_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
         device_class=SensorDeviceClass.POWER,
     ),
     AlfenSensorDescription(
-        key="active_power_p1_total",
-        name="P1 Meter Active Power Total",
+        key="smart_meter_total",
+        name="Smart Meter Power Total",
         icon="mdi:transmission-tower",
         api_param=None,
         unit=UnitOfPower.WATT,
@@ -946,8 +986,8 @@ ALFEN_SENSOR_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
         device_class=SensorDeviceClass.POWER,
     ),
     AlfenSensorDescription(
-        key="active_power_p1_voltage_l1",
-        name="P1 Meter Active Voltage L1",
+        key="smart_meter_voltage_l1",
+        name="Smart Meter Voltage L1N",
         icon="mdi:flash",
         api_param="5221_3",
         unit=UnitOfElectricPotential.VOLT,
@@ -956,8 +996,8 @@ ALFEN_SENSOR_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
         device_class=SensorDeviceClass.VOLTAGE,
     ),
     AlfenSensorDescription(
-        key="active_power_p1_voltage_l2",
-        name="P1 Meter Active Voltage L2",
+        key="smart_meter_voltage_l2",
+        name="Smart Meter Voltage L2N",
         icon="mdi:flash",
         api_param="5221_4",
         unit=UnitOfElectricPotential.VOLT,
@@ -966,14 +1006,95 @@ ALFEN_SENSOR_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
         device_class=SensorDeviceClass.VOLTAGE,
     ),
     AlfenSensorDescription(
-        key="active_power_p1_voltage_l3",
-        name="P1 Meter Active Voltage L3",
+        key="smart_meter_voltage_l3",
+        name="Smart Meter Voltage L3N",
         icon="mdi:flash",
         api_param="5221_5",
         unit=UnitOfElectricPotential.VOLT,
         round_digits=1,
         state_class=SensorStateClass.MEASUREMENT,
         device_class=SensorDeviceClass.VOLTAGE,
+    ),
+    # AlfenSensorDescription(
+    #     key="smart_meter_voltage_l1L2",
+    #     name="Smart Meter Voltage L1L2",
+    #     icon="mdi:flash",
+    #     api_param="5221_6",
+    #     unit=UnitOfElectricPotential.VOLT,
+    #     round_digits=1,
+    #     state_class=SensorStateClass.MEASUREMENT,
+    #     device_class=SensorDeviceClass.VOLTAGE,
+    # ),
+    # AlfenSensorDescription(
+    #     key="smart_meter_voltage_l2l3",
+    #     name="Smart Meter Voltage L2L3 Socket 2",
+    #     icon="mdi:flash",
+    #     api_param="5221_7",
+    #     unit=UnitOfElectricPotential.VOLT,
+    #     round_digits=1,
+    #     state_class=SensorStateClass.MEASUREMENT,
+    #     device_class=SensorDeviceClass.VOLTAGE,
+    # ),
+    # AlfenSensorDescription(
+    #     key="smart_meter_voltage_l3l1",
+    #     name="Smart Meter Voltage L3L1 Socket 2",
+    #     icon="mdi:flash",
+    #     api_param="5221_8",
+    #     unit=UnitOfElectricPotential.VOLT,
+    #     round_digits=1,
+    #     state_class=SensorStateClass.MEASUREMENT,
+    #     device_class=SensorDeviceClass.VOLTAGE,
+    # ),
+    AlfenSensorDescription(
+        key="smart_meter_active_power_total",
+        name="Smart Meter Active Power Total",
+        icon="mdi:flash",
+        api_param="5221_16",
+        unit=UnitOfPower.WATT,
+        round_digits=2,
+        state_class=SensorStateClass.MEASUREMENT,
+        device_class=SensorDeviceClass.POWER,
+    ),
+
+    AlfenSensorDescription(
+        key="smart_meter_current_l1",
+        name="Smart Meter Current L1",
+        icon="mdi:current-ac",
+        api_param="5221_A",
+        unit=UnitOfElectricCurrent.AMPERE,
+        round_digits=2,
+        state_class=SensorStateClass.MEASUREMENT,
+        device_class=SensorDeviceClass.CURRENT,
+    ),
+    AlfenSensorDescription(
+        key="smart_meter_current_l2",
+        name="Smart Meter Current L2",
+        icon="mdi:current-ac",
+        api_param="5221_B",
+        unit=UnitOfElectricCurrent.AMPERE,
+        round_digits=2,
+        state_class=SensorStateClass.MEASUREMENT,
+        device_class=SensorDeviceClass.CURRENT,
+    ),
+    AlfenSensorDescription(
+        key="smart_meter_current_l3",
+        name="Smart Meter Current L3",
+        icon="mdi:current-ac",
+        api_param="5221_C",
+        unit=UnitOfElectricCurrent.AMPERE,
+        round_digits=2,
+        state_class=SensorStateClass.MEASUREMENT,
+        device_class=SensorDeviceClass.CURRENT,
+    ),
+    AlfenSensorDescription(
+        key="smart_meter_current_total",
+        name="Smart Meter Current total",
+        icon="mdi:current-ac",
+        api_param="5221_D",
+        unit=UnitOfElectricCurrent.AMPERE,
+        round_digits=2,
+        state_class=SensorStateClass.MEASUREMENT,
+        device_class=SensorDeviceClass.CURRENT,
     ),
     AlfenSensorDescription(
         key="number_of_socket",
@@ -994,8 +1115,8 @@ ALFEN_SENSOR_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
         device_class=SensorDeviceClass.CURRENT,
     ),
     AlfenSensorDescription(
-        key="main_station_active_max_current",
-        name="Main Station Active Max Current",
+        key="main_station_active_max_current_socket_1",
+        name="Main Station Active Max Current Socket 1",
         icon="mdi:current-ac",
         api_param="2161_0",
         unit=UnitOfElectricCurrent.AMPERE,
@@ -1003,16 +1124,59 @@ ALFEN_SENSOR_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
         state_class=SensorStateClass.MEASUREMENT,
         device_class=SensorDeviceClass.CURRENT,
     ),
+    AlfenSensorDescription(
+        key="custom_tag_socket_1",
+        name="Tag Socket 1",
+        icon="mdi:badge-account-outline",
+        api_param=None,
+        unit=None,
+        round_digits=None,
+    ),
+
+    AlfenSensorDescription(
+        key="custom_transaction_socket_1_charging",
+        name="Transaction Socket 1 Charging",
+        icon="mdi:battery-charging",
+        api_param=None,
+        unit=UnitOfEnergy.KILO_WATT_HOUR,
+        round_digits=None,
+    ),
+    AlfenSensorDescription(
+        key="custom_transaction_socket_1_charging_time",
+        name="Transaction Socket 1 Charging Time",
+        icon="mdi:clock",
+        api_param=None,
+        unit=UnitOfTime.MINUTES,
+        round_digits=0,
+    ),
+    AlfenSensorDescription(
+        key="custom_transaction_socket_1_charged",
+        name="Transaction Socket 1 Last Charge",
+        icon="mdi:battery-charging",
+        api_param=None,
+        unit=UnitOfEnergy.KILO_WATT_HOUR,
+        round_digits=None,
+    ),
+    AlfenSensorDescription(
+        key="custom_transaction_socket_1_charged_time",
+        name="Transaction Socket 1 Last Charge Time",
+        icon="mdi:clock",
+        api_param=None,
+        unit=UnitOfTime.MINUTES,
+        round_digits=0,
+    ),
+
+
 )
 
 ALFEN_SENSOR_DUAL_SOCKET_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
     AlfenSensorDescription(
-         key="ps_connector_2_max_allowed_phase",
-         name="Connector 2 Max Allowed of Phases",
-         icon="mdi:scale-balance",
-         unit=None,
-         api_param="312F_0",
-         round_digits=None,
+        key="ps_connector_2_max_allowed_phase",
+        name="Connector 2 Max Allowed of Phases",
+        icon="mdi:scale-balance",
+        unit=None,
+        api_param="312F_0",
+        round_digits=None,
     ),
     AlfenSensorDescription(
         key="main_state_socket_2",
@@ -1091,6 +1255,8 @@ ALFEN_SENSOR_DUAL_SOCKET_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
         icon="mdi:current-ac",
         api_param="312A_0",
         unit=UnitOfElectricCurrent.AMPERE,
+        state_class=SensorStateClass.MEASUREMENT,
+        device_class=SensorDeviceClass.CURRENT,
         round_digits=2,
     ),
     AlfenSensorDescription(
@@ -1114,8 +1280,8 @@ ALFEN_SENSOR_DUAL_SOCKET_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
         device_class=SensorDeviceClass.CURRENT,
     ),
     AlfenSensorDescription(
-        key="main_external_min_current_socket_1",
-        name="Main External Min Current Socket 1",
+        key="main_external_min_current_socket_2",
+        name="Main External Min Current Socket 2",
         icon="mdi:current-ac",
         api_param="3160_0",
         unit=UnitOfElectricCurrent.AMPERE,
@@ -1149,15 +1315,202 @@ ALFEN_SENSOR_DUAL_SOCKET_TYPES: Final[tuple[AlfenSensorDescription, ...]] = (
         api_param="3191_2",
         round_digits=None,
     ),
+    AlfenSensorDescription(
+        key="frequency_socket_2",
+        name="Frequency Socket 2",
+        icon="mdi:information-outline",
+        api_param="3221_12",
+        unit=UnitOfFrequency.HERTZ,
+        round_digits=0,
+    ),
+    AlfenSensorDescription(
+        key="meter_reading_socket_2",
+        name="Meter Reading Socket 2",
+        icon="mdi:counter",
+        api_param="3221_22",
+        unit=UnitOfEnergy.KILO_WATT_HOUR,
+        round_digits=None,
+        state_class=SensorStateClass.TOTAL_INCREASING,
+        device_class=SensorDeviceClass.ENERGY,
+    ),
+    AlfenSensorDescription(
+        key="active_power_total_socket_2",
+        name="Active Power Total Socket 2",
+        icon="mdi:circle-slice-3",
+        api_param="3221_16",
+        unit=UnitOfPower.WATT,
+        round_digits=2,
+        state_class=SensorStateClass.MEASUREMENT,
+        device_class=SensorDeviceClass.POWER,
+    ),
+    AlfenSensorDescription(
+        key="voltage_l1_socket_2",
+        name="Voltage L1N Socket 2",
+        icon="mdi:flash",
+        api_param="3221_3",
+        unit=UnitOfElectricPotential.VOLT,
+        round_digits=1,
+        state_class=SensorStateClass.MEASUREMENT,
+        device_class=SensorDeviceClass.VOLTAGE,
+    ),
+    AlfenSensorDescription(
+        key="voltage_l2_socket_2",
+        name="Voltage L2N Socket 2",
+        icon="mdi:flash",
+        api_param="3221_4",
+        unit=UnitOfElectricPotential.VOLT,
+        round_digits=1,
+        state_class=SensorStateClass.MEASUREMENT,
+        device_class=SensorDeviceClass.VOLTAGE,
+    ),
+    AlfenSensorDescription(
+        key="voltage_l3_socket_2",
+        name="Voltage L3N Socket 2",
+        icon="mdi:flash",
+        api_param="3221_5",
+        unit=UnitOfElectricPotential.VOLT,
+        round_digits=1,
+        state_class=SensorStateClass.MEASUREMENT,
+        device_class=SensorDeviceClass.VOLTAGE,
+    ),
+    # AlfenSensorDescription(
+    #     key="voltage_l1l2_socket_2",
+    #     name="Voltage L1L2 Socket 2",
+    #     icon="mdi:flash",
+    #     api_param="3221_6",
+    #     unit=UnitOfElectricPotential.VOLT,
+    #     round_digits=1,
+    #     state_class=SensorStateClass.MEASUREMENT,
+    #     device_class=SensorDeviceClass.VOLTAGE,
+    # ),
+    # AlfenSensorDescription(
+    #     key="voltage_l2l3_socket_2",
+    #     name="Voltage L2L3 Socket 2",
+    #     icon="mdi:flash",
+    #     api_param="3221_7",
+    #     unit=UnitOfElectricPotential.VOLT,
+    #     round_digits=1,
+    #     state_class=SensorStateClass.MEASUREMENT,
+    #     device_class=SensorDeviceClass.VOLTAGE,
+    # ),
+    # AlfenSensorDescription(
+    #     key="voltage_l3l1_socket_2",
+    #     name="Voltage L3L1 Socket 2",
+    #     icon="mdi:flash",
+    #     api_param="3221_8",
+    #     unit=UnitOfElectricPotential.VOLT,
+    #     round_digits=1,
+    #     state_class=SensorStateClass.MEASUREMENT,
+    #     device_class=SensorDeviceClass.VOLTAGE,
+    # ),
+    AlfenSensorDescription(
+        key="current_n_socket_2",
+        name="Current N Socket 2",
+        icon="mdi:current-ac",
+        api_param="3221_9",
+        unit=UnitOfElectricCurrent.AMPERE,
+        round_digits=2,
+        state_class=SensorStateClass.MEASUREMENT,
+        device_class=SensorDeviceClass.CURRENT,
+    ),
+    AlfenSensorDescription(
+        key="current_l1_socket_2",
+        name="Current L1 Socket 2",
+        icon="mdi:current-ac",
+        api_param="3221_A",
+        unit=UnitOfElectricCurrent.AMPERE,
+        round_digits=2,
+        state_class=SensorStateClass.MEASUREMENT,
+        device_class=SensorDeviceClass.CURRENT,
+    ),
+    AlfenSensorDescription(
+        key="current_l2_socket_2",
+        name="Current L2 Socket 2",
+        icon="mdi:current-ac",
+        api_param="3221_B",
+        unit=UnitOfElectricCurrent.AMPERE,
+        round_digits=2,
+        state_class=SensorStateClass.MEASUREMENT,
+        device_class=SensorDeviceClass.CURRENT,
+    ),
+    AlfenSensorDescription(
+        key="current_l3_socket_2",
+        name="Current L3 Socket 2",
+        icon="mdi:current-ac",
+        api_param="3221_C",
+        unit=UnitOfElectricCurrent.AMPERE,
+        round_digits=2,
+        state_class=SensorStateClass.MEASUREMENT,
+        device_class=SensorDeviceClass.CURRENT,
+    ),
+    AlfenSensorDescription(
+        key="current_total_socket_2",
+        name="Current total Socket 2",
+        icon="mdi:current-ac",
+        api_param="3221_D",
+        unit=UnitOfElectricCurrent.AMPERE,
+        round_digits=2,
+        state_class=SensorStateClass.MEASUREMENT,
+        device_class=SensorDeviceClass.CURRENT,
+    ),
+    AlfenSensorDescription(
+        key="custom_tag_socket_2",
+        name="Tag Socket 2",
+        icon="mdi:badge-account-outline",
+        api_param=None,
+        unit=None,
+        round_digits=None,
+    ),
+    AlfenSensorDescription(
+        key="custom_transaction_socket_2_stop",
+        name="Transaction Socket 2 Stop",
+        icon="mdi:badge-account-outline",
+        api_param=None,
+        unit=None,
+        round_digits=None,
+    ),
+    AlfenSensorDescription(
+        key="custom_transaction_socket_2_charging",
+        name="Transaction Socket 2 Charging",
+        icon="mdi:battery-charging",
+        api_param=None,
+        unit=UnitOfEnergy.KILO_WATT_HOUR,
+        round_digits=None,
+    ),
+    AlfenSensorDescription(
+        key="custom_transaction_socket_2_charging_time",
+        name="Transaction Socket 2 Charging Time",
+        icon="mdi:clock",
+        api_param=None,
+        unit=UnitOfTime.MINUTES,
+        round_digits=0,
+    ),
+    AlfenSensorDescription(
+        key="custom_transaction_socket_2_charged",
+        name="Transaction Socket 2 Last Charge",
+        icon="mdi:battery-charging",
+        api_param=None,
+        unit=UnitOfEnergy.KILO_WATT_HOUR,
+        round_digits=None,
+    ),
+    AlfenSensorDescription(
+        key="custom_transaction_socket_2_charged_time",
+        name="Transaction Socket 2 Last Charge Time",
+        icon="mdi:clock",
+        api_param=None,
+        unit=UnitOfTime.MINUTES,
+        round_digits=0,
+    ),
 )
+
 
 async def async_setup_platform(
         hass: HomeAssistant,
         config: ConfigEntry,
         async_add_entities: AddEntitiesCallback,
         discovery_info=None):
+    """Set up the Alfen sensor."""
     pass
-
 
 
 async def async_setup_entry(
@@ -1171,6 +1524,7 @@ async def async_setup_entry(
     sensors = [
         AlfenSensor(device, description) for description in ALFEN_SENSOR_TYPES
     ]
+
 
     async_add_entities(sensors)
     async_add_entities([AlfenMainSensor(device, ALFEN_SENSOR_TYPES[0])])
@@ -1190,6 +1544,10 @@ async def async_setup_entry(
 
 
 class AlfenMainSensor(AlfenEntity):
+    """Representation of a Alfen Main Sensor."""
+
+    entity_description: AlfenSensorDescription
+
     def __init__(self, device: AlfenDevice, description: AlfenSensorDescription) -> None:
         """Initialize the sensor."""
         super().__init__(device)
@@ -1197,6 +1555,7 @@ class AlfenMainSensor(AlfenEntity):
         self._attr_name = f"{device.name}"
         self._sensor = "sensor"
         self.entity_description = description
+
 
     @property
     def unique_id(self):
@@ -1297,6 +1656,119 @@ class AlfenSensor(AlfenEntity, SensorEntity):
         """Return the unit the value is expressed in."""
         return self.entity_description.unit
 
+    def _processTransactionKWh(self, socket:str, entity_description:AlfenSensorDescription):
+        if self._device.latest_tag is None:
+            return "Unknown"
+        ## calculate the usage
+        startkWh = None
+        mvkWh = None
+        stopkWh = None
+        lastkWh = None
+
+        for (key,value) in self._device.latest_tag.items():
+            if key[0] == socket and key[1] ==  "start" and key[2] == "kWh":
+                startkWh = value
+                continue
+            if key[0] == socket and key[1] ==  "mv" and key[2] == "kWh":
+                mvkWh = value
+                continue
+            if key[0] == socket and key[1] ==  "stop" and key[2] == "kWh":
+                stopkWh = value
+                continue
+            if key[0] == socket and key[1] ==  "last_start" and key[2] == "kWh":
+                lastkWh = value
+                continue
+
+        # if the entity_key end with _charging, then we are calculating the charging
+        if startkWh is not None and mvkWh is not None and entity_description.key.endswith('_charging'):
+            # if we have stopkWh and it is higher then mvkWh, then we are not charging anymore and we should return 0
+            if stopkWh is not None and float(stopkWh) >= float(mvkWh):
+                return 0
+            value = round(float(mvkWh) - float(startkWh), 2)
+            if entity_description.round_digits is not None:
+                return round(value, entity_description.round_digits if entity_description.round_digits > 0 else None)
+            return value
+
+        # if the entity_key end with _charged, then we are calculating the charged
+        if lastkWh is not None and stopkWh is not None and entity_description.key.endswith('_charged'):
+            if float(stopkWh) >= float(lastkWh):
+                value =  round(float(stopkWh) - float(lastkWh), 2)
+                if entity_description.round_digits is not None:
+                    return round(value, entity_description.round_digits if entity_description.round_digits > 0 else None)
+                return value
+            return None
+
+    def _processTransactionTime(self, socket:str, entity_description:AlfenSensorDescription):
+        if self._device.latest_tag is None:
+            return "Unknown"
+
+        startDate = None
+        mvDate = None
+        stopDate = None
+        lastDate = None
+
+        for (key,value) in self._device.latest_tag.items():
+            if key[0] == "socket 1" and key[1] ==  "start" and key[2] == "date":
+                startDate = value
+                continue
+            if key[0] == "socket 1" and key[1] ==  "mv" and key[2] == "date":
+                mvDate = value
+                continue
+            if key[0] == "socket 1" and key[1] ==  "stop" and key[2] == "date":
+                stopDate = value
+                continue
+            if key[0] == "socket 1" and key[1] ==  "last_start" and key[2] == "date":
+                lastDate = value
+                continue
+
+        if startDate is not None and mvDate is not None and entity_description.key.endswith('_charging_time'):
+            startDate = datetime.datetime.strptime(startDate, '%Y-%m-%d %H:%M:%S')
+            mvDate = datetime.datetime.strptime(mvDate, '%Y-%m-%d %H:%M:%S')
+            stopDate = datetime.datetime.strptime(stopDate, '%Y-%m-%d %H:%M:%S')
+
+            # if there is a stopdate greater then startDate, then we are not charging anymore
+            if stopDate is not None and stopDate > startDate:
+                return 0
+
+            # return the value in minutes
+            value = round((mvDate - startDate).total_seconds() / 60, 2)
+            if entity_description.round_digits is not None:
+                return round(value, entity_description.round_digits if entity_description.round_digits > 0 else None)
+            return value
+
+
+        if lastDate is not None and stopDate is not None and entity_description.key.endswith('_charged_time'):
+            lastDate = datetime.datetime.strptime(lastDate, '%Y-%m-%d %H:%M:%S')
+            stopDate = datetime.datetime.strptime(stopDate, '%Y-%m-%d %H:%M:%S')
+
+            if stopDate < lastDate:
+                return None
+            # return the value in minutes
+            value = round((stopDate - lastDate).total_seconds() / 60, 2)
+            if entity_description.round_digits is not None:
+                return round(value, entity_description.round_digits if entity_description.round_digits > 0 else None)
+            return value
+
+    def _customTransactionCode(self, socker_number:int):
+        if self.entity_description.key == f"custom_tag_socket_{socker_number}":
+            if self._device.latest_tag is None:
+                return "No Tag"
+            for (key,value) in self._device.latest_tag.items():
+                if key[0] == f"socket {socker_number}" and key[1] ==  "start" and key[2] == "tag":
+                    return value
+            return "No Tag"
+
+        if self.entity_description.key in (f"custom_transaction_socket_{socker_number}_charging", f"custom_transaction_socket_{socker_number}_charged"):
+            value = self._processTransactionKWh(f"socket {socker_number}", self.entity_description)
+            if value is not None:
+                return value
+
+
+        if self.entity_description.key in [f"custom_transaction_socket_{socker_number}_charging_time", f"custom_transaction_socket_{socker_number}_charged_time"]:
+            value = self._processTransactionTime("socket " + str(socker_number), self.entity_description)
+            if value is not None:
+                return value
+
     @property
     def state(self) -> StateType:
         """Return the state of the sensor."""
@@ -1311,44 +1783,53 @@ class AlfenSensor(AlfenEntity, SensorEntity):
 
             for prop in self._device.properties:
                 if prop[ID] == "5221_3":
-                    voltage_l1 =  prop[VALUE]
+                    voltage_l1 = prop[VALUE]
                 if prop[ID] == "5221_4":
-                    voltage_l2 =  prop[VALUE]
+                    voltage_l2 = prop[VALUE]
                 if prop[ID] == "5221_5":
-                    voltage_l3 =  prop[VALUE]
+                    voltage_l3 = prop[VALUE]
                 if prop[ID] == "212F_1":
-                    current_l1 =  prop[VALUE]
+                    current_l1 = prop[VALUE]
                 if prop[ID] == "212F_2":
-                    current_l2 =  prop[VALUE]
+                    current_l2 = prop[VALUE]
                 if prop[ID] == "212F_3":
-                    current_l3 =  prop[VALUE]
-            
-            if self.entity_description.key == "active_power_p1_l1":
+                    current_l3 = prop[VALUE]
+
+            if self.entity_description.key == "smart_meter_l1":
                 if voltage_l1 is not None and current_l1 is not None:
-                    return round( float(voltage_l1) * float(current_l1) , 2)
-            if self.entity_description.key == "active_power_p1_l2":
+                    return round(float(voltage_l1) * float(current_l1), 2)
+            if self.entity_description.key == "smart_meter_l2":
                 if voltage_l2 is not None and current_l2 is not None:
-                    return round( float(voltage_l2) * float(current_l2) , 2)
-            if self.entity_description.key == "active_power_p1_l3":
+                    return round(float(voltage_l2) * float(current_l2), 2)
+            if self.entity_description.key == "smart_meter_l3":
                 if voltage_l3 is not None and current_l3 is not None:
-                    return round( float(voltage_l3) * float(current_l3) , 2)
-            if self.entity_description.key == "active_power_p1_total":
+                    return round(float(voltage_l3) * float(current_l3), 2)
+            if self.entity_description.key == "smart_meter_total":
                 if voltage_l1 is not None and current_l1 is not None and voltage_l2 is not None and current_l2 is not None and voltage_l3 is not None and current_l3 is not None:
-                    return round( (float(voltage_l1) * float(current_l1) + float(voltage_l2) * float(current_l2) + float(voltage_l3) * float(current_l3)) , 2)
-                
+                    return round((float(voltage_l1) * float(current_l1) + float(voltage_l2) * float(current_l2) + float(voltage_l3) * float(current_l3)), 2)
+
+
+
+        # Custom code for transaction and tag
+        for socketNr in [1,2]:
+            value = self._customTransactionCode(socketNr)
+            if value is not None:
+                return value
+
+
         for prop in self._device.properties:
             if prop[ID] == self.entity_description.api_param:
                 # some exception of return value
 
                 # Display state status
-                if self.entity_description.api_param == "3190_1" or self.entity_description.api_param == "3191_1":
+                if self.entity_description.api_param in ("3190_1", "3191_1"):
                     if prop[VALUE] == 28:
                         return "See error Number"
                     else:
                         return STATUS_DICT.get(prop[VALUE], 'Unknown')
 
                 # meter_reading from w to kWh
-                if self.entity_description.api_param == "2221_22":
+                if self.entity_description.api_param in ("2221_22", "3221_22"):
                     return round((prop[VALUE] / 1000), 2)
 
                 # Car PWM Duty cycle %
@@ -1373,7 +1854,7 @@ class AlfenSensor(AlfenEntity, SensorEntity):
                     return result
 
                 # change milliseconds to d/m/y HH:MM:SS
-                if self.entity_description.api_param == "2187_0" or self.entity_description.api_param == "2059_0":
+                if self.entity_description.api_param in ("2187_0", "2059_0"):
                     return datetime.datetime.fromtimestamp(prop[VALUE] / 1000).strftime("%d/%m/%Y %H:%M:%S")
 
                 # Allowed phase 1 or Allowed Phase 2
@@ -1384,15 +1865,15 @@ class AlfenSensor(AlfenEntity, SensorEntity):
                     return round(prop[VALUE], self.entity_description.round_digits)
 
                 # mode3_state
-                if self.entity_description.api_param == "2501_4" or self.entity_description.api_param == "2502_4":
+                if self.entity_description.api_param in ("2501_4", "2502_4"):
                     return MODE_3_STAT_DICT.get(prop[VALUE], 'Unknown')
 
                 # Socket CPRO State
-                if self.entity_description.api_param == "2501_3" or self.entity_description.api_param == "2502_3":
+                if self.entity_description.api_param in ("2501_3", "2502_3"):
                     return POWER_STATES_DICT.get(prop[VALUE], 'Unknown')
 
                 # Main CSM State
-                if self.entity_description.api_param == "2501_1" or self.entity_description.api_param == "2502_1":
+                if self.entity_description.api_param in ("2501_1", "2502_1"):
                     return MAIN_STATE_DICT.get(prop[VALUE], 'Unknown')
 
                 # OCPP Boot notification
@@ -1404,11 +1885,11 @@ class AlfenSensor(AlfenEntity, SensorEntity):
                     return MODBUS_CONNECTION_STATES_DICT.get(prop[VALUE], 'Unknown')
 
                 # wallbox display message
-                if self.entity_description.api_param == "3190_2" or self.entity_description.api_param == "3191_2":
+                if self.entity_description.api_param in ("3190_2", "3191_2"):
                     return str(prop[VALUE]) + ': ' + DISPLAY_ERROR_DICT.get(prop[VALUE],  'Unknown')
 
                 # Status code
-                if self.entity_description.api_param == "2501_2" or self.entity_description.api_param == "2502_2":
+                if self.entity_description.api_param in ("2501_2", "2502_2"):
                     return STATUS_DICT.get(prop[VALUE], 'Unknown')
 
                 return prop[VALUE]

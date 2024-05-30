@@ -1,22 +1,19 @@
 from __future__ import annotations
-import logging
 
 from dataclasses import dataclass
+import logging
 from typing import Final
 
-from .const import ID
 from homeassistant.components.counter import VALUE
-
-from .alfen import AlfenDevice
-from .entity import AlfenEntity
-
-
 from homeassistant.components.text import TextEntity, TextEntityDescription, TextMode
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from . import DOMAIN as ALFEN_DOMAIN
+from .alfen import AlfenDevice
+from .const import ID
+from .entity import AlfenEntity
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -62,13 +59,20 @@ ALFEN_TEXT_TYPES: Final[tuple[AlfenTextDescription, ...]] = (
         mode=TextMode.PASSWORD,
         api_param="2116_1"
     ),
+    AlfenTextDescription(
+        key="price_other_description",
+        name="Price other description",
+        icon="mdi:tag-text-outline",
+        mode=TextMode.TEXT,
+        api_param="3262_7"
+    ),
 )
 
 
 async def async_setup_entry(
     hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback
 ) -> None:
-    """Add Alfen Select from a config_entry"""
+    """Add Alfen Select from a config_entry."""
 
     device = hass.data[ALFEN_DOMAIN][entry.entry_id]
     texts = [AlfenText(device, description)
@@ -85,6 +89,7 @@ class AlfenText(AlfenEntity, TextEntity):
     def __init__(
         self, device: AlfenDevice, description: AlfenTextDescription
     ) -> None:
+        """Initialize the Alfen text entity."""
         super().__init__(device)
         self._device = device
         self._attr_name = f"{device.name} {description.name}"
@@ -108,5 +113,5 @@ class AlfenText(AlfenEntity, TextEntity):
     async def async_set_value(self, value: str) -> None:
         """Update the value."""
         self._attr_native_value = value
-        await self.update_state(self.entity_description.api_param, value)
+        await self._device.set_value(self.entity_description.api_param, value)
         self.async_write_ha_state()

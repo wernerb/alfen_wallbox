@@ -1,7 +1,6 @@
 """Alfen Wallbox integration."""
 
 import asyncio
-from datetime import timedelta
 import logging
 
 from aiohttp import ClientConnectionError
@@ -11,19 +10,16 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import (
     CONF_HOST,
     CONF_NAME,
-    CONF_USERNAME,
     CONF_PASSWORD,
+    CONF_SCAN_INTERVAL,
+    CONF_USERNAME,
     Platform,
 )
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryNotReady
 
 from .alfen import AlfenDevice
-
-from .const import (
-    DOMAIN,
-    TIMEOUT,
-)
+from .const import DOMAIN, TIMEOUT
 
 PLATFORMS = [
     Platform.SENSOR,
@@ -44,22 +40,28 @@ async def async_setup(hass: HomeAssistant, config: dict) -> bool:
     return True
 
 
-async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
-    conf = entry.data
+async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> bool:
+    """Set up Alfen Wallbox from a config entry."""
+    conf = config_entry.data
+
+    # if CONF_SCAN_INTERVAL not in conf, then we give 5
     device = await alfen_setup(
-        hass, conf[CONF_HOST], conf[CONF_NAME], conf[CONF_USERNAME], conf[CONF_PASSWORD]
+        hass, conf[CONF_HOST], conf[CONF_NAME], conf[CONF_USERNAME], conf[CONF_PASSWORD], conf[CONF_SCAN_INTERVAL] if CONF_SCAN_INTERVAL in conf else 5
     )
     if not device:
         return False
 
+    device.initilize = True
+    await device.async_update()
+    device.get_number_of_socket()
+    device.get_licenses()
+
+
     hass.data.setdefault(DOMAIN, {})
-    hass.data[DOMAIN][entry.entry_id] = device
+    hass.data[DOMAIN][config_entry.entry_id] = device
 
-    await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
-
-    if device is not None:
-        await hass.async_add_executor_job(device.logout)
-
+    await hass.config_entries.async_forward_entry_setups(config_entry, PLATFORMS)
+    device.initilize = False
     return True
 
 
@@ -77,22 +79,21 @@ async def async_unload_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> 
     return unload_ok
 
 
-async def alfen_setup(hass: HomeAssistant, host: str, name: str, username: str, password: str) -> AlfenDevice | None:
+async def alfen_setup(hass: HomeAssistant, host: str, name: str, username: str, password: str, scan_interval:int) -> AlfenDevice | None:
     """Create a Alfen instance only once."""
 
     try:
         with timeout(TIMEOUT):
-            device = AlfenDevice(host, name, username, password)
+            device = AlfenDevice(hass, host, name, username, password, scan_interval)
             await device.init()
     except asyncio.TimeoutError:
         _LOGGER.debug("Connection to %s timed out", host)
         raise ConfigEntryNotReady
-    except ClientConnectionError:
-        _LOGGER.debug("ClientConnectionError to %s", host)
+    except ClientConnectionError as e:
+        _LOGGER.debug("ClientConnectionError to %s %s", host, str(e))
         raise ConfigEntryNotReady
     except Exception as e:  # pylint: disable=broad-except
-        _LOGGER.error("Unexpected error creating device %s", host)
-        _LOGGER.error(str(e))
+        _LOGGER.error("Unexpected error creating device %s %s", host, str(e))
         return None
 
     return device

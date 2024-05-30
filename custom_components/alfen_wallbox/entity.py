@@ -1,14 +1,16 @@
-from datetime import timedelta
+"""Base entity for Alfen Wallbox integration."""
 import logging
+
+from homeassistant.helpers.entity import DeviceInfo, Entity
 
 from .alfen import AlfenDevice
 from .const import DOMAIN as ALFEN_DOMAIN
-from homeassistant.helpers.entity import DeviceInfo, Entity
 
 _LOGGER = logging.getLogger(__name__)
 
 
 class AlfenEntity(Entity):
+    """Define a base Alfen entity."""
 
     def __init__(self, device: AlfenDevice) -> None:
         """Initialize the Alfen entity."""
@@ -25,7 +27,3 @@ class AlfenEntity(Entity):
     async def async_added_to_hass(self) -> None:
         """Add listener for state changes."""
         await super().async_added_to_hass()
-
-    async def update_state(self, api_param, value):
-        """Get the state of the entity."""
-        await self._device.set_value(api_param, value)

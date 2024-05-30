@@ -1,28 +1,26 @@
-import logging
-from typing import Final, Any
-
+"""Alfen Wallbox Select Entities."""
 from dataclasses import dataclass
-
-from homeassistant.helpers import entity_platform
-
-from .const import ID, SERVICE_DISABLE_RFID_AUTHORIZATION_MODE, SERVICE_ENABLE_RFID_AUTHORIZATION_MODE, SERVICE_SET_CURRENT_PHASE, VALUE
-from .entity import AlfenEntity
-
-from homeassistant.config_entries import ConfigEntry
-from homeassistant.helpers.entity_platform import AddEntitiesCallback
-
-from .alfen import AlfenDevice
-
-from homeassistant.components.select import (
-    SelectEntity,
-    SelectEntityDescription,
-)
-
-from homeassistant.core import HomeAssistant, callback
-from . import DOMAIN as ALFEN_DOMAIN
+import logging
+from typing import Final
 
 import voluptuous as vol
 
+from homeassistant.components.select import SelectEntity, SelectEntityDescription
+from homeassistant.config_entries import ConfigEntry
+from homeassistant.core import HomeAssistant, callback
+from homeassistant.helpers import entity_platform
+from homeassistant.helpers.entity_platform import AddEntitiesCallback
+
+from . import DOMAIN as ALFEN_DOMAIN
+from .alfen import AlfenDevice
+from .const import (
+    ID,
+    SERVICE_DISABLE_RFID_AUTHORIZATION_MODE,
+    SERVICE_ENABLE_RFID_AUTHORIZATION_MODE,
+    SERVICE_SET_CURRENT_PHASE,
+    VALUE,
+)
+from .entity import AlfenEntity
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -134,6 +132,23 @@ DIRECT_EXTERNAL_SUSPEND_SIGNAL: Final[dict[str, int]] = {
     "Not allowed": 0,
     "Allowed, suspend when closed": 1,
     "Allowed, suspend when open": 2
+}
+
+SOCKET_TYPE_DICT: Final[dict[str, int]] = {
+    "Fixed Cable Unknown": 0,
+    "Mennekes": 1,
+    "FCT": 2,
+    "Schuko": 3,
+    "FIXED_CABLE_TYPE_1": 4,
+    "FIXED_CABLE_TYPE_2": 5,
+    "UNKNOWN": 99,
+}
+
+CAR_DISCONNECT_ACTION_DICT: Final[dict[str, int]] = {
+    "Continue": 0,
+    'Abort Lock': 1,
+    'Abort Unlock': 2,
+    'Abort Unlock When Offline': 3,
 }
 
 ALFEN_SELECT_TYPES: Final[tuple[AlfenSelectDescription, ...]] = (
@@ -259,7 +274,35 @@ ALFEN_SELECT_TYPES: Final[tuple[AlfenSelectDescription, ...]] = (
         options_dict=DIRECT_EXTERNAL_SUSPEND_SIGNAL,
         api_param="216C_0",
     ),
+    AlfenSelectDescription(
+        key="ps_socket_type_socket_1",
+        name="Socket Type Socket 1",
+        icon="mdi:cable-data",
+        options=list(SOCKET_TYPE_DICT),
+        options_dict=SOCKET_TYPE_DICT,
+        api_param="2125_0",
+    ),
+    AlfenSelectDescription(
+        key="ev_disconnect_action",
+        name="Car Disconnect Action",
+        icon="mdi:cable-data",
+        options=list(CAR_DISCONNECT_ACTION_DICT),
+        options_dict=CAR_DISCONNECT_ACTION_DICT,
+        api_param="2137_0",
+    ),
 
+
+)
+
+ALFEN_SELECT_DUAL_SOCKET_TYPES: Final[tuple[AlfenSelectDescription, ...]] = (
+    AlfenSelectDescription(
+        key="ps_socket_type_socket_2",
+        name="Socket Type Socket 2",
+        icon="mdi:cable-data",
+        options=list(SOCKET_TYPE_DICT),
+        options_dict=SOCKET_TYPE_DICT,
+        api_param="3125_0",
+    ),
 )
 
 
@@ -267,12 +310,17 @@ async def async_setup_entry(
     hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback
 ) -> None:
     """Add Alfen Select from a config_entry"""
-
+    device: AlfenDevice
     device = hass.data[ALFEN_DOMAIN][entry.entry_id]
     selects = [AlfenSelect(device, description)
                for description in ALFEN_SELECT_TYPES]
 
     async_add_entities(selects)
+
+    if device.number_socket == 2:
+        numbers = [AlfenSelect(device, description)
+                   for description in ALFEN_SELECT_DUAL_SOCKET_TYPES]
+        async_add_entities(numbers)
 
     platform = entity_platform.current_platform.get()
 
@@ -319,8 +367,9 @@ class AlfenSelect(AlfenEntity, SelectEntity):
 
     async def async_select_option(self, option: str) -> None:
         """Change the selected option."""
+
         value = {v: k for k, v in self.values_dict.items()}[option]
-        await self.update_state(self.entity_description.api_param, value)
+        await self._device.set_value(self.entity_description.api_param, value)
         self.async_write_ha_state()
 
     @property
@@ -333,6 +382,8 @@ class AlfenSelect(AlfenEntity, SelectEntity):
         """Return the current option."""
         for prop in self._device.properties:
             if prop[ID] == self.entity_description.api_param:
+                if self.entity_description.key == "ps_installation_max_allowed_phase":
+                    self._device.max_allowed_phases = prop[VALUE]
                 return prop[VALUE]
         return None
 
@@ -353,11 +404,11 @@ class AlfenSelect(AlfenEntity, SelectEntity):
     async def async_enable_rfid_auth_mode(self):
         """Enable RFID authorization mode."""
         await self._device.set_rfid_auth_mode(True)
-        await self.update_state(self.entity_description.api_param, 2)
+        await self._device.set_value(self.entity_description.api_param, 2)
         self.async_write_ha_state()
 
     async def async_disable_rfid_auth_mode(self):
         """Disable RFID authorization mode."""
         await self._device.set_rfid_auth_mode(False)
-        await self.update_state(self.entity_description.api_param, 0)
+        await self._device.set_value(self.entity_description.api_param, 0)
         self.async_write_ha_state()
